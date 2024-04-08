@@ -1,0 +1,24 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "axios": "^1.1.2",
+        "laravel-vite-plugin": "^0.7.5",
+        "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@pusher/push-notifications-web": "^1.1.0",
+        "cropperjs": "^1.5.13",
+        "firebase": "^10.2.0",
+        "html2canvas": "^1.4.1",
+        "laravel-echo": "^1.15.2",
+        "lightgallery": "^2.7.2",
+        "moment": "^2.29.4",
+        "pusher-js": "^8.3.0",
+        "sweetalert2": "^11.6.13"
+    }
+}
