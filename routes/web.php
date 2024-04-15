@@ -286,6 +286,7 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/manage-product/delete/{id}', 'destroyProduct')->name('pos.destroyProduct');
     Route::get('/pos/get-product-by-id/{id}', 'getProductById')->name('pos.getProductById');
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
+    Route::post('/pos/tambah-item', 'tambahItem')->name('pos.tambahItem');
     //Keranjang
     Route::post('/pos/tambah-keranjang', 'tambahKeranjang')->name('pos.tambahKeranjang');
     Route::post('/pos/setup-keranjang', 'setupKeranjang')->name('pos.setupKeranjang');

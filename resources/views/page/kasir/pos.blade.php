@@ -91,15 +91,41 @@
     //tambah keranjang
     function tambahItem(id){
         $.ajax({
-            url: '/pos/tambah-item/' + id,
+            url: '/pos/tambah-item',
             type: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
+                produk_id: id,
                 keranjang_id: $('#keranjang_id').val()
             },
             success: function(data){
-                $('#tableItems').DataTable().ajax.reload();
+                Swal.fire('Berhasil', 'Produk berhasil ditambahkan!', 'success');
+                $('#pilihProduk').modal('hide');
+                showTableItems();
             }
+        });
+    }
+
+    function showTableItems(idcart){
+        //destroy datatable
+        $('#tableItems').DataTable().destroy();
+
+        $('#tableItems').DataTable({
+            processing: true,
+            serverSide: true,
+            searching: false,
+            ordering: false,
+            paging: false,
+            info: false,
+            ajax: "/pos/keranjang-item/" + idcart,
+            columns: [
+                { data: 'nama_produk', name: 'nama_produk' },
+                { data: 'harga', name: 'harga' },
+                { data: 'qty', name: 'qty' },
+                { data: 'diskon', name: 'diskon' },
+                { data: 'total', name: 'total' },
+                { data: 'action', name: 'action' }
+            ]
         });
     }
 
@@ -153,23 +179,7 @@
                     console.log(data);
                     $('#keranjang_id').val(data.id);
 
-                    $('#tableItems').DataTable({
-                        processing: true,
-                        serverSide: true,
-                        searching: false,
-                        ordering: false,
-                        paging: false,
-                        info: false,
-                        ajax: "/pos/keranjang-item/" + $('#keranjang_id').val(),
-                        columns: [
-                            { data: 'nama_produk', name: 'nama_produk' },
-                            { data: 'harga', name: 'harga' },
-                            { data: 'qty', name: 'qty' },
-                            { data: 'diskon', name: 'diskon' },
-                            { data: 'total', name: 'total' },
-                            { data: 'action', name: 'action' }
-                        ]
-                    });
+                    showTableItems(data.id);
                 }
             });
         });

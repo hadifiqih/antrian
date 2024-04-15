@@ -156,6 +156,28 @@ class PosController extends Controller
         return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang']);
     }
 
+    public function tambahItem(Request $request)
+    {
+        $idCart = $request->keranjang_id;
+        $id = $request->produk_id;
+
+        if(auth()->user()->cabang_id == 1){
+            $hargaProduk = ProdukHarga::where('produk_id', $id)->where('cabang_id', 1)->first()->harga_jual;
+        }else{
+            $hargaProduk = ProdukHarga::where('produk_id', $id)->where('cabang_id', 2)->first()->harga_jual;
+        }
+
+        $item = new KeranjangItem;
+        $item->keranjang_id = $idCart;
+        $item->produk_id = $id;
+        $item->jumlah = 1;
+        $item->harga = $hargaProduk;
+        $item->diskon = 0;
+        $item->save();
+
+        return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang']);
+    }
+
     public function createProduct()
     {
         return view('page.kasir.tambah-produk');
@@ -342,6 +364,9 @@ class PosController extends Controller
         $items = KeranjangItem::getItemByIdCart($id_cart);
 
         return Datatables::of($items)
+            ->addColumn('nama_produk', function($row){
+                return $row->produk->nama_produk;
+            })
             ->addColumn('harga', function($row){
                 return CustomHelper::addCurrencyFormat($row->harga);
             })
