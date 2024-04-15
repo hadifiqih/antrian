@@ -235,11 +235,6 @@ class PosController extends Controller
         }
     }
 
-    public function show(string $id)
-    {
-        //
-    }
-
     public function editProduct(string $id)
     {
         $produk = Produk::getProduct($id);
@@ -320,7 +315,9 @@ class PosController extends Controller
         $existingItem = Keranjang::where('sales_id', $sales)->where('customer_id', $customer)->first();
 
         if($existingItem){
-            return response()->json($existingItem);
+            $totalItem = KeranjangItem::getTotalItem($existingItem->id);
+
+            return response()->json(['success' => 'Keranjang sudah ada', 'total' => $totalItem, 'id' => $existingItem->id]);
         }else{
             $keranjang = new Keranjang;
             $keranjang->cabang_id = $cabang;
@@ -329,7 +326,12 @@ class PosController extends Controller
             $keranjang->customer_id = $customer;
             $keranjang->save();
 
-            return response()->json($keranjang);
+            $totalItem = KeranjangItem::getTotalItem($keranjang->id);
+            if($totalItem == 0 || $totalItem == null){
+                $totalItem = 0;
+            }
+
+            return response()->json(['success' => 'Keranjang berhasil dibuat', 'total' => $totalItem, 'id' => $keranjang->id]);
         }
     }
 
@@ -371,16 +373,43 @@ class PosController extends Controller
                 return CustomHelper::addCurrencyFormat($row->harga);
             })
             ->addColumn('diskon', function($row){
-                return CustomHelper::addCurrencyFormat($row->diskon);
+                $diskon = CustomHelper::addCurrencyFormat($row->diskon);
+                return '<input id="diskon" type="text" style="width: 80px;" class="form-control maskMoney" value="'.$row->diskon.'" onchange="updateDiskon('.$row->id.', this.value)">';
             })
             ->addColumn('total', function($row){
-                return CustomHelper::addCurrencyFormat($row->harga * $row->jumlah - $row->diskon);
+                return CustomHelper::addCurrencyFormat(($row->harga - $row->diskon) * $row->jumlah);
+            })
+            ->addColumn('qty', function($row){
+                return '<input id="qty" type="number" style="width: 80px;" class="form-control" value="'.$row->jumlah.'" onchange="updateQty('.$row->id.', this.value)">';
             })
             ->addColumn('action', function($row){
                 $actionBtn = '<button type="button" class="btn btn-danger btn-sm" onclick="hapusItem('.$row->id.')"><i class="fas fa-trash"></i> Hapus</button>';
                 return $actionBtn;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'qty', 'diskon', 'total'])
             ->make(true);
     }
+
+    public function updateQty(Request $request)
+    {
+        $item = KeranjangItem::find($request->id);
+        $item->jumlah = $request->qty;
+        $item->save();
+
+        $total = KeranjangItem::getItemByIdCart($request->cart_id);
+
+        return response()->json(['success' => 'Jumlah produk berhasil diubah', 'total' => $total]);
+    }
+
+    public function updateDiskon(Request $request)
+    {
+        $item = KeranjangItem::find($request->id);
+        $item->diskon = $request->diskon;
+        $item->save();
+
+        $total = KeranjangItem::getItemByIdCart($request->cart_id);
+
+        return response()->json(['success' => 'Diskon produk berhasil diubah', 'total' => $total]);
+    }
+
 }

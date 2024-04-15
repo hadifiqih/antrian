@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\ProdukHarga;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Produk extends Model
 {
@@ -18,6 +19,11 @@ class Produk extends Model
         'harga_jual',
         'stok'
     ];
+
+    public function produkHarga()
+    {
+        return $this->hasMany(ProdukHarga::class);
+    }
 
     public static function getProducts()
     {

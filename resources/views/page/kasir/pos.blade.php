@@ -58,7 +58,7 @@
 
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <h5 class="font-weight-bold bg-dark p-2 rounded">{{ __('Total: Rp ') }}<span id="total">0</span></h5>
+                    <h5 class="font-weight-bold bg-dark p-2 rounded">{{ __('Total : Rp ') }}<span id="total">0</span></h5>
                 </div>
             </div>
 
@@ -101,7 +101,7 @@
             success: function(data){
                 Swal.fire('Berhasil', 'Produk berhasil ditambahkan!', 'success');
                 $('#pilihProduk').modal('hide');
-                showTableItems();
+                $('#tableItems').DataTable().ajax.reload();
             }
         });
     }
@@ -129,9 +129,43 @@
         });
     }
 
+    function updateQty(id, qty){
+        $.ajax({
+            url: '{{ route("pos.updateQty") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id,
+                qty: qty,
+                cart_id: $('#keranjang_id').val()
+            },
+            success: function(data){
+                $('#tableItems').DataTable().ajax.reload();
+                $('#total').text(data.total);
+            }
+        });
+    }
+
+    function updateDiskon(id, diskon){
+        $.ajax({
+            url: '{{ route("pos.updateDiskon") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id,
+                diskon: diskon,
+                cart_id: $('#keranjang_id').val()
+            },
+            success: function(data){
+                $('#tableItems').DataTable().ajax.reload();
+                $('#total').text(data.total);
+            }
+        });
+    }
+
     $(document).ready(function() {
         //mask money
-        $('#diterima').maskMoney({
+        $('.maskMoney').maskMoney({
             prefix: 'Rp ',
             thousands: '.',
             decimal: ',',
@@ -176,10 +210,13 @@
                     customer_id: customer
                 },
                 success: function(data){
-                    console.log(data);
                     $('#keranjang_id').val(data.id);
 
                     showTableItems(data.id);
+
+                    $('#total').text(data.total);
+
+                    console.log(data.id);
                 }
             });
         });
