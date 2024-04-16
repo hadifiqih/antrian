@@ -26,7 +26,7 @@
             <div class="card-body">
                 <input type="hidden" id="keranjang_id" value="">
 
-                <button class="btn btn-sm btn-warning mb-2">Tambah Pelanggan</button>
+                <button class="btn btn-sm btn-warning mb-2 float-right">Tambah Pelanggan</button>
 
                 <div class="form-group mb-3">
                     <label for="product" class="form-label">{{ __('Nama Pelanggan') }}</label>
@@ -55,18 +55,21 @@
                 </table>
             </div>
 
-
             <div class="row mt-3">
                 <div class="col-md-12">
-                    <h5 class="font-weight-bold bg-dark p-2 rounded">{{ __('Total : Rp ') }}<span id="total">0</span></h5>
+                    <h5 class="font-weight-bold bg-dark p-2 rounded">{{ __('Total') }}<span class="float-right" id="total">0</span></h5>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12 mt-2">
-                    <button class="btn btn-success btn-sm"><i class="fas fa-cart-plus"></i> {{ __('Checkout') }}</button>
+                    <button id="btnCheckout" class="btn btn-success btn-sm float-right"><i class="fas fa-cart-plus"></i> {{ __('Checkout') }}</button>
                 </div>
             </div>
+
+            </div>
+            <div class="overlay dark" style="display: none">
+                <i class="fas fa-2x fa-sync-alt fa-spin"></i>
             </div>
             </div>
         </div>
@@ -172,6 +175,11 @@
             precision: 0
         });
 
+        $('#btnCheckout').click(function(){
+            //BERALIH KE HALAMAN CHECKOUT
+            window.location.href = '/pos/checkout/' + $('#keranjang_id').val();
+        });
+
         //menampilkan data pelanggan
         $('#nama_pelanggan').select2({
             placeholder: 'Pilih Pelanggan',
@@ -215,8 +223,6 @@
                     showTableItems(data.id);
 
                     $('#total').text(data.total);
-
-                    console.log(data.id);
                 }
             });
         });

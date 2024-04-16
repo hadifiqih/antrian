@@ -47,6 +47,6 @@ class KeranjangItem extends Model
             $total = 0;
         }
         
-        return $total;
+        return number_format($total, 0, ',', '.');
     }
 }

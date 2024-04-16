@@ -294,6 +294,8 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/hapus-keranjang/{id_cart}', 'hapusKeranjang')->name('pos.hapusKeranjang');
     Route::post('/pos/update-qty', 'updateQty')->name('pos.updateQty');
     Route::post('/pos/update-diskon', 'updateDiskon')->name('pos.updateDiskon');
+    //
+    Route::get('/pos/checkout/{cart_id}', 'checkoutCart')->name('pos.checkout');
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
 })->middleware('auth');

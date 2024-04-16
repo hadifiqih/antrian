@@ -315,9 +315,31 @@ class PosController extends Controller
         $existingItem = Keranjang::where('sales_id', $sales)->where('customer_id', $customer)->first();
 
         if($existingItem){
-            $totalItem = KeranjangItem::getTotalItem($existingItem->id);
+            $totalItem = KeranjangItem::getItemByIdCart($existingItem->id);
 
-            return response()->json(['success' => 'Keranjang sudah ada', 'total' => $totalItem, 'id' => $existingItem->id]);
+            $totalHarga = 0;
+
+            foreach($totalItem as $item){
+                //jika isGrosir true, maka harga grosir dikalikan jumlah
+                if($this->isGrosir($item->produk_id, $item->jumlah)){
+                    $cabang = auth()->user()->cabang_id;
+                    if($cabang != 1){
+                        $cabang = 2;
+                    }
+
+                    $grosir = ProdukGrosir::where('produk_id', $item->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $item->jumlah)->first();
+
+                    if($grosir){
+                        $totalHarga += ($grosir->harga_grosir * $item->jumlah) - $item->diskon;
+                    }else{
+                        $totalHarga += ($item->harga * $item->jumlah) - $item->diskon;
+                    }
+                }else{
+                    $totalHarga += ($item->harga * $item->jumlah) - $item->diskon;
+                }
+            }
+
+            return response()->json(['success' => 'Keranjang sudah ada', 'total' => CustomHelper::addCurrencyFormat($totalHarga), 'id' => $existingItem->id]);
         }else{
             $keranjang = new Keranjang;
             $keranjang->cabang_id = $cabang;
@@ -361,32 +383,92 @@ class PosController extends Controller
         return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang']);
     }
 
+    public function isGrosir($produkId, $qty)
+    {
+        $cabangId = auth()->user()->cabang_id;
+        if($cabangId != 1){
+            $cabangId = 2;
+        }
+
+        $grosir = ProdukGrosir::where('produk_id', $produkId)->where('cabang_id', $cabangId)->get();
+        if($grosir->count() > 0){
+            foreach($grosir as $g){
+                if($qty >= $g->min_qty && $qty <= $g->max_qty){
+                    return true;
+                }
+            }
+        }else{
+            return false;
+        }
+    }
+
     public function tampilkanKeranjang(string $id_cart)
     {
         $items = KeranjangItem::getItemByIdCart($id_cart);
 
         return Datatables::of($items)
             ->addColumn('nama_produk', function($row){
-                return $row->produk->nama_produk;
+                //jika isGrosir true, maka muncul badge grosir
+                if($this->isGrosir($row->produk_id, $row->jumlah)){
+                    return $row->produk->nama_produk.' <span class="badge badge-primary">Grosir</span>';
+                }else{
+                    return $row->produk->nama_produk;
+                }
             })
             ->addColumn('harga', function($row){
-                return CustomHelper::addCurrencyFormat($row->harga);
+                //jika isGrosir true, maka muncul harga grosir
+                if($this->isGrosir($row->produk_id, $row->jumlah)){
+                    $cabang = auth()->user()->cabang_id;
+                    if($cabang != 1){
+                        $cabang = 2;
+                    }
+
+                    $grosir = ProdukGrosir::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $row->jumlah)->first();
+
+                    if($grosir){
+                        $hargaGrosir = $grosir->harga_grosir;
+                        return CustomHelper::addCurrencyFormat($hargaGrosir);
+                    }else{
+                        return CustomHelper::addCurrencyFormat($row->harga);
+                    }
+                }else{
+                    return CustomHelper::addCurrencyFormat($row->harga);
+                }
             })
             ->addColumn('diskon', function($row){
                 $diskon = CustomHelper::addCurrencyFormat($row->diskon);
                 return '<input id="diskon" type="text" style="width: 80px;" class="form-control maskMoney" value="'.$row->diskon.'" onchange="updateDiskon('.$row->id.', this.value)">';
             })
             ->addColumn('total', function($row){
-                return CustomHelper::addCurrencyFormat(($row->harga - $row->diskon) * $row->jumlah);
+                //jika isGrosir true, maka harga grosir dikalikan jumlah
+                if($this->isGrosir($row->produk_id, $row->jumlah)){
+                    $cabang = auth()->user()->cabang_id;
+                    if($cabang != 1){
+                        $cabang = 2;
+                    }
+
+                    $grosir = ProdukGrosir::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $row->jumlah)->first();
+
+                    if($grosir){
+                        $total = ($grosir->harga_grosir * $row->jumlah) - $row->diskon;
+                        return CustomHelper::addCurrencyFormat($total);
+                    }else{
+                        $total = ($row->harga * $row->jumlah) - $row->diskon;
+                        return CustomHelper::addCurrencyFormat($total);
+                    }
+                }else{
+                    $total = ($row->harga * $row->jumlah) - $row->diskon;
+                    return CustomHelper::addCurrencyFormat($total);
+                }
             })
             ->addColumn('qty', function($row){
                 return '<input id="qty" type="number" style="width: 80px;" class="form-control" value="'.$row->jumlah.'" onchange="updateQty('.$row->id.', this.value)">';
             })
             ->addColumn('action', function($row){
-                $actionBtn = '<button type="button" class="btn btn-danger btn-sm" onclick="hapusItem('.$row->id.')"><i class="fas fa-trash"></i> Hapus</button>';
+                $actionBtn = '<button type="button" class="btn btn-danger btn-sm" onclick="hapusItem('.$row->id.')"><i class="fas fa-trash"></i></button>';
                 return $actionBtn;
             })
-            ->rawColumns(['action', 'qty', 'diskon', 'total'])
+            ->rawColumns(['nama_produk', 'action', 'qty', 'diskon', 'total'])
             ->make(true);
     }
 
@@ -396,9 +478,31 @@ class PosController extends Controller
         $item->jumlah = $request->qty;
         $item->save();
 
-        $total = KeranjangItem::getItemByIdCart($request->cart_id);
+        $items = KeranjangItem::getItemByIdCart($item->keranjang_id);
+        $total = 0;
+        foreach($items as $i){
+            //jika isGrosir true, maka harga grosir dikalikan jumlah
+            if($this->isGrosir($i->produk_id, $i->jumlah)){
+                $cabang = auth()->user()->cabang_id;
+                if($cabang != 1){
+                    $cabang = 2;
+                }
 
-        return response()->json(['success' => 'Jumlah produk berhasil diubah', 'total' => $total]);
+                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $i->jumlah)->first();
+
+                if($grosir){
+                    $hargaGrosir = $grosir->harga_grosir;
+                }else{
+                    $hargaGrosir = $i->harga;
+                }
+
+                $total += ($hargaGrosir * $i->jumlah) - $i->diskon;
+            }else{
+                $total += ($i->harga * $i->jumlah) - $i->diskon;
+            }
+        }
+
+        return response()->json(['success' => 'Jumlah produk berhasil diubah', 'total' => CustomHelper::addCurrencyFormat($total)]);
     }
 
     public function updateDiskon(Request $request)
@@ -407,9 +511,60 @@ class PosController extends Controller
         $item->diskon = $request->diskon;
         $item->save();
 
-        $total = KeranjangItem::getItemByIdCart($request->cart_id);
+        $items = KeranjangItem::getItemByIdCart($item->keranjang_id);
+        $total = 0;
 
-        return response()->json(['success' => 'Diskon produk berhasil diubah', 'total' => $total]);
+        foreach($items as $i){
+            //jika isGrosir true, maka harga grosir dikalikan jumlah
+            if($this->isGrosir($i->produk_id, $i->jumlah)){
+                $cabang = auth()->user()->cabang_id;
+                if($cabang != 1){
+                    $cabang = 2;
+                }
+
+                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $i->jumlah)->first();
+
+                if($grosir){
+                    $hargaGrosir = $grosir->harga_grosir;
+                }else{
+                    $hargaGrosir = $i->harga;
+                }
+
+                $total += ($hargaGrosir * $i->jumlah) - $i->diskon;
+            }else{
+                $total += ($i->harga * $i->jumlah) - $i->diskon;
+            }
+        }
+
+        return response()->json(['success' => 'Diskon produk berhasil diubah', 'total' => CustomHelper::addCurrencyFormat($total)]);
     }
 
+    public function checkoutCart(string $cart_id)
+    {
+        $items = KeranjangItem::getItemByIdCart($cart_id);
+        $total = 0;
+
+        //perulangan untuk menghitung total harga
+        foreach($items as $item){
+            //jika isGrosir true, maka harga grosir dikalikan jumlah
+            if($this->isGrosir($item->produk_id, $item->jumlah)){
+                $cabang = auth()->user()->cabang_id;
+                if($cabang != 1){
+                    $cabang = 2;
+                }
+
+                $grosir = ProdukGrosir::where('produk_id', $item->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $item->jumlah)->first();
+
+                if($grosir){
+                    $total += ($grosir->harga_grosir * $item->jumlah) - $item->diskon;
+                }else{
+                    $total += ($item->harga * $item->jumlah) - $item->diskon;
+                }
+            }else{
+                $total += ($item->harga * $item->jumlah) - $item->diskon;
+            }
+        }
+
+        return view('page.kasir.checkout', compact('items', 'total'));
+    }
 }
