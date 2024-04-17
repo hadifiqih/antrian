@@ -15,23 +15,26 @@
       <div class="col-md-12">
         <div class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">Review your order</h3>
+            <h3 class="card-title">Konfirmasi Order</h3>
           </div>
           <div class="card-body">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Digital Product</td>
-                  <td>$10.00</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table id="tableItems" class="table table-striped mt-3">
+                  <thead>
+                      <tr>
+                          <th scope="col">{{ __('Nama Produk') }}</th>
+                          <th scope="col">{{ __('Harga') }}</th>
+                          <th scope="col">{{ __('Qty') }}</th>
+                          <th scope="col">{{ __('Diskon') }}</th>
+                          <th scope="col">{{ __('Total') }}</th>
+                          <th scope="col">{{ __('Aksi') }}</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+
+                  </tbody>
+              </table>
+          </div>
           </div>
           <div class="card-body">
             <form>
@@ -47,7 +50,7 @@
                 <label for="billingAddress">Billing Address</label>
                 <textarea class="form-control" id="billingAddress" rows="3" placeholder="Enter your address"></textarea>
               </div>
-              <button type="submit" class="btn btn-primary float-right">Confirm Order</button>
+              <button type="submit" class="btn btn-primary float-right">Buat Pesanan</button>
             </form>
           </div>
         </div>
@@ -58,5 +61,25 @@
 @endsection
 
 @section('script')
-
+<script>
+    $(document).ready(function() {
+      $('#tableItems').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        ordering: false,
+        paging: false,
+        info: false,
+        ajax: "/pos/checkout-json/{{ $cart_id }}",
+        columns: [
+            { data: 'nama_produk', name: 'nama_produk' },
+            { data: 'harga', name: 'harga' },
+            { data: 'qty', name: 'qty' },
+            { data: 'diskon', name: 'diskon' },
+            { data: 'total', name: 'total' },
+            { data: 'action', name: 'action' }
+        ]
+      });
+    });
+</script>
 @endsection
