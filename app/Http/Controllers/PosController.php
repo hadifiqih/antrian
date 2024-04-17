@@ -423,7 +423,7 @@ class PosController extends Controller
                         $cabang = 2;
                     }
 
-                    $grosir = ProdukGrosir::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $row->jumlah)->first();
+                    $grosir = ProdukGrosir::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->where('min_qty', '<=', $row->jumlah)->where('max_qty', '>=', $row->jumlah)->first();
 
                     if($grosir){
                         $hargaGrosir = $grosir->harga_grosir;
@@ -488,12 +488,14 @@ class PosController extends Controller
                     $cabang = 2;
                 }
 
-                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $i->jumlah)->first();
+                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '<=', $i->jumlah)->where('max_qty', '>=', $i->jumlah)->first();
 
                 if($grosir){
                     $hargaGrosir = $grosir->harga_grosir;
+                    KeranjangItem::updateHargaDiKeranjang($i->id, $hargaGrosir);
                 }else{
                     $hargaGrosir = $i->harga;
+                    KeranjangItem::updateHargaDiKeranjang($i->id, $hargaGrosir);
                 }
 
                 $total += ($hargaGrosir * $i->jumlah) - $i->diskon;
@@ -522,7 +524,7 @@ class PosController extends Controller
                     $cabang = 2;
                 }
 
-                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '>=', $i->jumlah)->first();
+                $grosir = ProdukGrosir::where('produk_id', $i->produk_id)->where('cabang_id', $cabang)->where('min_qty', '<=', $i->jumlah)->where('max_qty', '>=', $i->jumlah)->first();
 
                 if($grosir){
                     $hargaGrosir = $grosir->harga_grosir;
@@ -545,6 +547,10 @@ class PosController extends Controller
         $total = 0;
         $cart_id = $cart_id;
 
+        $customer_id = Keranjang::find($cart_id)->customer_id;
+
+        $nama_customer = Customer::find($customer_id)->nama;
+
         //perulangan untuk menghitung total harga
         foreach($items as $item){
             //jika isGrosir true, maka harga grosir dikalikan jumlah
@@ -566,7 +572,9 @@ class PosController extends Controller
             }
         }
 
-        return view('page.kasir.checkout', compact('items', 'total', 'cart_id'));
+        $total = CustomHelper::addCurrencyFormat($total);
+
+        return view('page.kasir.checkout', compact('items', 'total', 'cart_id', 'customer_id', 'nama_customer'));
     }
 
     public function checkoutCartJson(string $cart_id)
@@ -630,10 +638,6 @@ class PosController extends Controller
             })
             ->addColumn('qty', function($row){
                 return $row->jumlah;
-            })
-            ->addColumn('action', function($row){
-                $actionBtn = '<button type="button" class="btn btn-danger btn-sm" onclick="hapusItem('.$row->id.')"><i class="fas fa-trash"></i></button>';
-                return $actionBtn;
             })
             ->rawColumns(['nama_produk', 'action', 'qty', 'diskon', 'total'])
             ->make(true);

@@ -49,4 +49,11 @@ class KeranjangItem extends Model
         
         return number_format($total, 0, ',', '.');
     }
+
+    public function updateHargaDiKeranjang($cart_item_id, $harga)
+    {
+        $cart_item = static::find($cart_item_id);
+        $cart_item->harga = $harga;
+        $cart_item->save();
+    }
 }
