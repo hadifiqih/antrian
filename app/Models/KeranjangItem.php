@@ -22,6 +22,11 @@ class KeranjangItem extends Model
         return $this->belongsTo(Produk::class, 'produk_id', 'id');
     }
 
+    public function produkGrosir()
+    {
+        return $this->belongsTo(ProdukGrosir::class, 'produk_id', 'id');
+    }
+
     public static function getKeranjang()
     {
         return static::all();
@@ -50,7 +55,7 @@ class KeranjangItem extends Model
         return number_format($total, 0, ',', '.');
     }
 
-    public function updateHargaDiKeranjang($cart_item_id, $harga)
+    public static function updateHargaDiKeranjang($cart_item_id, $harga)
     {
         $cart_item = static::find($cart_item_id);
         $cart_item->harga = $harga;

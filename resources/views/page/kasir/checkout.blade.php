@@ -17,7 +17,7 @@
           <div class="card-header">
             <h3 class="card-title">Konfirmasi Order</h3>
           </div>
-          <div class="card-body">
+          <div class="card-body pb-0">
             <div class="table-responsive">
               <table id="tableItems" class="table table-bordered">
                   <thead class="thead-dark">
@@ -33,36 +33,16 @@
 
                   </tbody>
               </table>
-              <h5 class="font-weight-bold mx-3 mt-2">Total : <span id="totalItems" class="float-right text-danger">{{ $total }}</span></h5>
+              <h6 class="font-weight-bold mx-3 mt-2">Total : <span id="totalItems" class="float-right">{{ $total }}</span></h6>
+              <h5 class="font-weight-bold mx-3">Total Akhir : <span id="pembulatan" class="float-right text-danger">{{ $pembulatan }}</span></h5>
           </div>
           </div>
+          <hr>
           <div class="card-body pt-0">
             <div class="form-group">
               <label for="customer">Pelanggan</label>
               <input type="hidden" name="customer_id" value="{{ $customer_id }}">
               <input type="text" class="form-control" id="customer" name="customer" placeholder="Nama Pelanggan" value="{{ $nama_customer }}" disabled>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="metode">Metode Pembayaran</label>
-                  <select class="form-control" id="metode" name="metode" required>
-                    <option value="tunai">Tunai</option>
-                    <option value="debit">Transfer</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="payment">Pembayaran</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Rp</span>
-                    </div>
-                    <input type="text" value="0" class="form-control form-lg" name="total_bayar" id="totalBayar">
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="row">
               <div class="col-md-12">
@@ -97,9 +77,48 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label for="metode">Metode Pembayaran</label>
+                  <select class="form-control" id="metode" name="metode" required>
+                    <option value="ditempat">Bayar Ditempat</option>
+                    <option value="transfer">Transfer</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label for="rekening">Rekening Tujuan</label>
+                  <select class="form-control" id="rekening" name="rekening" required>
+                    <option id="tunai" value="tunai">Tunai</option>
+                    <option value="bca">Bank Central Asia (BCA)</option>
+                    <option value="bri">Bank Rakyat Indonesia (BRI)</option>
+                    <option value="mandiri">Bank Mandiri</option>
+                    <option value="bni">Bank Negara Indonesia (BNI)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="payment">Pembayaran</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Rp</span>
+                    </div>
+                    <input type="text" value="0" class="form-control form-lg" name="total_bayar" id="totalBayar">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <h5 class="font-weight-bold mx-3">Kembalian : <span id="kembalian" class="float-right text-danger">Rp 0</span></h5>
+              </div>
+            </div>
           </div>
           <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm float-right">Buat Pesanan</button>
+            <button id="btnBuatPesanan" type="submit" class="btn btn-primary btn-sm float-right">Buat Pesanan</button>
           </div>
         </div>
       </div>
@@ -111,6 +130,14 @@
 @section('script')
 <script src="{{ asset('adminlte/dist/js/maskMoney.min.js') }}"></script>
 <script>
+
+  function formatRupiah(angka) {
+    var reverse = angka.toString().split('').reverse().join(''),
+    ribuan = reverse.match(/\d{1,3}/g);
+    ribuan = ribuan.join('.').split('').reverse().join('');
+    return 'Rp ' + ribuan;
+  }
+
     $(document).ready(function() {
       $('#totalBayar').maskMoney({thousands:'.', decimal:',', precision:0});
 
@@ -130,6 +157,19 @@
             { data: 'diskon', name: 'diskon' },
             { data: 'total', name: 'total' }
         ]
+      });
+
+      //jika metode pembayaran transfer maka tampilkan rekening
+      $('#metode').on('change', function() {
+        if($(this).val() == 'ditempat') {
+          //set rekening tunai
+          $('#rekening').val('tunai');
+          $('#rekening').prop('disabled', true);
+        }else{
+          $('#rekening').prop('disabled', false);
+          $('#rekening').val('bca');
+          $('#tunai').prop('disabled', true);
+        }
       });
 
       //Jika dikirim maka tampikan alamat dan wajib diisi
@@ -166,6 +206,79 @@
         }
       });
 
+      $('#totalBayar').on('keyup', function() {
+          var totalText = $('#pembulatan').text().replace(/\./g, '').replace('Rp ', '');
+          var bayarText = $(this).val().replace(/\./g, '');
+          
+          // Mengonversi teks menjadi angka, jika tidak valid akan menghasilkan NaN
+          var total = parseInt(totalText);
+          var bayar = parseInt(bayarText);
+          
+          // Memeriksa apakah kedua nilai adalah angka yang valid
+          if (!isNaN(total) && !isNaN(bayar)) {
+              var kembalian = bayar - total;
+              if(kembalian < 0) {
+                kembalian = 0;
+              }else{
+                kembalian = kembalian;
+              }
+              $('#kembalian').text(formatRupiah(kembalian));
+          } else {
+              // Jika salah satu atau kedua nilai bukan angka, atur kembalian menjadi kosong
+              $('#kembalian').text('');
+          }
+      });
+
+      $('#btnBuatPesanan').on('click', function(){
+        var totalText = $('#pembulatan').text().replace(/\./g, '').replace('Rp ', '');
+        var bayarText = $('#totalBayar').val().replace(/\./g, '');
+        var total = parseInt(totalText);
+        var bayar = parseInt(bayarText);
+
+        if(bayar < total) {
+          Swal.fire({
+            title: "Gagal!",
+            text: "Pembayaran kurang dari total pesanan!",
+            icon: "error"
+          });
+          return false;
+        }
+
+        $.ajax({
+          url: '/pos/buat-pesanan',
+          type: 'POST',
+          data: {
+            customer_id: $('input[name="customer_id"]').val(),
+            keterangan: $('#keterangan').val(),
+            telepon: $('#telepon').val(),
+            alamat: $('#alamat').val(),
+            metode: $('#metode').val(),
+            rekening: $('#rekening').val(),
+            total_bayar: $('#totalBayar').val(),
+            total: total,
+            pembulatan: totalText
+          },
+          success: function(data) {
+            if(data.status == 'success') {
+              Swal.fire({
+              icon: "success",
+              title: "Pesanan kamu berhasil dibuat !",
+              showConfirmButton: false,
+              timer: 1500
+            });
+              window.location.href = '/pos/add-order';
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Gagal membuat pesanan !",
+                showConfirmButton: false,
+                timer: 1500
+              });
+            }
+          }
+        });
+      });
+      
     });
 </script>
 @endsection

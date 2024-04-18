@@ -297,6 +297,7 @@ Route::controller(PosController::class)->group(function(){
     //checkout
     Route::get('/pos/checkout/{cart_id}', 'checkoutCart')->name('pos.checkout');
     Route::get('/pos/checkout-json/{cart_id}', 'checkoutCartJson')->name('pos.checkoutJson');
+    Route::post('/pos/buat-pesanan', 'buatPesanan')->name('pos.buatPesanan');
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
 })->middleware('auth');
