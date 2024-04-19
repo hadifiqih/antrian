@@ -18,8 +18,8 @@
             <h3 class="card-title">Konfirmasi Order</h3>
           </div>
           <div class="card-body pb-0">
-            <div class="table-responsive">
-              <table id="tableItems" class="table table-bordered">
+            <div>
+              <table id="tableItems" class="table table-bordered display nowarp" style="width:100%">
                   <thead class="thead-dark">
                       <tr>
                           <th scope="col">{{ __('Nama Produk') }}</th>
@@ -33,15 +33,15 @@
 
                   </tbody>
               </table>
-              <h6 class="font-weight-bold mx-3 mt-2">Total : <span id="totalItems" class="float-right">{{ $total }}</span></h6>
-              <h5 class="font-weight-bold mx-3">Total Akhir : <span id="pembulatan" class="float-right text-danger">{{ $pembulatan }}</span></h5>
-          </div>
+            </div>
+              <h6 class="font-weight-bold mx-3 mt-2">Total<span id="totalItems" class="float-right">{{ $total }}</span></h6>
+              <h5 class="font-weight-bold mx-3">Total (Pembulatan)<span id="pembulatan" class="float-right text-danger">{{ $pembulatan }}</span></h5>
           </div>
           <hr>
           <div class="card-body pt-0">
             <div class="form-group">
               <label for="customer">Pelanggan</label>
-              <input type="hidden" name="customer_id" value="{{ $customer_id }}">
+              <input type="hidden" id="customer_id" name="customer_id" value="{{ $customer_id }}">
               <input type="text" class="form-control" id="customer" name="customer" placeholder="Nama Pelanggan" value="{{ $nama_customer }}" disabled>
             </div>
             <div class="row">
@@ -149,6 +149,7 @@
         ordering: false,
         paging: false,
         info: false,
+        scrollX: true,
         ajax: "/pos/checkout-json/{{ $cart_id }}",
         columns: [
             { data: 'nama_produk', name: 'nama_produk' },
@@ -248,15 +249,15 @@
           url: '/pos/buat-pesanan',
           type: 'POST',
           data: {
-            customer_id: $('input[name="customer_id"]').val(),
+            _token: '{{ csrf_token() }}',
+            customer_id: $('#customer_id').val(),
             keterangan: $('#keterangan').val(),
             telepon: $('#telepon').val(),
             alamat: $('#alamat').val(),
             metode: $('#metode').val(),
             rekening: $('#rekening').val(),
             total_bayar: $('#totalBayar').val(),
-            total: total,
-            pembulatan: totalText
+            total: total
           },
           success: function(data) {
             if(data.status == 'success') {

@@ -26,11 +26,11 @@
             <div class="card-body">
                 <input type="hidden" id="keranjang_id" value="">
 
-                <button class="btn btn-sm btn-warning mb-2 float-right">Tambah Pelanggan</button>
+                <button id="btnTambahPelanggan" onclick="showModalPelanggan()" class="btn btn-sm btn-warning mb-2 float-right">Tambah Pelanggan</button>
 
                 <div class="form-group mb-3">
                     <label for="product" class="form-label">{{ __('Nama Pelanggan') }}</label>
-                    <select class="custom-select select2" id="nama_pelanggan">
+                    <select class="custom-select select2" id="nama_pelanggan" style="width:100%">
 
                     </select>
                 </div>
@@ -38,7 +38,7 @@
             <button id="btnTambahProduk" onclick="modalPilihProduk()" class="btn btn-primary btn-sm mt-3">{{ __('Tambah Produk') }}</button>
 
             <div class="table-responsive">
-                <table id="tableItems" class="table table-striped mt-3">
+                <table id="tableItems" class="table table-striped mt-3 display nowarp" style="width:100%">
                     <thead>
                         <tr>
                             <th scope="col">{{ __('Nama Produk') }}</th>
@@ -76,6 +76,7 @@
     </div>
 </div>
 @includeIf('page.kasir.modal.pilih-produk')
+@includeIf('page.kasir.modal.modal-tambah-pelanggan')
 @endsection
 
 @section('script')
@@ -89,6 +90,10 @@
         }else{
             $('#pilihProduk').modal('show');
         }
+    }
+
+    function showModalPelanggan(){
+        $('#modalTambahPelanggan').modal('show');
     }
 
     //tambah keranjang
@@ -175,7 +180,54 @@
             precision: 0
         });
 
+        // function provinsi
+        $.ajax({
+            url: "{{ route('getProvinsi') }}",
+            method: "GET",
+            success: function(data){
+                //foreach provinsi
+                $.each(data, function(key, value){
+                    $('#provinsi').append(`
+                        <option value="${key}">${value}</option>
+                    `);
+                });
+            }
+        });
+
+        // function kota
+        $('#provinsi').on('change', function(){
+            var provinsi = $(this).val();
+            $('#groupKota').show();
+            $('#kota').empty();
+            $('#kota').append(`<option value="" selected disabled>Pilih Kota</option>`);
+            $.ajax({
+                url: "{{ route('getKota') }}",
+                method: "GET",
+                delay: 250,
+                data: {
+                    provinsi: provinsi
+                },
+                success: function(data){
+                    //foreach kota
+                    $.each(data, function(key, value){
+                        $('#kota').append(`
+                            <option value="${key}">${value}</option>
+                        `);
+                    });
+                }
+            });
+        });
+
         $('#btnCheckout').click(function(){
+            if($('#keranjang_id').val() == ''){
+                Swal.fire('Peringatan', 'Pilih pelanggan terlebih dahulu', 'warning');
+                return false;
+            }
+
+            if($('#tableItems tbody tr').length < 2){
+                Swal.fire('Peringatan', 'Tambahkan produk terlebih dahulu', 'warning');
+                return false;
+            }
             //BERALIH KE HALAMAN CHECKOUT
             window.location.href = '/pos/checkout/' + $('#keranjang_id').val();
         });
@@ -232,6 +284,7 @@
             processing: true,
             serverSide: true,
             autoWidth: false,
+            scrollX: true,
             ajax: "{{ route('pos.pilihProduk') }}",
             columns: [
                 {data: 'nama_produk', name: 'nama_produk'},
@@ -239,6 +292,71 @@
                 {data: 'stok', name: 'stok'},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
             ],
+        });
+
+        // function simpanPelanggan
+        $('#pelanggan-form').on('submit', function(e){
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ route('pelanggan.store') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    salesID: $('#salesID').val(),
+                    nama: $('#modalNama').val(),
+                    telepon: $('#modalTelepon').val(),
+                    alamat: $('#modalAlamat').val(),
+                    instansi: $('#modalInstansi').val(),
+                    infoPelanggan: $('#infoPelanggan').val(),
+                    provinsi: $('#provinsi').val(),
+                    kota: $('#kota').val(),
+                },
+                success: function(data){
+                    $('#modalTambahPelanggan').modal('hide');
+                    $('#namaPelanggan').append(`<option value="${data.id}" selected>${data.nama}</option>`);
+                    $('#namaPelanggan').val(data.id).trigger('change');
+                    $('#namaPelanggan').select2({
+                        placeholder: 'Pilih Pelanggan',
+                        ajax: {
+                            url: "/pelanggan-all/{{ auth()->user()->sales->id }}",
+                            dataType: 'json',
+                            delay: 250,
+                            processResults: function (data) {
+                                return {
+                                    results:  $.map(data, function (item) {
+                                        if(item.instansi == null){
+                                            return {
+                                                text: item.nama + ' - ' + item.telepon,
+                                                id: item.id,
+                                            }
+                                        }else{
+                                            return {
+                                                text: item.nama + ' - ' + item.telepon,
+                                                id: item.id,
+                                            }
+                                        }
+                                    })
+                                };
+                            },
+                            cache: true
+                        }
+                    });
+
+                    //tampilkan toast sweet alert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Pelanggan berhasil ditambahkan',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                },
+                error: function(xhr, status, error){
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                }
+            });
         });
     });
 </script>

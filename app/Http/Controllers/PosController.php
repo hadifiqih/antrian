@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use App\Models\Customer;
 use App\Models\Keranjang;
+use App\Models\Penjualan;
 use App\Models\StokBahan;
 use App\Models\ProdukHarga;
 use App\Models\ProdukGrosir;
 use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
 use App\Models\KeranjangItem;
+use App\Models\PenjualanDetail;
+use App\Models\SumberPelanggan;
 use Yajra\DataTables\Facades\DataTables;
 
 class PosController extends Controller
@@ -30,7 +33,8 @@ class PosController extends Controller
 
     public function addOrder()
     {
-        return view('page.kasir.pos');
+        $infoPelanggan = SumberPelanggan::all();
+        return view('page.kasir.pos', compact('infoPelanggan'));
     }
 
     public function daftarPelanggan()
@@ -546,14 +550,68 @@ class PosController extends Controller
 
     public function buatPesanan(Request $request)
     {
+        dd($request->all());
         //Format No Invoice: INV-<cabang_id>-<sales_id>-<customer_id>-<date>
         $cabang = auth()->user()->cabang_id;
         $sales = auth()->user()->sales->id;
         $customer = $request->customer_id;
-        $date = date('Ymd');
-        $invoice = 'INV-'.$cabang.'-'.$sales.'-'.$customer.'-'.$date;
+        $date = date('Ym');
 
-        $keranjang = Keranjang::find($request->keranjang_id);
-        
+        $keranjang = Keranjang::where('sales_id', $sales)->where('customer_id', $customer)->first();
+        $items = KeranjangItem::getItemByIdCart($keranjang->id);
+
+        //get latest id from penjualan
+        $latest = Penjualan::latest()->first();
+        if($latest == null){
+            $latestId = 1;
+        }else{
+            $latestId = $latest->id + 1;
+        }
+        //generate invoice
+        $invoice = 'INV-'.$cabang.'/'.$sales.'/'.$customer.'/'.$date.'/'.$latestId;
+        //sum diskon
+        $diskon = 0;
+        foreach($items as $item){
+            $diskon += $item->diskon;
+        }
+
+        //create new penjualan
+        $penjualan = new Penjualan;
+        $penjualan->customer_id = $customer;
+        $penjualan->sales_id = $sales;
+        $penjualan->no_invoice = $invoice;
+        $penjualan->total = $request->total;
+        $penjualan->diskon = $diskon;
+        $penjualan->diterima = $request->total_bayar;
+        $penjualan->keterangan = $request->keterangan;
+        $penjualan->metode_pembayaran = $request->metode;
+        $penjualan->rekening = $request->rekening == null || $request->rekening == "" ? null : $request->rekening;
+        $penjualan->alamat = $request->alamat == null || $request->alamat == "" ? null : $request->alamat;
+        $penjualan->telepon = $request->telepon == null || $request->telepon == "" ? null : $request->telepon;
+        $penjualan->status = 1;
+        $penjualan->save();
+
+        if($penjualan->save()){
+            //create new penjualan detail (item penjualan)
+            foreach($items as $item){
+                $detail = new PenjualanDetail;
+                $detail->penjualan_id = $penjualan->id;
+                $detail->produk_id = $item->produk_id;
+                $detail->harga = $item->harga;
+                $detail->jumlah = $item->jumlah;
+                $detail->diskon = $item->diskon;
+                $detail->save();
+            }
+
+            //hapus item keranjang
+            foreach($items as $item){
+                $item->delete();
+            }
+        }
+
+        //delete keranjang
+        $keranjang->delete();
+
+        return response()->json(['success' => 'Pesanan berhasil dibuat !']);
     }
 }
