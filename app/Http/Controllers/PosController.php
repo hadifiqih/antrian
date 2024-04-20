@@ -18,6 +18,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class PosController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function roundUpTotal($total)
     {
         if($total % 500 != 0) {
@@ -173,6 +178,22 @@ class PosController extends Controller
         return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang']);
     }
 
+    public function hapusItem($id, $cart_id)
+    {
+        $item = KeranjangItem::find($id);
+        $item->delete();
+
+        $totalHarga = KeranjangItem::getItemByIdCart($cart_id);
+        $total = 0;
+
+        foreach($totalHarga as $i){
+            $subtotal = ($i->harga * $i->jumlah) - $i->diskon;
+            $total += $subtotal;
+        }
+
+        return response()->json(['success' => 'Produk berhasil dihapus dari keranjang', 'total' => CustomHelper::addCurrencyFormat($total)]);
+    }
+
     public function tambahItem(Request $request)
     {
         $idCart = $request->keranjang_id;
@@ -184,15 +205,30 @@ class PosController extends Controller
             $hargaProduk = ProdukHarga::where('produk_id', $id)->where('cabang_id', 2)->first()->harga_jual;
         }
 
-        $item = new KeranjangItem;
-        $item->keranjang_id = $idCart;
-        $item->produk_id = $id;
-        $item->jumlah = 1;
-        $item->harga = $hargaProduk;
-        $item->diskon = 0;
-        $item->save();
+        $existingItem = KeranjangItem::where('keranjang_id', $idCart)->where('produk_id', $id)->first();
 
-        return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang']);
+        if($existingItem){
+            $existingItem->jumlah += 1;
+            $existingItem->save();
+        }else{
+            $item = new KeranjangItem;
+            $item->keranjang_id = $idCart;
+            $item->produk_id = $id;
+            $item->jumlah = 1;
+            $item->harga = $hargaProduk;
+            $item->diskon = 0;
+            $item->save();
+        }
+
+        $totalHarga = KeranjangItem::getItemByIdCart($idCart);
+        $total = 0;
+
+        foreach($totalHarga as $i){
+            $subtotal = ($i->harga * $i->jumlah) - $i->diskon;
+            $total += $subtotal;
+        }
+
+        return response()->json(['success' => 'Produk berhasil ditambahkan ke keranjang', 'total' => CustomHelper::addCurrencyFormat($total)]);
     }
 
     public function createProduct()
@@ -490,6 +526,12 @@ class PosController extends Controller
 
     public function checkoutCart(string $cart_id)
     {
+        //cek apakah ada keranjang dengan id tersebut
+        $keranjang = Keranjang::find($cart_id);
+        if($keranjang == null){
+            return redirect()->route('pos.addOrder')->with('error', 'Keranjang tidak ditemukan');
+        }
+
         $items = KeranjangItem::getItemByIdCart($cart_id);
         $total = 0;
         $diskon = 0;
@@ -550,12 +592,11 @@ class PosController extends Controller
 
     public function buatPesanan(Request $request)
     {
-        dd($request->all());
-        //Format No Invoice: INV-<cabang_id>-<sales_id>-<customer_id>-<date>
+
         $cabang = auth()->user()->cabang_id;
         $sales = auth()->user()->sales->id;
         $customer = $request->customer_id;
-        $date = date('Ym');
+        $date = date('ym');
 
         $keranjang = Keranjang::where('sales_id', $sales)->where('customer_id', $customer)->first();
         $items = KeranjangItem::getItemByIdCart($keranjang->id);
@@ -568,7 +609,7 @@ class PosController extends Controller
             $latestId = $latest->id + 1;
         }
         //generate invoice
-        $invoice = 'INV-'.$cabang.'/'.$sales.'/'.$customer.'/'.$date.'/'.$latestId;
+        $invoice = 'INV/'. $cabang . $sales.'/'.$customer.'/'.$date.'/'.$latestId;
         //sum diskon
         $diskon = 0;
         foreach($items as $item){
@@ -582,7 +623,7 @@ class PosController extends Controller
         $penjualan->no_invoice = $invoice;
         $penjualan->total = $request->total;
         $penjualan->diskon = $diskon;
-        $penjualan->diterima = $request->total_bayar;
+        $penjualan->diterima = CustomHelper::removeCurrencyFormat($request->total_bayar);
         $penjualan->keterangan = $request->keterangan;
         $penjualan->metode_pembayaran = $request->metode;
         $penjualan->rekening = $request->rekening == null || $request->rekening == "" ? null : $request->rekening;
@@ -613,5 +654,13 @@ class PosController extends Controller
         $keranjang->delete();
 
         return response()->json(['success' => 'Pesanan berhasil dibuat !']);
+    }
+
+    public function tampilFaktur(string $id)
+    {
+        $penjualan = Penjualan::find($id);
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+
+        return view('page.kasir.invoice-penjualan', compact('penjualan', 'items'));
     }
 }

@@ -260,22 +260,17 @@
             total: total
           },
           success: function(data) {
-            if(data.status == 'success') {
               Swal.fire({
               icon: "success",
               title: "Pesanan kamu berhasil dibuat !",
               showConfirmButton: false,
               timer: 1500
-            });
-              window.location.href = '/pos/add-order';
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "Gagal membuat pesanan !",
-                showConfirmButton: false,
-                timer: 1500
               });
-            }
+
+              //redirect ke halaman add order setelah 1.5 detik
+              setTimeout(function() {
+                window.location.href = '/pos/add-order';
+              }, 1500);
           }
         });
       });

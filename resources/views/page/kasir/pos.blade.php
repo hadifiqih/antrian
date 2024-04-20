@@ -95,7 +95,6 @@
     function showModalPelanggan(){
         $('#modalTambahPelanggan').modal('show');
     }
-
     //tambah keranjang
     function tambahItem(id){
         $.ajax({
@@ -107,9 +106,40 @@
                 keranjang_id: $('#keranjang_id').val()
             },
             success: function(data){
-                Swal.fire('Berhasil', 'Produk berhasil ditambahkan!', 'success');
+                //tampilkan toast sweet alert
+                Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Produk berhasil ditambahkan',
+                        showConfirmButton: false,
+                        timer: 1500
+                });
                 $('#pilihProduk').modal('hide');
                 $('#tableItems').DataTable().ajax.reload();
+                $('#total').text(data.total);
+            }
+        });
+    }
+    //hapus item
+    function hapusItem(id){
+        Swal.fire({
+            title: "Konfirmasi Hapus Item",
+            text: "Apakah anda yakin ingin menghapus item ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, Hapus!"
+            }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/pos/hapus-item/' + id + '/' + $('#keranjang_id').val(),
+                    type: 'GET',
+                    success: function(data){
+                        $('#tableItems').DataTable().ajax.reload();
+                        $('#total').text(data.total);
+                    }
+                });
             }
         });
     }
@@ -284,7 +314,6 @@
             processing: true,
             serverSide: true,
             autoWidth: false,
-            scrollX: true,
             ajax: "{{ route('pos.pilihProduk') }}",
             columns: [
                 {data: 'nama_produk', name: 'nama_produk'},

@@ -13,7 +13,7 @@
             <div class="modal-body">
                 {{-- Table Produk --}}
                 <div class="table-responsive">
-                    <table id="tableProduct" class="table table-striped">
+                    <table id="tableProduct" class="table table-striped display nowarp" style="width:100%">
                         <thead>
                             <tr>
                                 <th scope="col">Nama Produk</th>
