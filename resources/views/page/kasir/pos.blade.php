@@ -254,10 +254,12 @@
                 return false;
             }
 
-            if($('#tableItems tbody tr').length < 2){
-                Swal.fire('Peringatan', 'Tambahkan produk terlebih dahulu', 'warning');
+            //jika td pada table kosong
+            if($('#tableItems tbody tr td').hasClass('dt-empty')){
+                Swal.fire('Peringatan', 'Tambahkan produk terlebih dahulu!', 'warning');
                 return false;
             }
+
             //BERALIH KE HALAMAN CHECKOUT
             window.location.href = '/pos/checkout/' + $('#keranjang_id').val();
         });

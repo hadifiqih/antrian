@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sales;
 use App\Models\Produk;
 use App\Models\Customer;
 use App\Models\Keranjang;
@@ -660,7 +661,73 @@ class PosController extends Controller
     {
         $penjualan = Penjualan::find($id);
         $items = PenjualanDetail::where('penjualan_id', $id)->get();
+        $salesId = auth()->user()->sales->id;
+        $sales = Sales::find($salesId);
 
-        return view('page.kasir.invoice-penjualan', compact('penjualan', 'items'));
+        $diskon = 0;
+        $total = 0;
+        foreach($items as $item){
+            $diskon += $item->diskon;
+            $subtotal = ($item->harga * $item->jumlah) - $item->diskon;
+            $total += $subtotal;
+        }
+
+        $rekening = $penjualan->rekening;
+        if($rekening == 'tunai'){
+            $rekening = 'Tunai';
+        }elseif($rekening == 'bca'){
+            $rekening = 'Bank BCA';
+        }elseif($rekening == 'bni'){
+            $rekening = 'Bank BNI';
+        }elseif($rekening == 'bri'){
+            $rekening = 'Bank BRI';
+        }elseif($rekening == 'mandiri'){
+            $rekening = 'Bank Mandiri';
+        }else{
+            $rekening = 'Lainnya';
+        }
+
+        return view('page.kasir.invoice-penjualan', compact('penjualan', 'items', 'sales', 'diskon', 'total', 'rekening'));
+    }
+
+    public function printFaktur(string $id)
+    {
+        $penjualan = Penjualan::find($id);
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+        $salesId = auth()->user()->sales->id;
+        $sales = Sales::find($salesId);
+
+        $diskon = 0;
+        $total = 0;
+        foreach($items as $item){
+            $diskon += $item->diskon;
+            $subtotal = ($item->harga * $item->jumlah) - $item->diskon;
+            $total += $subtotal;
+        }
+
+        $rekening = $penjualan->rekening;
+        if($rekening == 'tunai'){
+            $rekening = 'Tunai';
+        }elseif($rekening == 'bca'){
+            $rekening = 'Bank BCA';
+        }elseif($rekening == 'bni'){
+            $rekening = 'Bank BNI';
+        }elseif($rekening == 'bri'){
+            $rekening = 'Bank BRI';
+        }elseif($rekening == 'mandiri'){
+            $rekening = 'Bank Mandiri';
+        }else{
+            $rekening = 'Lainnya';
+        }
+
+        return view('page.kasir.invoice-print', compact('penjualan', 'items', 'sales', 'diskon', 'total', 'rekening'));
+    }
+
+    public function laporanBahan()
+    {
+        $sales = auth()->user()->sales->id;
+        $penjualan = Penjualan::where('sales_id', $sales)->get();
+
+        return view('page.kasir.penjualan', compact('penjualan'));
     }
 }

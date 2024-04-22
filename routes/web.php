@@ -287,6 +287,7 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/get-product-by-id/{id}', 'getProductById')->name('pos.getProductById');
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
     Route::post('/pos/tambah-item', 'tambahItem')->name('pos.tambahItem');
+    Route::get('/pos/laporan-bahan', 'laporanBahan')->name('pos.laporanBahan');
     //Keranjang
     Route::post('/pos/tambah-keranjang', 'tambahKeranjang')->name('pos.tambahKeranjang');
     Route::post('/pos/setup-keranjang', 'setupKeranjang')->name('pos.setupKeranjang');
@@ -300,6 +301,7 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/checkout-json/{cart_id}', 'checkoutCartJson')->name('pos.checkoutJson');
     Route::post('/pos/buat-pesanan', 'buatPesanan')->name('pos.buatPesanan');
     Route::get('/pos/faktur/{id}', 'tampilFaktur')->name('pos.faktur');
+    Route::get('/pos/faktur-print/{id}', 'printFaktur')->name('pos.printFaktur');
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
 })->middleware('auth');
