@@ -81,6 +81,12 @@
                     <p style="margin-left:7px">Laporan Penjualan</p>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('pos.laporanItem') }}" class="nav-link {{ request()->routeIs('pos.laporanItem') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p style="margin-left:7px">Laporan Bahan</p>
+                    </a>
+                </li>
             </ul>
         </li>
     </ul>

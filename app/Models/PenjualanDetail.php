@@ -21,4 +21,9 @@ class PenjualanDetail extends Model
     {
         return $this->belongsTo(Produk::class, 'produk_id', 'id');
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
 }

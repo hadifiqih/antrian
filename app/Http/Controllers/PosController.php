@@ -728,6 +728,106 @@ class PosController extends Controller
         $sales = auth()->user()->sales->id;
         $penjualan = Penjualan::where('sales_id', $sales)->get();
 
-        return view('page.kasir.penjualan', compact('penjualan'));
+        $omsetToday = 0;
+        $omsetMonth = 0;
+
+        $penjualanToday = Penjualan::where('sales_id', $sales)->whereDate('created_at', date('Y-m-d'))->get();
+        $penjualanMonth = Penjualan::where('sales_id', $sales)->whereMonth('created_at', date('m'))->get();
+
+        foreach($penjualanToday as $p){
+            $omsetToday += $p->total;
+        }
+
+        foreach($penjualanMonth as $p){
+            $omsetMonth += $p->total;
+        }
+
+        $omsetToday = CustomHelper::addCurrencyFormat($omsetToday);
+        $omsetMonth = CustomHelper::addCurrencyFormat($omsetMonth);
+
+        return view('page.kasir.penjualan', compact('penjualan', 'omsetToday', 'omsetMonth'));
+    }
+
+    public function laporanBahanJson()
+    {
+        $sales = auth()->user()->sales->id;
+        $penjualan = Penjualan::where('sales_id', $sales)->get();
+
+        return Datatables::of($penjualan)
+            ->addIndexColumn()
+            ->addColumn('no_invoice', function($row){
+                return $row->no_invoice;
+            })
+            ->addColumn('tanggal', function($row){
+                return date_format($row->created_at, 'd F Y');
+            })
+            ->addColumn('customer', function($row){
+                return $row->customer->nama;
+            })
+            ->addColumn('total', function($row){
+                return CustomHelper::addCurrencyFormat($row->total);
+            })
+            ->addColumn('action', function($row){
+                $actionBtn = '<div class="btn-group">';
+                $actionBtn .= '<a href="'.route('pos.faktur', $row->id).'" class="btn btn-primary btn-sm"><i class="fas fa-list-alt"></i> Invoice</a>';
+                $actionBtn .= '<a href="#" class="btn btn-info btn-sm"><i class="fas fa-print"></i> Print Nota</a>';
+                $actionBtn .= '</div>';
+                return $actionBtn;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function laporanItem()
+    {
+        $sales = auth()->user()->sales->id;
+        $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
+            $q->where('sales_id', $sales);
+        })->with('customer', 'produk')
+        ->get();
+
+        return view('page.kasir.penjualan-item', compact('penjualanDetail'));
+    }
+
+    public function itemsJson()
+    {
+        $sales = auth()->user()->sales->id;
+        $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
+            $q->where('sales_id', $sales);
+        })->with('customer', 'produk')
+        ->get();
+
+        return Datatables::of($penjualanDetail)
+            ->addIndexColumn()
+            ->addColumn('tanggal', function($row){
+                return date_format($row->penjualan->created_at, 'd F Y');
+            })
+            ->addColumn('produk', function($row){
+                return $row->produk->nama_produk;
+            })
+            ->addColumn('jumlah', function($row){
+                return $row->jumlah;
+            })
+            ->addColumn('kulak', function($row){
+                $cabang = auth()->user()->cabang_id;
+                $harga = ProdukHarga::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->first();
+                return CustomHelper::addCurrencyFormat($harga->harga_kulak);
+            })
+            ->addColumn('harga', function($row){
+                return CustomHelper::addCurrencyFormat($row->harga);
+            })
+            ->addColumn('total', function($row){
+                $total = ($row->harga * $row->jumlah) - $row->diskon;
+                return CustomHelper::addCurrencyFormat($total);
+            })
+            ->addColumn('laba', function($row){
+                $cabang = auth()->user()->cabang_id;
+                $harga = ProdukHarga::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->first();
+                $laba = ($row->harga - $harga->harga_kulak) * $row->jumlah;
+                return CustomHelper::addCurrencyFormat($laba);
+            })
+            
+            ->rawColumns(['tanggal', 'produk', 'jumlah', 'kulak', 'harga', 'total', 'laba'])
+            ->make(true);
     }
 }

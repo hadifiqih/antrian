@@ -288,6 +288,9 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
     Route::post('/pos/tambah-item', 'tambahItem')->name('pos.tambahItem');
     Route::get('/pos/laporan-bahan', 'laporanBahan')->name('pos.laporanBahan');
+    Route::get('/pos/laporan-bahan-json', 'laporanBahanJson')->name('pos.laporanBahanJson');
+    Route::get('/pos/laporan-item', 'laporanItem')->name('pos.laporanItem');
+    Route::get('/pos/laporan-item-json', 'itemsJson')->name('pos.laporanItemJson');
     //Keranjang
     Route::post('/pos/tambah-keranjang', 'tambahKeranjang')->name('pos.tambahKeranjang');
     Route::post('/pos/setup-keranjang', 'setupKeranjang')->name('pos.setupKeranjang');
