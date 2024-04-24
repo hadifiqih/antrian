@@ -35,7 +35,6 @@
               </table>
             </div>
               <h6 class="font-weight-bold mx-3 mt-2">Total<span id="totalItems" class="float-right">{{ $total }}</span></h6>
-              <h5 class="font-weight-bold mx-3">Total (Pembulatan)<span id="pembulatan" class="float-right text-danger">{{ $pembulatan }}</span></h5>
           </div>
           <hr>
           <div class="card-body pt-0">
@@ -208,7 +207,7 @@
       });
 
       $('#totalBayar').on('keyup', function() {
-          var totalText = $('#pembulatan').text().replace(/\./g, '').replace('Rp ', '');
+          var totalText = $('#totalItems').text().replace(/\./g, '').replace('Rp ', '');
           var bayarText = $(this).val().replace(/\./g, '');
           
           // Mengonversi teks menjadi angka, jika tidak valid akan menghasilkan NaN
@@ -231,7 +230,7 @@
       });
 
       $('#btnBuatPesanan').on('click', function(){
-        var totalText = $('#pembulatan').text().replace(/\./g, '').replace('Rp ', '');
+        var totalText = $('#totalItems').text().replace(/\./g, '').replace('Rp ', '');
         var bayarText = $('#totalBayar').val().replace(/\./g, '');
         var total = parseInt(totalText);
         var bayar = parseInt(bayarText);

@@ -307,6 +307,12 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/faktur-print/{id}', 'printFaktur')->name('pos.printFaktur');
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
+    //Fungsi tambahan
+    Route::get('/pos/omset-today/{bulan}', 'penjualanToday')->name('pos.penjualanToday');
+    Route::get('/pos/omset-bulanan/{bulan}', 'penjualanBulanan')->name('pos.penjualanBulanan');
+
+    Route::get('/pos/omset-item-bulanan/{bulan}', 'penjualanItemBulanan')->name('pos.penjualanItemBulanan');
+    Route::get('/pos/omset-laba/{bulan}', 'labaBulanan')->name('pos.labaBulanan');
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){

@@ -723,35 +723,64 @@ class PosController extends Controller
         return view('page.kasir.invoice-print', compact('penjualan', 'items', 'sales', 'diskon', 'total', 'rekening'));
     }
 
-    public function laporanBahan()
+    public function penjualanToday(string $bulan)
     {
         $sales = auth()->user()->sales->id;
-        $penjualan = Penjualan::where('sales_id', $sales)->get();
+        $penjualan = Penjualan::where('sales_id', $sales)->whereDate('created_at', date('Y-'.$bulan.'-d'))->get();
 
         $omsetToday = 0;
-        $omsetMonth = 0;
-
-        $penjualanToday = Penjualan::where('sales_id', $sales)->whereDate('created_at', date('Y-m-d'))->get();
-        $penjualanMonth = Penjualan::where('sales_id', $sales)->whereMonth('created_at', date('m'))->get();
-
-        foreach($penjualanToday as $p){
+        foreach($penjualan as $p){
             $omsetToday += $p->total;
         }
 
-        foreach($penjualanMonth as $p){
+        $omsetToday = CustomHelper::addCurrencyFormat($omsetToday);
+
+        return response()->json($omsetToday);
+    }
+
+    public function penjualanBulanan($bulan)
+    {
+        $sales = auth()->user()->sales->id;
+        $penjualan = Penjualan::where('sales_id', $sales)->whereMonth('created_at', $bulan)->get();
+
+        $omsetMonth = 0;
+        foreach($penjualan as $p){
             $omsetMonth += $p->total;
         }
 
-        $omsetToday = CustomHelper::addCurrencyFormat($omsetToday);
         $omsetMonth = CustomHelper::addCurrencyFormat($omsetMonth);
 
-        return view('page.kasir.penjualan', compact('penjualan', 'omsetToday', 'omsetMonth'));
+        return response()->json($omsetMonth);
     }
 
-    public function laporanBahanJson()
+    public function laporanBahan(Request $request)
     {
         $sales = auth()->user()->sales->id;
-        $penjualan = Penjualan::where('sales_id', $sales)->get();
+        $bulan = $request->query('bulan') ?? date('m');
+        if(!isset($bulan)){
+            $awal = date('Y-m-01');
+            $akhir = date('Y-m-31');
+        }else{
+            $awal = date('Y-'.$bulan.'-01');
+            $akhir = date('Y-'.$bulan.'-t');
+        }
+
+        return view('page.kasir.penjualan', compact('bulan'));
+    }
+
+    public function laporanBahanJson(Request $request)
+    {
+        $sales = auth()->user()->sales->id;
+        $filter = $request->query('bulan') ?? date('m');
+        if(!isset($filter)){
+            $awal = date('Y-m-01');
+            $akhir = date('Y-m-t');
+        }else{
+            $awal = date('Y-'.$filter.'-01');
+            $akhir = date('Y-'.$filter.'-t');
+        }
+
+        $penjualan = Penjualan::where('sales_id', $sales)->whereBetween('created_at', [$awal, $akhir])->get();
 
         return Datatables::of($penjualan)
             ->addIndexColumn()
@@ -781,21 +810,41 @@ class PosController extends Controller
     public function laporanItem()
     {
         $sales = auth()->user()->sales->id;
+        $awal = date('Y-m-01');
+        $akhir = date('Y-m-t');
+        $bulan = date('m');
+
         $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
             $q->where('sales_id', $sales);
-        })->with('customer', 'produk')
-        ->get();
+        })->whereBetween('created_at', [$awal, $akhir])->get();
 
-        return view('page.kasir.penjualan-item', compact('penjualanDetail'));
+        $laba = 0;
+        foreach($penjualanDetail as $p){
+            $cabang = auth()->user()->cabang_id;
+            $harga = ProdukHarga::where('produk_id', $p->produk_id)->where('cabang_id', $cabang)->first();
+            $laba += ($p->harga - $harga->harga_kulak) * $p->jumlah;
+        }
+        $laba = CustomHelper::addCurrencyFormat($laba);
+
+        $total = 0;
+        foreach($penjualanDetail as $p){
+            $subtotal = ($p->harga * $p->jumlah) - $p->diskon;
+            $total += $subtotal;
+        }
+        $total = CustomHelper::addCurrencyFormat($total);
+
+        return view('page.kasir.penjualan-item', compact('penjualanDetail', 'laba', 'total', 'bulan'));
     }
 
     public function itemsJson()
     {
         $sales = auth()->user()->sales->id;
+        $awal = date('Y-m-01');
+        $akhir = date('Y-m-t');
+
         $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
             $q->where('sales_id', $sales);
-        })->with('customer', 'produk')
-        ->get();
+        })->whereBetween('created_at', [$awal, $akhir])->get();
 
         return Datatables::of($penjualanDetail)
             ->addIndexColumn()
@@ -829,5 +878,38 @@ class PosController extends Controller
             
             ->rawColumns(['tanggal', 'produk', 'jumlah', 'kulak', 'harga', 'total', 'laba'])
             ->make(true);
+    }
+
+    public function penjualanItemBulanan($bulan)
+    {
+        $items = PenjualanDetail::whereHas('penjualan', function($q){
+            $q->where('sales_id', auth()->user()->sales->id);
+        })->whereMonth('created_at', $bulan)->get();
+
+        $total = 0;
+
+        foreach($items as $item){
+            $subtotal = ($item->harga * $item->jumlah) - $item->diskon;
+            $total += $subtotal;
+        }
+
+        return response()->json(CustomHelper::addCurrencyFormat($total));
+    }
+
+    public function labaBulanan($bulan)
+    {
+        $items = PenjualanDetail::whereHas('penjualan', function($q){
+            $q->where('sales_id', auth()->user()->sales->id);
+        })->whereMonth('created_at', $bulan)->get();
+
+        $laba = 0;
+
+        foreach($items as $item){
+            $cabang = auth()->user()->cabang_id;
+            $harga = ProdukHarga::where('produk_id', $item->produk_id)->where('cabang_id', $cabang)->first();
+            $laba += ($item->harga - $harga->harga_kulak) * $item->jumlah;
+        }
+
+        return response()->json(CustomHelper::addCurrencyFormat($laba));
     }
 }
