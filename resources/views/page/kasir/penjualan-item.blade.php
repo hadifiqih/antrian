@@ -121,6 +121,14 @@
             var bulan = $(this).val();
             // change data in datatable with selected month
             $('#table').DataTable().ajax.url("/pos/laporan-item-json?bulan=" + bulan).load();
+
+            $.get('/pos/omset-item-bulanan/' + $('#bulan').val(), function(data) {
+                $('#total').html(data);
+            });
+
+            $.get('/pos/omset-laba/' + $('#bulan').val(), function(data) {
+                $('#laba').html(data);
+            });
         });
     });
 </script>

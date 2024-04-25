@@ -466,7 +466,8 @@ class PosController extends Controller
                 return CustomHelper::addCurrencyFormat($total);
             })
             ->addColumn('qty', function($row){
-                return '<input id="qty" type="number" style="width: 80px;" class="form-control" value="'.$row->jumlah.'" onchange="updateQty('.$row->id.', this.value)">';
+                $stok = StokBahan::where('produk_id', $row->produk_id)->where('cabang_id', auth()->user()->cabang_id)->first()->jumlah_stok;
+                return '<input id="qty" type="number" style="width: 80px;" class="form-control" value="'.$row->jumlah.'" onchange="updateQty('.$row->id.', this.value)"><p class="text-sm text-danger font-weight-bold">Max. '. $stok .' pcs</p>';
             })
             ->addColumn('action', function($row){
                 $actionBtn = '<button type="button" class="btn btn-danger btn-sm" onclick="hapusItem('.$row->id.')"><i class="fas fa-trash"></i></button>';
@@ -643,6 +644,11 @@ class PosController extends Controller
                 $detail->jumlah = $item->jumlah;
                 $detail->diskon = $item->diskon;
                 $detail->save();
+
+                //update stok bahan
+                $stok = StokBahan::where('produk_id', $item->produk_id)->where('cabang_id', $cabang)->first();
+                $stok->jumlah_stok -= $item->jumlah;
+                $stok->save();
             }
 
             //hapus item keranjang
@@ -836,11 +842,17 @@ class PosController extends Controller
         return view('page.kasir.penjualan-item', compact('penjualanDetail', 'laba', 'total', 'bulan'));
     }
 
-    public function itemsJson()
+    public function itemsJson(Request $request)
     {
         $sales = auth()->user()->sales->id;
-        $awal = date('Y-m-01');
-        $akhir = date('Y-m-t');
+        $filter = $request->query('bulan') ?? date('m');
+        if(!isset($filter)){
+            $awal = date('Y-m-01');
+            $akhir = date('Y-m-t');
+        }else{
+            $awal = date('Y-'.$filter.'-01');
+            $akhir = date('Y-'.$filter.'-t');
+        }
 
         $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
             $q->where('sales_id', $sales);

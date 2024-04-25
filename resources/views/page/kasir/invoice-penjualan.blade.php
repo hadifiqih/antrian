@@ -91,7 +91,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-right">Grand Total (Pembulatan) : </h6>
+                            <h6 class="text-right">Grand Total : </h6>
                         </div>
                         <div class="col-md-6">
                             <h5 class="text-center font-weight-bold text-success">Rp. {{ number_format($penjualan->total, 0, ',', '.') }}</h5>

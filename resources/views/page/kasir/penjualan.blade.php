@@ -44,25 +44,33 @@
                 <h3 class="card-title">Laporan Penjualan</h3>
             </div>
             <div class="card-body">
-                {{-- Memilih Bulan --}}
-        <div class="col-md-3 col-sm-6 col-12">
-            <div class="form-group">
-                <select name="bulan" id="bulan" class="form-control">
-                    <option value="01" {{ $bulan == '01' ? 'selected' : '' }}>Januari</option>
-                    <option value="02" {{ $bulan == '02' ? 'selected' : '' }}>Februari</option>
-                    <option value="03" {{ $bulan == '03' ? 'selected' : '' }}>Maret</option>
-                    <option value="04" {{ $bulan == '04' ? 'selected' : '' }}>April</option>
-                    <option value="05" {{ $bulan == '05' ? 'selected' : '' }}>Mei</option>
-                    <option value="06" {{ $bulan == '06' ? 'selected' : '' }}>Juni</option>
-                    <option value="07" {{ $bulan == '07' ? 'selected' : '' }}>Juli</option>
-                    <option value="08" {{ $bulan == '08' ? 'selected' : '' }}>Agustus</option>
-                    <option value="09" {{ $bulan == '09' ? 'selected' : '' }}>September</option>
-                    <option value="10" {{ $bulan == '10' ? 'selected' : '' }}>Oktober</option>
-                    <option value="11" {{ $bulan == '11' ? 'selected' : '' }}>November</option>
-                    <option value="12" {{ $bulan == '12' ? 'selected' : '' }}>Desember</option>
-                </select>
-            </div>
-        </div>
+                <div class="row">
+                    {{-- Memilih Bulan --}}
+                    <div class="col-md-3 col-sm-6 col-12">
+                        <div class="form-group">
+                            <select name="bulan" id="bulan" class="form-control">
+                                <option value="01" {{ $bulan == '01' ? 'selected' : '' }}>Januari</option>
+                                <option value="02" {{ $bulan == '02' ? 'selected' : '' }}>Februari</option>
+                                <option value="03" {{ $bulan == '03' ? 'selected' : '' }}>Maret</option>
+                                <option value="04" {{ $bulan == '04' ? 'selected' : '' }}>April</option>
+                                <option value="05" {{ $bulan == '05' ? 'selected' : '' }}>Mei</option>
+                                <option value="06" {{ $bulan == '06' ? 'selected' : '' }}>Juni</option>
+                                <option value="07" {{ $bulan == '07' ? 'selected' : '' }}>Juli</option>
+                                <option value="08" {{ $bulan == '08' ? 'selected' : '' }}>Agustus</option>
+                                <option value="09" {{ $bulan == '09' ? 'selected' : '' }}>September</option>
+                                <option value="10" {{ $bulan == '10' ? 'selected' : '' }}>Oktober</option>
+                                <option value="11" {{ $bulan == '11' ? 'selected' : '' }}>November</option>
+                                <option value="12" {{ $bulan == '12' ? 'selected' : '' }}>Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-sm-6 text-right">
+                        <div class="form-group">
+                            <button class="btn btn-success"><i class="fas fa-download"></i> Laporan Excel</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <table id="table" class="table table-bordered table-striped display nowarp" style="width:100%">
