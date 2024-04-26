@@ -256,7 +256,7 @@ class ReportController extends Controller
         $printer->text("=============================================\n");
         foreach ($items as $item) {
             $printer->text(buatBaris1Kolom($item->job->job_name));
-            $printer->text(buatBaris3Kolom($item->qty . " PCS", number_format($item->price, 0, ',', '.') ,number_format($item->price * $item->qty, 0, ',', '.')));
+            $printer->text(buatBaris3Kolom($item->qty . "x", number_format($item->price, 0, ',', '.') ,number_format($item->price * $item->qty, 0, ',', '.')));
         }
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->text("=============================================\n");

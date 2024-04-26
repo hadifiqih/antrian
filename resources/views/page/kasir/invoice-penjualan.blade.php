@@ -91,10 +91,19 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
+                            <h6 class="text-right">Pajak (11%) : </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center">Rp. {{ $total * (11/100) }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
                             <h6 class="text-right">Grand Total : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h5 class="text-center font-weight-bold text-success">Rp. {{ number_format($penjualan->total, 0, ',', '.') }}</h5>
+                            <h5 class="text-center font-weight-bold text-success">Rp. {{ number_format($total + ($total * (11/100)), 0, ',', '.') }}</h5>
                         </div>
                     </div>
                 </div>

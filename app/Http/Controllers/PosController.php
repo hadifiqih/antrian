@@ -17,6 +17,12 @@ use App\Models\PenjualanDetail;
 use App\Models\SumberPelanggan;
 use Yajra\DataTables\Facades\DataTables;
 
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\CapabilityProfile;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+
 class PosController extends Controller
 {
     public function __construct()
@@ -604,14 +610,17 @@ class PosController extends Controller
         $items = KeranjangItem::getItemByIdCart($keranjang->id);
 
         //get latest id from penjualan
-        $latest = Penjualan::latest()->first();
-        if($latest == null){
+        $latest = Penjualan::whereMonth('created_at', $month)->count();
+        
+        if($latest == 0){
             $latestId = 1;
         }else{
-            $latestId = $latest->id + 1;
+            $latestId = $latest + 1;
         }
+
         //generate invoice
-        $invoice = 'INV/'. $cabang . $sales.'/'.$customer.'/'.$date.'/'.$latestId;
+        $invoice = 'INV/'. $cabang . $sales . $date . $latestId;
+
         //sum diskon
         $diskon = 0;
         foreach($items as $item){
@@ -805,7 +814,7 @@ class PosController extends Controller
             ->addColumn('action', function($row){
                 $actionBtn = '<div class="btn-group">';
                 $actionBtn .= '<a href="'.route('pos.faktur', $row->id).'" class="btn btn-primary btn-sm"><i class="fas fa-list-alt"></i> Invoice</a>';
-                $actionBtn .= '<a href="#" class="btn btn-info btn-sm"><i class="fas fa-print"></i> Print Nota</a>';
+                $actionBtn .= '<button onclick="printStruk('.$row->id.')" class="btn btn-info btn-sm"><i class="fas fa-print"></i> Print Nota</button>';
                 $actionBtn .= '</div>';
                 return $actionBtn;
             })
@@ -923,5 +932,170 @@ class PosController extends Controller
         }
 
         return response()->json(CustomHelper::addCurrencyFormat($laba));
+    }
+
+    public function printNota(string $id)
+    {
+        //function pembagian kolom
+        function buatBaris1Kolom($kolom1)
+        {
+            // Mengatur lebar setiap kolom (dalam satuan karakter)
+            $lebar_kolom_1 = 45;
+
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
+
+            // Merubah hasil wordwrap menjadi array, kolom yang memiliki 2 index array berarti memiliki 2 baris (kena wordwrap)
+            $kolom1Array = explode("\n", $kolom1);
+
+            // Mengambil jumlah baris terbanyak dari kolom-kolom untuk dijadikan titik akhir perulangan
+            $jmlBarisTerbanyak = count($kolom1Array);
+
+            // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
+            $hasilBaris = array();
+
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
+
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ");
+
+                // Menggabungkan kolom tersebut menjadi 1 baris dan ditampung ke variabel hasil (ada 1 spasi disetiap kolom)
+                $hasilBaris[] = $hasilKolom1;
+            }
+
+            // Hasil yang berupa array, disatukan kembali menjadi string dan tambahkan \n disetiap barisnya.
+            return implode("\n", $hasilBaris) . "\n";
+        }
+
+        function buatBaris3Kolom($kolom1, $kolom2, $kolom3)
+        {
+            // Mengatur lebar setiap kolom (dalam satuan karakter)
+            $lebar_kolom_1 = 9;
+            $lebar_kolom_2 = 15;
+            $lebar_kolom_3 = 19;
+
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
+            $kolom2 = wordwrap($kolom2, $lebar_kolom_2, "\n", true);
+            $kolom3 = wordwrap($kolom3, $lebar_kolom_3, "\n", true);
+
+            // Merubah hasil wordwrap menjadi array, kolom yang memiliki 2 index array berarti memiliki 2 baris (kena wordwrap)
+            $kolom1Array = explode("\n", $kolom1);
+            $kolom2Array = explode("\n", $kolom2);
+            $kolom3Array = explode("\n", $kolom3);
+
+            // Mengambil jumlah baris terbanyak dari kolom-kolom untuk dijadikan titik akhir perulangan
+            $jmlBarisTerbanyak = max(count($kolom1Array), count($kolom2Array), count($kolom3Array));
+
+            // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
+            $hasilBaris = array();
+
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
+
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
+                // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
+                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_RIGHT);
+
+                $hasilKolom3 = str_pad((isset($kolom3Array[$i]) ? $kolom3Array[$i] : ""), $lebar_kolom_3, " ", STR_PAD_LEFT);
+
+                // Menggabungkan kolom tersebut menjadi 1 baris dan ditampung ke variabel hasil (ada 1 spasi disetiap kolom)
+                $hasilBaris[] = $hasilKolom1 . " " . $hasilKolom2 . " " . $hasilKolom3;
+            }
+
+            // Hasil yang berupa array, disatukan kembali menjadi string dan tambahkan \n disetiap barisnya.
+            return implode("\n", $hasilBaris) . "\n";
+        }
+
+        function buatBaris2Kolom($kolom1, $kolom2)
+        {
+            // Mengatur lebar setiap kolom (dalam satuan karakter)
+            $lebar_kolom_1 = 20;
+            $lebar_kolom_2 = 25;
+
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
+            $kolom2 = wordwrap($kolom2, $lebar_kolom_2, "\n", true);
+
+            // Merubah hasil wordwrap menjadi array, kolom yang memiliki 2 index array berarti memiliki 2 baris (kena wordwrap)
+            $kolom1Array = explode("\n", $kolom1);
+            $kolom2Array = explode("\n", $kolom2);
+
+            // Mengambil jumlah baris terbanyak dari kolom-kolom untuk dijadikan titik akhir perulangan
+            $jmlBarisTerbanyak = max(count($kolom1Array), count($kolom2Array));
+
+            // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
+            $hasilBaris = array();
+
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
+
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
+                // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
+                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_LEFT);
+
+                // Menggabungkan kolom tersebut menjadi 1 baris dan ditampung ke variabel hasil (ada 1 spasi disetiap kolom)
+                $hasilBaris[] = $hasilKolom1 . " " . $hasilKolom2;
+            }
+
+            // Hasil yang berupa array, disatukan kembali menjadi string dan tambahkan \n disetiap barisnya.
+            return implode("\n", $hasilBaris) . "\n";
+        }
+
+        $sales = Sales::find(auth()->user()->sales->id);
+        $penjualan = Penjualan::find($id);
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+
+        $connector = new WindowsPrintConnector("POS-80");
+        $printer = new Printer($connector);
+
+        //print nota order dengan menggunakan printer thermal
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("STRUK PEMBELIAN\n");
+        $printer->setEmphasis(true);
+        $printer->text($sales->sales_name."\n");
+        $printer->setEmphasis(false);
+        $printer->text($sales->address."\n");
+        $printer->text("WA. ".$sales->sales_phone."\n");
+        $printer->text("-----------------------------------------------\n");
+        $printer->setEmphasis(true);
+        $printer->text($penjualan->no_invoice . "\n");
+        $printer->setEmphasis(false);
+        $printer->text("-----------------------------------------------\n");
+        $printer->text("\n");
+        $printer->text(buatBaris2Kolom(date_format($penjualan->created_at ,'d F Y') , date_format($penjualan->created_at ,'H:i')));
+        $printer->text(buatBaris2Kolom('Pelanggan', $penjualan->customer->nama));
+        $printer->text(buatBaris2Kolom('Kasir', $sales->sales_name));
+        $printer->text("-----------------------------------------------\n");
+
+        foreach($items as $item){
+            $qty = $item->jumlah . 'x';
+            $harga = '@'. number_format($item->harga, 0, ',', '.');
+            $printer->setEmphasis(true);
+            $printer->text(buatBaris1Kolom($item->produk->nama_produk));
+            $printer->setEmphasis(false);
+            $printer->text(buatBaris3Kolom($qty, $harga , CustomHelper::addCurrencyFormat($item->harga * $item->jumlah)));
+        }
+
+        $printer->text("-----------------------------------------------\n");
+        $printer->text(buatBaris2Kolom('Subtotal', CustomHelper::addCurrencyFormat($penjualan->total)));
+        $printer->text(buatBaris2Kolom('Diskon', CustomHelper::addCurrencyFormat($penjualan->diskon)));
+        $printer->text(buatBaris2Kolom('PPN(11%)', round((100/111)*($penjualan->total - $penjualan->diskon))));
+        $printer->text("-----------------------------------------------\n");
+        $printer->setEmphasis(true);
+        $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon)));
+        $printer->setEmphasis(false);
+        $printer->text("-----------------------------------------------\n");
+        $printer->text(buatBaris2Kolom('Cash/Transfer', CustomHelper::addCurrencyFormat($penjualan->diterima)));
+        $printer->text(buatBaris2Kolom('Kembali', CustomHelper::addCurrencyFormat($penjualan->diterima - ($penjualan->total - $penjualan->diskon))));
+        $printer->text("-----------------------------------------------\n");
+        $printer->text("-- Terima kasih --\n");
+        $printer->text("Selamat Datang Kembali\n");
+
+        $printer->cut();
+        $printer->close();
     }
 }

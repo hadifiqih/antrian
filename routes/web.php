@@ -305,6 +305,7 @@ Route::controller(PosController::class)->group(function(){
     Route::post('/pos/buat-pesanan', 'buatPesanan')->name('pos.buatPesanan');
     Route::get('/pos/faktur/{id}', 'tampilFaktur')->name('pos.faktur');
     Route::get('/pos/faktur-print/{id}', 'printFaktur')->name('pos.printFaktur');
+    Route::get('/pos/nota-print/{id}', 'printNota')->name('pos.printNota');
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
     //Fungsi tambahan

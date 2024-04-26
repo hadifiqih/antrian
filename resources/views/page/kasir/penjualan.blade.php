@@ -98,6 +98,24 @@
 
 @section('script')
 <script>
+    function printStruk($id) {
+        //menggunakan ajax untuk mengirim data ke server
+        $.ajax({
+          url: "/pos/nota-print/" + $id,
+          type: "GET",
+          success: function(response) {
+            //sweetalert2 untuk menampilkan pesan berhasil
+            Swal.fire({
+              icon: 'success',
+              title: 'Berhasil',
+              text: 'Struk berhasil dicetak',
+              showConfirmButton: false,
+              timer: 1500
+            });
+          }
+        });
+      }
+
     $(document).ready(function() {
         $.get('/pos/omset-today/' + $('#bulan').val(), function(data) {
             $('#omsetToday').html(data);
@@ -110,10 +128,6 @@
         $('#table').DataTable({
             processing: true,
             serverSide: true,
-            searching: false,
-            ordering: false,
-            paging: false,
-            info: false,
             scrollX: true,
             ajax: "{{ route('pos.laporanBahanJson') }}",
             columns: [
