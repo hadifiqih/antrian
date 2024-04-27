@@ -36,6 +36,8 @@
             </div>
               <h6 class="font-weight-bold mx-3 mt-2">Total<span id="totalItems" class="float-right">{{ $total }}</span></h6>
           </div>
+          {{-- Checkbox untuk penggunaan pajak --}}
+            
           <hr>
           <div class="card-body pt-0">
             <div class="form-group">
@@ -76,6 +78,27 @@
                 </div>
               </div>
             </div>
+
+            <div class="row">
+              <div class="col-6">
+                <div class="form-group">
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="pajak">
+                    <label class="custom-control-label" for="pajak">Pajak PPN(11%)</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="form-group">
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="pph">
+                    <label class="custom-control-label" for="pph">Pajak PPH(1,5%)</label>
+                  </div>
+                </div>
+              </div>
+          </div>
+
             <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
@@ -139,6 +162,28 @@
 
     $(document).ready(function() {
       $('#totalBayar').maskMoney({thousands:'.', decimal:',', precision:0});
+
+      $('#pajak').on('change', function() {
+        var total = parseInt("{{ $total }}".replace(/\./g, '').replace('Rp ', ''));
+        // Hitung pajak
+        var pajak = $(this).is(':checked') ? total * 0.11 : 0;
+        // Hitung PPH
+        var pph = $('#pph').is(':checked') ? total * 0.015 : 0;
+        // Hitung total
+        var grandTotal = total + pajak + pph;
+        $('#totalItems').text(formatRupiah(Math.round(grandTotal)));
+      });
+
+      $('#pph').on('change', function() {
+        var total = parseInt("{{ $total }}".replace(/\./g, '').replace('Rp ', ''));
+        // Hitung pajak
+        var pajak = $('#pajak').is(':checked') ? total * 0.11 : 0;
+        // Hitung PPH
+        var pph = $(this).is(':checked') ? total * 0.015 : 0;
+        // Hitung total
+        var grandTotal = total + pajak + pph;
+        $('#totalItems').text(formatRupiah(Math.round(grandTotal)));
+      });
 
       //Datatable Items
       $('#tableItems').DataTable({

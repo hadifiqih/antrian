@@ -63,16 +63,16 @@
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $item->produk->nama_produk }}</td>
-                                <td class="text-center">Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                <td class="text-center">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                 <td class="text-center">{{ $item->jumlah }}</td>
-                                <td class="text-center font-weight-bold">Rp. {{ number_format($item->jumlah * $item->harga, 0, ',', '.') }}</td>
+                                <td class="text-center font-weight-bold">Rp {{ number_format($item->jumlah * $item->harga, 0, ',', '.') }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-right font-weight-bold">Total</td>
-                                <td class="text-center font-weight-bold">Rp. {{ number_format($total, 0, ',', '.') }}</td>
+                                <td class="text-center font-weight-bold">Rp {{ number_format($total, 0, ',', '.') }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -86,7 +86,7 @@
                             <h6 class="text-right">Diskon : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp. {{ number_format($diskon, 0, ',', '.') }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($diskon, 0, ',', '.') }}</h6>
                         </div>
                     </div>
                     <div class="row">
@@ -94,7 +94,7 @@
                             <h6 class="text-right">Pajak (11%) : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp. {{ $total * (11/100) }}</h6>
+                            <h6 class="text-center">Rp {{ $total * (11/100) }}</h6>
                         </div>
                     </div>
 
@@ -103,7 +103,7 @@
                             <h6 class="text-right">Grand Total : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h5 class="text-center font-weight-bold text-success">Rp. {{ number_format($total + ($total * (11/100)), 0, ',', '.') }}</h5>
+                            <h5 class="text-center font-weight-bold text-success">Rp {{ number_format($total + ($total * (11/100)), 0, ',', '.') }}</h5>
                         </div>
                     </div>
                 </div>

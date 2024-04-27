@@ -82,6 +82,26 @@
                                 <input type="text" class="form-control maskRupiah" id="diskon" placeholder="Contoh : Rp 100.000" name="diskon" value="{{ old('diskon') }}">
                             </div>
 
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="pajak">
+                                        <label class="custom-control-label" for="pajak">Pajak PPN(11%)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                  
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="pph">
+                                        <label class="custom-control-label" for="pph">Pajak PPH(1,5%)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <div class="custom-control custom-checkbox">
                                     <input class="custom-control-input custom-control-input-danger" type="checkbox" id="isOngkir" name="isOngkir" value="{{ old('isOngkir') }}">
