@@ -22,6 +22,16 @@ class DataAntrian extends Model
 
     protected $table = 'data_antrian';
 
+    protected $fillable = [
+        'ticket_order',
+        'customer_id',
+        'sales_id',
+        'ppn',
+        'pph',
+        'status',
+    ];
+    
+
     public function estimator()
     {
         return $this->belongsTo(Employee::class, 'estimator_id', 'id');

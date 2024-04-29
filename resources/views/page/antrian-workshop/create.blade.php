@@ -24,7 +24,7 @@
                 <div class="card-body">
                     {{-- Tambah Pelanggan Baru --}}
                     <div class="form-group">
-                        <label for="nama">Nama Pelanggan <span class="text-danger">*</span></label>
+                        <label for="customer_id">Nama Pelanggan <span class="text-danger">*</span></label>
                         <select class="form-control select2" id="customer_id" name="customer_id" style="width: 100%">
                             <option value="" selected>Pilih Pelanggan</option>
                         </select>
@@ -67,7 +67,27 @@
                             </tfoot>
                         </table>
 
-                            <div class="form-group mt-3">
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="ppn">
+                                    <label class="custom-control-label" for="ppn">Pajak PPN(11%)</label>
+                                    </div>
+                                </div>
+                            </div>
+              
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="pph">
+                                    <label class="custom-control-label" for="pph">Pajak PPH(2,5%)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                            <div class="form-group">
                                 <label for="packing">Biaya Packing</label>
                                 <input type="text" class="form-control maskRupiah" id="packing" placeholder="Contoh : Rp 100.000" name="biayaPacking" value="{{ old('packing') }}">
                             </div>
@@ -80,26 +100,6 @@
                             <div class="form-group">
                                 <label for="diskon">Diskon / Potongan Harga</label>
                                 <input type="text" class="form-control maskRupiah" id="diskon" placeholder="Contoh : Rp 100.000" name="diskon" value="{{ old('diskon') }}">
-                            </div>
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" id="pajak">
-                                        <label class="custom-control-label" for="pajak">Pajak PPN(11%)</label>
-                                        </div>
-                                    </div>
-                                </div>
-                  
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" id="pph">
-                                        <label class="custom-control-label" for="pph">Pajak PPH(1,5%)</label>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="form-group">
@@ -330,17 +330,51 @@
         });
     }
 
-    function formatPhoneNumber(phoneNumber) {
-    // Menghapus semua karakter non-digit dari nomor telepon
-    const digits = phoneNumber.replace(/\D/g, '');
+    function formatPhoneNumber(phoneNumber){
+        // Menghapus semua karakter non-digit dari nomor telepon
+        const digits = phoneNumber.replace(/\D/g, '');
 
-    // Membagi nomor menjadi array yang berisi substring 4 digit
-    const substrings = digits.match(/.{1,4}/g);
+        // Membagi nomor menjadi array yang berisi substring 4 digit
+        const substrings = digits.match(/.{1,4}/g);
 
-    // Menggabungkan substring dengan tanda (-)
-    const formattedPhoneNumber = substrings ? substrings.join('-') : '';
+        // Menggabungkan substring dengan tanda (-)
+        const formattedPhoneNumber = substrings ? substrings.join('-') : '';
 
-    return formattedPhoneNumber;
+        return formattedPhoneNumber;
+    }
+
+    function resetFormValues() {
+        $('#alamatKirim').val('');
+        $('#ongkir').val('');
+        $('#ekspedisi').val('');
+        $('#namaEkspedisi').val('');
+        $('#noResi').val('');
+        console.log('resetFormValues');
+    }
+
+    function addRequiredAttributes() {
+        $('#alamatKirim').attr('required', true);
+        $('#ongkir').attr('required', true);
+        $('#ekspedisi').attr('required', true);
+        console.log('addRequiredAttributes');
+    }
+
+    function updateTotalWithoutShipping() {
+        var totalBarang = parseInt($('span#subtotal').text().replace(/\D/g, '') || 0);
+        var bPacking = parseInt($('#packing').val().replace(/\D/g, '') || 0);
+        var bPasang = parseInt($('#pasang').val().replace(/\D/g, '') || 0);
+        var diskon = parseInt($('#diskon').val().replace(/\D/g, '') || 0);
+
+        var totalTanpaOngkir = totalBarang + bPacking + bPasang - diskon;
+        $('#totalAll').html('Rp ' + totalTanpaOngkir.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        $('#totalAllInput').val(totalTanpaOngkir);
+        $('#sisaPembayaran').html('Rp ' + $('#totalAllInput').val());
+        console.log('updateTotalWithoutShipping');
+    }
+
+    function removeRequiredAttributes() {
+        $('#alamatKirim, #ongkir, #ekspedisi').removeAttr('required');
+        console.log('removeRequiredAttributes');
     }
 
     $(document).ready(function() {
@@ -349,6 +383,22 @@
         $('#modalTelepon').on('keyup', function(){
             var phone = $(this).val();
             $(this).val(formatPhoneNumber(phone));
+        });
+
+        // ketika isOngkir dicentang maka divAlamatKirim, divOngkir, divEkspedisi akan muncul
+        $('#isOngkir').on('change', function(){
+            if($(this).is(':checked')){
+                resetFormValues();
+                $('.pengiriman').show();
+                addRequiredAttributes();
+            } else {
+                if($('#ongkir').val() != ''){
+                    updateTotalWithoutShipping();
+                }
+                resetFormValues();
+                $('.pengiriman').hide();
+                removeRequiredAttributes();
+            }
         });
 
         // function provinsi
@@ -626,179 +676,82 @@
             });
         });
 
-        // saat ada perubahan pada inputan biaya packing, biaya ongkir, biaya pasang, diskon maka totalAll akan berubah
-        $('#packing, #ongkir, #pasang, #diskon').on('keyup', function(){
-            var packing = $('#packing').val();
-            packing = packing.replace(/[^0-9]/g, '');
-            packing = parseInt(packing);
-
-            var ongkir = $('#ongkir').val();
-            ongkir = ongkir.replace(/[^0-9]/g, '');
-            ongkir = parseInt(ongkir);
-
-            var pasang = $('#pasang').val();
-            pasang = pasang.replace(/[^0-9]/g, '');
-            pasang = parseInt(pasang);
-
-            var diskon = $('#diskon').val();
-            diskon = diskon.replace(/[^0-9]/g, '');
-            diskon = parseInt(diskon);
-
-            var totalAll = $('#subtotal').text();
-            totalAll = totalAll.replace(/[^0-9]/g, '');
-            totalAll = parseInt(totalAll);
-
-            if(isNaN(packing)){
-                packing = 0;
-            }
-
-            if(isNaN(ongkir)){
-                ongkir = 0;
-            }
-
-            if(isNaN(pasang)){
-                pasang = 0;
-            }
-
-            if(isNaN(diskon)){
-                diskon = 0;
-            }
-
-            if(isNaN(totalAll)){
-                totalAll = 0;
-            }
-
-            var totalAll = totalAll + packing + ongkir + pasang - diskon;
-            totalAll = totalAll.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-            $('#totalAll').html('Rp ' + totalAll);
-            $('#totalAllInput').val(totalAll);
-            if(totalAll == 0){
-                $('#jumlahPembayaran').val(totalAll);
-                $('#jumlahPembayaran').attr('readonly', true);
-                $('#sisaPembayaran').html('Rp 0');
-                $('#statusPembayaran').val('');
-            }else{
-                $('#jumlahPembayaran').val('');
-                $('#jumlahPembayaran').attr('readonly', false);
-                $('#sisaPembayaran').html(totalAll + ' (Belum Lunas)');
-                $('#statusPembayaran').val('');
-            }
+        // Event handler untuk perubahan pada input packing, ongkir, pasang, dan diskon
+        $('#packing, #ongkir, #pasang, #diskon').on('keyup', function() {
+            calculateTotal(); // Panggil fungsi perhitungan saat terjadi perubahan pada input packing, ongkir, pasang, atau diskon
         });
 
-        $('#statusPembayaran').on('click', function(){
+        // Event handler untuk perubahan pada checkbox PPN dan PPH
+        $('#ppn, #pph').on('change', function() {
+            calculateTotal(); // Panggil fungsi perhitungan saat terjadi perubahan pada checkbox PPN atau PPH
+        });
+
+        // Fungsi perhitungan total
+        function calculateTotal() {
+            var packing = parseInt($('#packing').val().replace(/[^0-9]/g, '')) || 0;
+            var ongkir = parseInt($('#ongkir').val().replace(/[^0-9]/g, '')) || 0;
+            var pasang = parseInt($('#pasang').val().replace(/[^0-9]/g, '')) || 0;
+            var diskon = parseInt($('#diskon').val().replace(/[^0-9]/g, '')) || 0;
+            var ppn = $('#ppn').prop('checked');
+            var pph = $('#pph').prop('checked');
+
+            var totalAll = parseInt($('#subtotal').text().replace(/[^0-9]/g, '')) || 0;
+
+            var pajak = 0;
+            if (ppn) {
+                // Menghitung PPN
+                pajak += Math.floor((totalAll + packing + ongkir + pasang - diskon) * 0.11); // 11% PPN
+            }
+            if (pph) {
+                // Menghitung PPH
+                pajak += Math.floor((totalAll + packing + ongkir + pasang - diskon) * 0.025); // 2,5% PPH
+            }
+
+            totalAll += packing + ongkir + pasang - diskon + pajak;
+            var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia
+            $('#totalAll').html('Rp ' + formattedTotal);
+            $('#totalAllInput').val(totalAll);
+
+            if (totalAll == 0) {
+                $('#jumlahPembayaran').val(totalAll);
+                $('#jumlahPembayaran').prop('readonly', true);
+                $('#sisaPembayaran').html('Rp 0');
+                $('#statusPembayaran').val('');
+            } else {
+                $('#jumlahPembayaran').val('');
+                $('#jumlahPembayaran').prop('readonly', false);
+                $('#sisaPembayaran').html('Rp ' + formattedTotal + ' (Belum Lunas)');
+                $('#statusPembayaran').val('');
+            }
+        }
+
+        $('#statusPembayaran').on('change', function(){
             var statusPembayaran = $('#statusPembayaran').val();
+            var totalAll = parseInt($('#totalAllInput').val());
             if(statusPembayaran == 2){
                 $('#jumlahPembayaran').val($('#totalAllInput').val());
                 $('#jumlahPembayaran').attr('readonly', true);
                 $('#sisaPembayaran').html('Rp 0');
-            }else{
+            }else if(statusPembayaran == 1){
                 $('#jumlahPembayaran').val('');
                 $('#jumlahPembayaran').attr('readonly', false);
-                $('#sisaPembayaran').html($('#totalAllInput').val() + ' (Belum Lunas)');
+                $('#sisaPembayaran').html('Rp ' + totalAll.toLocaleString('id-ID') + ' (Belum Lunas)');
             }
         });
 
         // sisaPembayaran akan berubah saat ada perubahan pada inputan jumlahPembayaran - totalAll
-        $('#jumlahPembayaran').on('keyup', function(){
-            var jumlahPembayaran = $('#jumlahPembayaran').val();
-            jumlahPembayaran = jumlahPembayaran.replace(/[^0-9]/g, '');
-            jumlahPembayaran = parseInt(jumlahPembayaran);
-
-            var totalAll = $('#totalAll').text();
-            totalAll = totalAll.replace(/[^0-9]/g, '');
-            totalAll = parseInt(totalAll);
-
-            if(isNaN(jumlahPembayaran)){
-                jumlahPembayaran = 0;
-            }
-
-            if(isNaN(totalAll)){
-                totalAll = 0;
-            }
+        $('#jumlahPembayaran').on('keyup' , function(){
+            var jumlahPembayaran = parseInt($(this).val().replace(/\D/g, '') || 0);
+            var totalAll = parseInt($('#totalAll').text().replace(/\D/g, '') || 0);
 
             var sisaPembayaran = totalAll - jumlahPembayaran;
             if(sisaPembayaran < 0){
                 sisaPembayaran = "Melebihi Total Pembayaran";
+            } else {
+                sisaPembayaran = 'Rp ' + sisaPembayaran.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' (Belum Lunas)';
             }
-            sisaPembayaran = sisaPembayaran.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-            if(sisaPembayaran == 0){
-                $('#sisaPembayaran').html('Rp 0');
-            }else{
-                $('#sisaPembayaran').html('Rp ' + sisaPembayaran + ' (Belum Lunas)');
-            }
-        });
 
-        // ketika isOngkir dicentang maka divAlamatKirim, divOngkir, divEkspedisi akan muncul
-        $('#isOngkir').on('change', function(){
-            if($(this).is(':checked')){
-                //reset value
-                $('#alamatKirim').val('');
-                $('#ongkir').val('');
-                $('#ekspedisi').val('');
-                $('#namaEkspedisi').val('');
-                $('#noResi').val('');
-
-                $('.pengiriman').show();
-                //add required
-                $('#alamatKirim').attr('required', true);
-                $('#ongkir').attr('required', true);
-                $('#ekspedisi').attr('required', true);
-            }else{
-                if($('#ongkir').val() != ''){
-                    // function updateTotalBarang
-                    var totalBarang = $('span#subtotal').text();
-                    totalBarang = totalBarang.replace(/[^0-9]/g, '');
-                    totalBarang = parseInt(totalBarang);
-
-                    var bPacking = $('#packing').val();
-                    bPacking = bPacking.replace(/[^0-9]/g, '');
-                    bPacking = parseInt(bPacking);
-
-                    var bPasang = $('#pasang').val();
-                    bPasang = bPasang.replace(/[^0-9]/g, '');
-                    bPasang = parseInt(bPasang);
-
-                    var diskon = $('#diskon').val();
-                    diskon = diskon.replace(/[^0-9]/g, '');
-                    diskon = parseInt(diskon);
-
-                    if(isNaN(bPacking)){
-                        bPacking = 0;
-                    }
-                    if(isNaN(bPasang)){
-                        bPasang = 0;
-                    }
-                    if(isNaN(diskon)){
-                        diskon = 0;
-                    }
-
-                    var totalTanpaOngkir = totalBarang + bPacking + bPasang - diskon;
-                    totalTanpaOngkir = totalTanpaOngkir.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-                    console.log(totalTanpaOngkir);
-                    $('#totalAll').html('Rp ' + totalTanpaOngkir);
-                    $('#totalAllInput').val(totalTanpaOngkir);
-                    $('#sisaPembayaran').html('Rp ' + $('#totalAllInput').val());
-                }
-
-                $('.divAlamatKirim').hide();
-                $('.divOngkir').hide();
-                $('.divEkspedisi').hide();
-                $('.divEksLain').hide();
-                $('.divResi').hide();
-
-                $('#alamatKirim').val('');
-                $('#ongkir').val('');
-                $('#ekspedisi').val('');
-                $('#namaEkspedisi').val('');
-                $('#noResi').val('');
-
-                //remove required
-                $('#alamatKirim').removeAttr('required');
-                $('#ongkir').removeAttr('required');
-                $('#ekspedisi').removeAttr('required');
-
-                //Jika biaya ongkir tidak digunakan maka totalAllInput dan sisaPembayaranInput akan bernilai sama dengan totalAll
-            }
+            $('#sisaPembayaran').html(sisaPembayaran);
         });
 
         //jika ekspedisi dipilih selain Lainnya maka divEksLain akan hide

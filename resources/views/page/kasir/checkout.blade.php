@@ -93,7 +93,7 @@
                 <div class="form-group">
                   <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="pph">
-                    <label class="custom-control-label" for="pph">Pajak PPH(1,5%)</label>
+                    <label class="custom-control-label" for="pph">Pajak PPH(2,5%)</label>
                   </div>
                 </div>
               </div>
@@ -168,7 +168,7 @@
         // Hitung pajak
         var pajak = $(this).is(':checked') ? total * 0.11 : 0;
         // Hitung PPH
-        var pph = $('#pph').is(':checked') ? total * 0.015 : 0;
+        var pph = $('#pph').is(':checked') ? total * 0.025 : 0;
         // Hitung total
         var grandTotal = total + pajak + pph;
         $('#totalItems').text(formatRupiah(Math.round(grandTotal)));
@@ -179,7 +179,7 @@
         // Hitung pajak
         var pajak = $('#pajak').is(':checked') ? total * 0.11 : 0;
         // Hitung PPH
-        var pph = $(this).is(':checked') ? total * 0.015 : 0;
+        var pph = $(this).is(':checked') ? total * 0.025 : 0;
         // Hitung total
         var grandTotal = total + pajak + pph;
         $('#totalItems').text(formatRupiah(Math.round(grandTotal)));

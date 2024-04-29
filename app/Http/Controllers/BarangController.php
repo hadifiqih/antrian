@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Barang;
 use App\Models\RefDesain;
 use App\Models\BarangIklan;
+use App\Models\DesignQueue;
 use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
 use Illuminate\Support\Facades\DB;
