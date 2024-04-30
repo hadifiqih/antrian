@@ -10,6 +10,21 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'customers';
+
+    protected $fillable = [
+        'nama',
+        'telepon',
+        'alamat',
+        'infoPelanggan',
+        'instansi',
+        'frekuensi_order',
+        'count_followUp',
+        'sales_id',
+        'provinsi',
+        'kota',
+    ];
+
     public static function antrian()
     {
         return $this->hasMany(Antrian::class);

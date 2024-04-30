@@ -21,6 +21,22 @@ class Barang extends Model
 
     protected $table = 'barang';
 
+    protected $fillable = [
+        'ticket_order',
+        'data_antrian_id',
+        'customer_id',
+        'kategori_id',
+        'job_id',
+        'user_id',
+        'price',
+        'qty',
+        'note',
+        'spesifikasi',
+        'acc_desain',
+        'desain_queue_id',
+        'documentation_id',
+    ];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');

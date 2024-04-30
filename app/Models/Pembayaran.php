@@ -12,6 +12,21 @@ class Pembayaran extends Model
 
     protected $table = 'pembayaran';
 
+    protected $fillable = [
+        'ticket_order',
+        'metode_pembayaran',
+        'biaya_packing',
+        'biaya_pasang',
+        'diskon',
+        'total_harga',
+        'dibayarkan',
+        'status_pembayaran',
+        'nominal_pelunasan',
+        'file_peluasan',
+        'tanggal_pelunasan',
+        'status_pembayaran'
+    ];
+
     public function pengiriman()
     {
         return $this->hasOne(Pengiriman::class);

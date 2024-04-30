@@ -12,6 +12,16 @@ class DataKerja extends Model
 
     public $table = 'data_kerja';
 
+    public $fillable = [
+        'ticket_order',
+        'tgl_mulai',
+        'tgl_selesai',
+        'machine_id',
+        'operator_id',
+        'finishing_id',
+        'qc_id',
+    ];
+
     public function antrian()
     {
         return $this->belongsTo(DataAntrian::class, 'ticket_order', 'ticket_order');

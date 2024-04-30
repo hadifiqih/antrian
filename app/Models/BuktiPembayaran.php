@@ -10,4 +10,9 @@ class BuktiPembayaran extends Model
     use HasFactory;
 
     protected $table = 'bukti_pembayaran';
+
+    protected $fillable = [
+        'ticket_order',
+        'gambar',
+    ];
 }

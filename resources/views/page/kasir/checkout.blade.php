@@ -299,6 +299,8 @@
             telepon: $('#telepon').val(),
             alamat: $('#alamat').val(),
             metode: $('#metode').val(),
+            ppn: $('#pajak').is(':checked') ? 1 : 0,
+            pph: $('#pph').is(':checked') ? 1 : 0,
             rekening: $('#rekening').val(),
             total_bayar: $('#totalBayar').val(),
             total: total

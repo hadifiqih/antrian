@@ -29,6 +29,14 @@ class DataAntrian extends Model
         'ppn',
         'pph',
         'status',
+        'is_revision',
+        'is_priority',
+        'cabang_id',
+        'finish_date',
+        'deadline_status',
+        'admin_note',
+        'done_production_at',
+        'estimator_id',
     ];
     
 

@@ -438,6 +438,7 @@ class AntrianController extends Controller
         $lastId = DataAntrian::latest()->value('id');
         $lastId = $lastId ? $lastId + 1 : 1;
         $ticketOrder = Carbon::now()->format('Ymd') . $lastId;
+        $customer = Customer::where('id', $request->input('customer_id'))->first();
 
         // Simpan antrian
         $antrian = DataAntrian::create([
@@ -452,7 +453,7 @@ class AntrianController extends Controller
         // Simpan data barang
         Barang::where('customer_id', $request->input('customer_id'))
             ->whereNull('ticket_order')
-            ->update(['ticket_order' => $ticketOrder, 'data_antrian_id' => $antrian->id]);
+            ->update(['ticket_order' => $ticketOrder]);
 
         // Simpan pembayaran
         $payment = Pembayaran::create([
@@ -505,117 +506,6 @@ class AntrianController extends Controller
 
     public function store(Request $request)
     {
-        //Mencari data order berdasarkan id order yang diinputkan
-        $order = Order::where('id', $request->input('idOrder'))->first();
-        $ticketOrder = $order->ticket_order;
-
-        //Melakukan Check Antrian
-        $checkAntrian = Antrian::where('ticket_order', $ticketOrder)->first();
-        if($checkAntrian){
-            return redirect()->back()->with('error', 'Data antrian sudah ada !');
-        }
-
-        //Mengambil data customer berdasarkan nama customer yang diinputkan
-        $idCustomer = Customer::where('id', $request->input('nama'))->first();
-        if($idCustomer){
-            //Jika customer sudah ada, maka frekuensi order ditambah 1
-            $repeat = $idCustomer->frekuensi_order + 1;
-            $idCustomer->frekuensi_order = $repeat;
-            $idCustomer->save();
-        }
-
-        //Jika ada request file bukti pembayaran, maka simpan file tersebut
-        if($request->file('buktiPembayaran')){
-            $buktiPembayaran = $request->file('buktiPembayaran');
-            $namaBuktiPembayaran = $buktiPembayaran->getClientOriginalName();
-            $namaBuktiPembayaran = time() . '_' . $namaBuktiPembayaran;
-            $path = 'bukti-pembayaran/' . $namaBuktiPembayaran;
-            Storage::disk('public')->put($path, file_get_contents($buktiPembayaran));
-        }else{
-            $namaBuktiPembayaran = null;
-        }
-            //Membuat payment baru dan menyimpan data pembayaran
-            $payment = new Payment();
-            $payment->ticket_order = $ticketOrder;
-            $totalPembayaran = str_replace(['Rp ', '.'], '', $request->input('totalPembayaran'));
-            $pembayaran = str_replace(['Rp ', '.'], '', $request->input('jumlahPembayaran'));
-
-            // menyimpan inputan biaya jasa pengiriman
-            if($request->input('biayaPengiriman') == null){
-                $biayaPengiriman = 0;
-            }else{
-                $biayaPengiriman = str_replace(['Rp ', '.'], '', $request->input('biayaPengiriman'));
-            }
-
-            // menyimpan inputan biaya jasa pemasangan
-            if($request->input('biayaPemasangan') == null){
-                $biayaPemasangan = 0;
-            }else{
-                $biayaPemasangan = str_replace(['Rp ', '.'], '', $request->input('biayaPemasangan'));
-            }
-
-            // menyimpan inputan biaya jasa pengemasan
-            if($request->input('biayaPengemasan') == null){
-                $biayaPengemasan = 0;
-            }else{
-                $biayaPengemasan = str_replace(['Rp ', '.'], '', $request->input('biayaPengemasan'));
-            }
-
-            // menyimpan inputan sisa pembayaran
-            $sisaPembayaran = str_replace(['Rp ', '.'], '', $request->input('sisaPembayaran'));
-
-            // Menyimpan file purcase order
-            $namaPurchaseOrder = null;
-            if($request->file('filePO')){
-                $purchaseOrder = $request->file('filePO');
-                $namaPurchaseOrder = $purchaseOrder->getClientOriginalName();
-                $namaPurchaseOrder = time() . '_' . $namaPurchaseOrder;
-                $path = 'purchase-order/' . $namaPurchaseOrder;
-                Storage::disk('public')->put($path, file_get_contents($purchaseOrder));
-            }else{
-                $namaPurchaseOrder = null;
-            }
-
-            $payment->total_payment = $totalPembayaran;
-            $payment->payment_amount = $pembayaran;
-            $payment->shipping_cost = $biayaPengiriman;
-            $payment->installation_cost = $biayaPemasangan;
-            $payment->remaining_payment = $sisaPembayaran;
-            $payment->payment_method = $request->input('jenisPembayaran');
-            $payment->payment_status = $request->input('statusPembayaran');
-            $payment->payment_proof = $namaBuktiPembayaran;
-            $payment->save();
-
-
-        $accDesain = $request->file('accDesain');
-        $namaAccDesain = $accDesain->getClientOriginalName();
-        $namaAccDesain = time() . '_' . $namaAccDesain;
-        $path = 'acc-desain/' . $namaAccDesain;
-        Storage::disk('public')->put($path, file_get_contents($accDesain));
-
-        $order->acc_desain = $namaAccDesain;
-        $order->toWorkshop = 1;
-        $order->save();
-
-        $hargaProduk = str_replace(['Rp ', '.'], '', $request->input('hargaProduk'));
-        $omset = ((int)$hargaProduk * (int)$request->input('qty')) + (int)$biayaPemasangan + (int)$biayaPengemasan;
-
-        $antrian = new Antrian();
-        $antrian->ticket_order = $ticketOrder;
-        $antrian->sales_id = $request->input('sales');
-        $antrian->customer_id = $idCustomer->id;
-        $antrian->job_id = $request->input('namaPekerjaan');
-        $antrian->note = $request->input('keterangan');
-        $antrian->omset = $omset;
-        $antrian->qty = $request->input('qty');
-        $antrian->order_id = $request->input('idOrder');
-        $antrian->alamat_pengiriman = $request->input('alamatPengiriman') ? $request->input('alamatPengiriman') : null;
-        $antrian->file_po = $namaPurchaseOrder == null ? null : $namaPurchaseOrder;
-        $antrian->harga_produk = $hargaProduk;
-        $antrian->packing_cost = $biayaPengemasan;
-        $antrian->save();
-
-
         $user = User::where('role', 'admin')->first();
         $user->notify(new AntrianWorkshop($antrian, $order, $payment));
         // Menampilkan push notifikasi saat selesai

@@ -138,9 +138,9 @@ class ReportController extends Controller
         function buatBaris3Kolom($kolom1, $kolom2, $kolom3)
         {
             // Mengatur lebar setiap kolom (dalam satuan karakter)
-            $lebar_kolom_1 = 15;
+            $lebar_kolom_1 = 9;
             $lebar_kolom_2 = 15;
-            $lebar_kolom_3 = 15;
+            $lebar_kolom_3 = 19;
 
             // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
@@ -162,9 +162,9 @@ class ReportController extends Controller
             for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
 
                 // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
-                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ");
+                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
                 // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
-                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_LEFT);
+                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_RIGHT);
 
                 $hasilKolom3 = str_pad((isset($kolom3Array[$i]) ? $kolom3Array[$i] : ""), $lebar_kolom_3, " ", STR_PAD_LEFT);
 
@@ -179,8 +179,8 @@ class ReportController extends Controller
         function buatBaris2Kolom($kolom1, $kolom2)
         {
             // Mengatur lebar setiap kolom (dalam satuan karakter)
-            $lebar_kolom_1 = 30;
-            $lebar_kolom_2 = 15;
+            $lebar_kolom_1 = 20;
+            $lebar_kolom_2 = 25;
 
             // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
@@ -200,7 +200,7 @@ class ReportController extends Controller
             for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
 
                 // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
-                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_LEFT);
+                $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
                 // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
                 $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_LEFT);
 
@@ -222,6 +222,7 @@ class ReportController extends Controller
         $totalOngkir = 0;
         $totalPasang = 0;
         $diskon = 0;
+
         foreach ($items as $item) {
             $totalHarga += $item->price * $item->qty;
         }
@@ -232,64 +233,56 @@ class ReportController extends Controller
         $diskon = $infoBayar->diskon;
 
         $infoPengiriman = Pengiriman::where('ticket_order', $id)->first();
-        $totalOngkir = $infoPengiriman->ongkir;
+        $totalOngkir = $infoPengiriman->ongkir ?? 0;
 
         $grandTotal = $totalHarga + $totalPacking + $totalOngkir + $totalPasang - $diskon;
         $sisaTagihan = $grandTotal - $infoBayar->dibayarkan;
 
         //print nota order dengan menggunakan printer thermal
-        $profile = CapabilityProfile::load("simple");
         $connector = new WindowsPrintConnector("POS-80");
-        $printer = new Printer($connector, $profile);
+        $printer = new Printer($connector);
 
         $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("NOTA ORDER\n");
+        $printer->text("STRUK PEMBELIAN\n");
         $printer->text($sales->sales_name."\n");
         $printer->text($sales->address."\n");
         $printer->text("WA. ".$sales->sales_phone."\n");
-        $printer->text("=============================================\n");
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text("No. Order : " . $order->ticket_order . "\n");
-        $printer->text("Tanggal : " . $order->created_at->format('d-m-Y H:i') . "\n");
-        $printer->text("Customer : " . $order->customer->nama . "\n");
-        $printer->text("Sales : " . $order->sales->sales_name . "\n");
-        $printer->text("=============================================\n");
+        $printer->text("==============================================\n");
+        $printer->setEmphasis(true);
+        $printer->text("No. Antrian : ".$order->ticket_order."\n");
+        $printer->setEmphasis(false);
+        $printer->text("==============================================\n");
+        $printer->text(buatBaris2Kolom($order->created_at->format('d F Y'), $order->created_at->format('H:i')));
+        $printer->text(buatBaris2Kolom("Pelanggan" , $order->customer->nama));
+        $printer->text(buatBaris2Kolom("Kasir" , $order->sales->sales_name));
+        $printer->text();
+        $printer->text("==============================================\n");
         foreach ($items as $item) {
             $printer->text(buatBaris1Kolom($item->job->job_name));
-            $printer->text(buatBaris3Kolom($item->qty . "x", number_format($item->price, 0, ',', '.') ,number_format($item->price * $item->qty, 0, ',', '.')));
+            $printer->text(buatBaris3Kolom($item->qty . "x", '@' . number_format($item->price, 0, ',', '.') ,'Rp '. number_format($item->price * $item->qty, 0, ',', '.')));
         }
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("=============================================\n");
-        $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $printer->setPrintWidth(64);
-        $printer->setEmphasis(true);
-        $printer->text(buatBaris2Kolom("Total Harga : " , number_format($totalHarga, 0, ',', '.') . "\n"));
-        $printer->setEmphasis(false);
-        $printer->text(buatBaris2Kolom("Biaya Packing : " , number_format($totalPacking, 0, ',', '.') . "\n"));
-        $printer->text(buatBaris2Kolom("Biaya Ongkir : " , number_format($totalOngkir, 0, ',', '.') . "\n"));
+        $printer->text("==============================================\n");
+        $printer->text(buatBaris2Kolom("Total Harga : " , 'Rp '. number_format($totalHarga, 0, ',', '.')));
+        $printer->text(buatBaris2Kolom("Biaya Packing : " , 'Rp '. number_format($totalPacking, 0, ',', '.')));
+        $printer->text(buatBaris2Kolom("Biaya Ongkir : " , 'Rp '. number_format($totalOngkir, 0, ',', '.')));
 
         if ($totalPasang != 0) {
-            $printer->text(buatBaris2Kolom("Biaya Pasang : " , number_format($totalPasang, 0, ',', '.') . "\n"));
+            $printer->text(buatBaris2Kolom("Biaya Pasang : " , 'Rp '. number_format($totalPasang, 0, ',', '.') . "\n"));
         }
 
         if ($diskon != 0) {
-            $printer->text(buatBaris2Kolom("Diskon : " , number_format($diskon, 0, ',', '.') . "\n"));
+            $printer->text(buatBaris2Kolom("Diskon : " ,'Rp '.  number_format($diskon, 0, ',', '.') . "\n"));
         }
 
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("=============================================\n");
-        $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $printer->setTextSize(1, 4);
-        $printer->text(buatBaris2Kolom("Grand Total : " , number_format($grandTotal, 0, ',', '.') . "\n"));
-        $printer->setTextSize(1, 1);
-        $printer->text(buatBaris2Kolom("Dibayarkan : " , number_format($infoBayar->dibayarkan, 0, ',', '.') . "\n"));
-        $printer->text(buatBaris2Kolom("Sisa Tagihan : " , number_format($sisaTagihan, 0, ',', '.') . "\n"));
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("=============================================\n");
+        $printer->text("==============================================\n");
+        $printer->text(buatBaris2Kolom("Grand Total" ,'Rp '. number_format($grandTotal, 0, ',', '.')));
+        $printer->text(buatBaris2Kolom("Dibayarkan" ,'Rp '. number_format($infoBayar->dibayarkan, 0, ',', '.')));
+        $printer->text("==============================================\n");
+        $printer->text(buatBaris2Kolom("Sisa Tagihan" ,'Rp '. number_format($sisaTagihan, 0, ',', '.')));
+        $printer->text("==============================================\n");
         $printer->text("-- Terima Kasih --\nSelamat Datang Kembali\n");
-        $printer->text("=============================================\n");
-        $printer->setBarcodeWidth(8);
-        $printer->barcode((string)$order->ticket_order, Printer::BARCODE_CODE39);
+        $printer->text("----------------------------------------------\n");
+        $printer->text("Tanggal Cetak : ". date('d F Y H:i:s'));
 
         $printer->cut();
         $printer->close();
