@@ -193,7 +193,9 @@ Route::controller(ReportController::class)->group(function(){
     Route::get('/order/{id}/nota-order-view', 'notaOrderView')->name('order.notaOrderView');
     Route::get('/cetak-form-espk/{id}', 'cetakFormEspk')->name('cetak-form-espk');
     Route::get('/report/tampilBP/{id}', 'tampilBP')->name('report.tampilBP');
+    Route::get('/report/faktur-penjualan/{tiket}', 'fakturPenjualan')->name('report.faktur');
     // Route Laporan Iklan
+    //--------------------------------------------
 })->middleware('auth');
 
 Route::controller(DesignController::class)->group(function(){

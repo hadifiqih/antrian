@@ -115,9 +115,12 @@
             <div class="row">
                 <h6 class="mb-3 mr-2"><strong><i class="fas fa-circle"></i> <span class="ml-2">Ticket Order - </span></strong>{{ $antrian->ticket_order }}</h6>
                 <h6 class="mb-3 ml-2"><strong><i class="fas fa-circle"></i> <span class="ml-2">Sales : {{ $antrian->sales->sales_name }}</span></strong></h6>
+                <div class="ml-auto">
+                    <a href="{{ route('report.faktur', $antrian->ticket_order) }}" class="btn btn-primary btn-sm" ><i class="fas fa-print"></i> Faktur</a>
+                </div>
             </div>
             <div class="row table-responsive">
-                <div class="col">
+                <div class="col-12">
             <table id="tableItems" class="table table-bordered table-responsive">
                 <thead>
                     <tr>

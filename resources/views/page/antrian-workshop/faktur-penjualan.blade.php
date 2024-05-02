@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Invoice Penjualan | CV. Kassab Syariah')
+@section('title', 'Invoice Penjualan Jasa| CV. Kassab Syariah')
 
 @section('username', Auth::user()->name)
 
 @section('page', 'POS')
 
-@section('breadcrumb', 'Invoice Penjualan')
+@section('breadcrumb', 'Invoice Penjualan Jasa')
 
 @section('content')
 <div class="container">
     <div class="row mb-3">
         <div class="col-md-12">
             <a onclick="goBack()" class="btn btn-primary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
-            <a href="{{ route('pos.printFaktur', $penjualan->id) }}" class="btn btn-danger btn-sm"><i class="fas fa-print"></i> Cetak PDF</a>
+            <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-print"></i> Cetak PDF</a>
         </div>
     </div>
     <div class="card p-3">
@@ -21,7 +21,7 @@
             <div class="row mb-5">
                 <h4 class="col-md-6 font-weight-bold">Faktur Penjualan</h4>
                 <div class="col-md-6 text-right">
-                    <p class="font-weight-bold">No Invoice : {{ $penjualan->no_invoice }}</p>
+                    <p class="font-weight-bold">No Invoice : {{ $antrian->ticket_order }}</p>
                 </div>
             </div>
             <div class="row">
@@ -38,11 +38,11 @@
                     <address>
                         <strong>DITERBITKAN KEPADA</strong><br>
                         Pembeli :
-                        <strong>{{ $penjualan->customer->nama }}</strong><br>
+                        <strong>{{ $antrian->customer->nama }}</strong><br>
                         Tanggal Pembelian : 
-                        <strong>{{ date_format($penjualan->created_at, 'd F Y') }}</strong><br>
-                        Alamat : {{ $penjualan->customer->alamat ?? '-' }}<br>
-                        Telp: {{ $penjualan->customer->telepon ?? '-'}}
+                        <strong>{{ date_format($antrian->created_at, 'd F Y') }}</strong><br>
+                        Alamat : {{ $antrian->customer->alamat ?? '-' }}<br>
+                        Telp: {{ $antrian->customer->telepon ?? '-'}}
                     </address>
                 </div>
             </div>
@@ -62,17 +62,17 @@
                             @foreach ($items as $item)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                <td>{{ $item->produk->nama_produk }}</td>
-                                <td class="text-center">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                <td class="text-center">{{ $item->jumlah }}</td>
-                                <td class="text-center font-weight-bold">Rp {{ number_format($item->jumlah * $item->harga, 0, ',', '.') }}</td>
+                                <td>{{ $item->job->job_name }}</td>
+                                <td class="text-center">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                                <td class="text-center">{{ $item->qty }}</td>
+                                <td class="text-center font-weight-bold">Rp {{ number_format($item->qty * $item->price, 0, ',', '.') }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-right font-weight-bold">Total</td>
-                                <td class="text-center font-weight-bold">Rp {{ number_format($total, 0, ',', '.') }}</td>
+                                <td class="text-center font-weight-bold">Rp {{ number_format($totalHarga, 0, ',', '.') }}</td>
                             </tr>
                         </tfoot>
                     </table>

@@ -486,8 +486,16 @@ class PosController extends Controller
     public function updateQty(Request $request)
     {
         $item = KeranjangItem::find($request->id);
-        $item->jumlah = $request->qty;
-        $item->save();
+        //lakukan pengecekan stok
+        $stok = StokBahan::where('produk_id', $item->produk_id)->where('cabang_id', auth()->user()->cabang_id)->first()->jumlah_stok;
+        if($request->qty > $stok){
+            //jika qty melebihi stok, maka qty di set menjadi stok
+            $item->jumlah = $stok;
+            $item->save();
+        }else{
+            $item->jumlah = $request->qty;
+            $item->save();
+        }
 
         $items = KeranjangItem::getItemByIdCart($item->keranjang_id);
         $total = 0;
@@ -683,11 +691,15 @@ class PosController extends Controller
 
         $diskon = 0;
         $total = 0;
+
         foreach($items as $item){
             $diskon += $item->diskon;
             $subtotal = ($item->harga * $item->jumlah) - $item->diskon;
             $total += $subtotal;
         }
+
+        //tambahkan ppn dan pph
+        $total += $penjualan->ppn + $penjualan->pph;
 
         $rekening = $penjualan->rekening;
         if($rekening == 'tunai'){

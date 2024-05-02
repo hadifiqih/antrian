@@ -288,6 +288,36 @@ class ReportController extends Controller
         $printer->close();
     }
 
+    public function fakturPenjualan($tiket)
+    {
+        $antrian = DataAntrian::where('ticket_order', $tiket)->first();
+        $items = Barang::where('ticket_order', $tiket)->get();
+        $sales = Sales::find($antrian->sales_id);
+
+        $totalHarga = 0;
+        $totalPacking = 0;
+        $totalOngkir = 0;
+        $totalPasang = 0;
+        $diskon = 0;
+
+        foreach ($items as $item) {
+            $totalHarga += $item->price * $item->qty;
+        }
+
+        $infoBayar = Pembayaran::where('ticket_order', $tiket)->first();
+        $totalPacking = $infoBayar->biaya_packing;
+        $totalPasang = $infoBayar->biaya_pasang;
+        $diskon = $infoBayar->diskon;
+
+        $infoPengiriman = Pengiriman::where('ticket_order', $tiket)->first();
+        $totalOngkir = $infoPengiriman->ongkir ?? 0;
+
+        $grandTotal = $totalHarga + $totalPacking + $totalOngkir + $totalPasang - $diskon;
+        $sisaTagihan = $grandTotal - $infoBayar->dibayarkan;
+
+        return view('page.report.faktur-penjualan', compact('antrian', 'items', 'totalHarga', 'totalPacking', 'totalOngkir', 'totalPasang', 'diskon', 'grandTotal', 'sisaTagihan', 'infoBayar'));
+    }
+
     public function index()
     {
         // $tanggalAwal adalah selalu tanggal 1 dari bulan yang dipilih

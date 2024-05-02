@@ -277,8 +277,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.7/dayjs.min.js"></script>
 
 <!-- OPTIONAL SCRIPTS -->
-<script>
+<script src="{{ asset('adminlte') }}/dist/js/qz-tray.js"></script>
 
+<script>
+  //connect to QZ Tray
+  // qz.websocket.connect().then(() => {
+  //   console.log('Connected to QZ Tray');
+  // }).catch((err) => {
+  //   console.error(err);
+  // });
+
+  //print function
+  function printData() {
+    var config = qz.configs.create("POS-80");               // Exact printer name from OS
+    var data = ['Halo kak Sandya !'];   // Raw commands (ZPL provided)
+
+    qz.print(config, data).then(function() {
+      alert("Sent data to printer");
+    });
+  }
+
+  //FIND PRINTER
+  function findPrinter() {
+    qz.printers.find().then((printers) => {
+      console.log(printers);
+    }).catch((err) => {
+      console.error(err);
+    });
+  }
+</script>
+
+<script>
     function notif(data) {
         if(data.message.title == 'Antrian Workshop') {
             $(document).Toasts('create', {
