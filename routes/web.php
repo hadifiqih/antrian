@@ -316,6 +316,8 @@ Route::controller(PosController::class)->group(function(){
 
     Route::get('/pos/omset-item-bulanan/{bulan}', 'penjualanItemBulanan')->name('pos.penjualanItemBulanan');
     Route::get('/pos/omset-laba/{bulan}', 'labaBulanan')->name('pos.labaBulanan');
+    //Api POS
+    Route::get('/nota/{id}', 'notaStruk')->name('pos.notaStruk');
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){

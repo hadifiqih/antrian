@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Keranjang;
 use App\Models\Penjualan;
 use App\Models\StokBahan;
+use Mike42\Escpos\Printer;
 use App\Models\ProdukHarga;
 use App\Models\ProdukGrosir;
 use Illuminate\Http\Request;
@@ -15,19 +16,86 @@ use App\Helpers\CustomHelper;
 use App\Models\KeranjangItem;
 use App\Models\PenjualanDetail;
 use App\Models\SumberPelanggan;
-use Yajra\DataTables\Facades\DataTables;
 
-use Mike42\Escpos\Printer;
+use App\Http\Resources\NotaResource;
+use Illuminate\Support\Facades\Http;
 use Mike42\Escpos\CapabilityProfile;
+use Yajra\DataTables\Facades\DataTables;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 
 class PosController extends Controller
 {
-    public function __construct()
+    public function notaStruk($id)
     {
-        $this->middleware('auth');
+        $sales1 = Sales::find(1);
+        dd($sales1);
+        //ambil data dari api
+        $response = Http::get('http://dashboard.kassabsyariah.com/api/pos/nota/'.$id);
+
+        $sales = Sales::find($response['data']['penjualan']['sales_id']);
+        $items = $response['data']['items'];
+
+        $connector = new WindowsPrintConnector("POS-80");
+        $printer = new Printer($connector);
+
+        //print nota order dengan menggunakan printer thermal
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("STRUK PEMBELIAN\n");
+        $printer->setEmphasis(true);
+        $printer->text($sales->sales_name."\n");
+        $printer->setEmphasis(false);
+        $printer->text($sales->address."\n");
+        $printer->text("WA. ".$sales->sales_phone."\n");
+        $printer->text("===============================================\n");
+        $printer->setEmphasis(true);
+        $printer->text($penjualan->no_invoice . "\n");
+        $printer->setEmphasis(false);
+        $printer->text("===============================================\n");
+        $printer->text("\n");
+        $printer->text(buatBaris2Kolom(date_format($penjualan->created_at ,'d F Y') , date_format($penjualan->created_at ,'H:i')));
+        $printer->text(buatBaris2Kolom('Pelanggan', $penjualan->customer->nama));
+        $printer->text(buatBaris2Kolom('Kasir', $sales->sales_name));
+        $printer->text("-----------------------------------------------\n");
+
+        foreach($items as $item){
+            $qty = $item->jumlah . 'x';
+            $harga = '@'. number_format($item->harga, 0, ',', '.');
+            $printer->setEmphasis(true);
+            $printer->text(buatBaris1Kolom($item->produk->nama_produk));
+            $printer->setEmphasis(false);
+            $printer->text(buatBaris3Kolom($qty, $harga , CustomHelper::addCurrencyFormat($item->harga * $item->jumlah)));
+        }
+
+        $printer->text("-----------------------------------------------\n");
+        $printer->text(buatBaris2Kolom('Subtotal', CustomHelper::addCurrencyFormat($penjualan->total)));
+        $printer->text(buatBaris2Kolom('Diskon', CustomHelper::addCurrencyFormat($penjualan->diskon)));
+        if($penjualan->ppn != 0){
+            $printer->text(buatBaris2Kolom('PPN(11%)', CustomHelper::addCurrencyFormat($penjualan->ppn)));
+        }
+        if($penjualan->pph != 0){
+            $printer->text(buatBaris2Kolom('PPh(2,5%)', CustomHelper::addCurrencyFormat($penjualan->pph)));
+        }
+        $printer->text("-----------------------------------------------\n");
+        if($penjualan->ppn != 0 || $penjualan->pph != 0){
+            $printer->setEmphasis(true);
+            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon + $penjualan->ppn + $penjualan->pph)));
+            $printer->setEmphasis(false);
+        }else{
+            $printer->setEmphasis(true);
+            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon)));
+            $printer->setEmphasis(false);
+        }
+        $printer->text("-----------------------------------------------\n");
+        $printer->text(buatBaris2Kolom('Cash/Transfer', CustomHelper::addCurrencyFormat($penjualan->diterima)));
+        $printer->text(buatBaris2Kolom('Kembali', CustomHelper::addCurrencyFormat($penjualan->diterima - ($penjualan->total - $penjualan->diskon))));
+        $printer->text("-----------------------------------------------\n");
+        $printer->text("-- Terima kasih --\n");
+        $printer->text("Selamat Datang Kembali\n");
+
+        $printer->cut();
+        $printer->close();
     }
 
     public function roundUpTotal($total)
@@ -1122,5 +1190,24 @@ class PosController extends Controller
 
         $printer->cut();
         $printer->close();
+    }
+
+    public function notaPenjualan($id)
+    {
+        $penjualan = Penjualan::find($id);
+
+        if (!$penjualan) {
+            return response()->json(['message' => 'Tidak ditemukan penjualan !'], 404);
+        }
+
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+
+        //merge data penjualan dan item penjualan
+        $data = [
+            'penjualan' => $penjualan,
+            'items' => $items
+        ];
+
+        return NotaResource::make($data);
     }
 }
