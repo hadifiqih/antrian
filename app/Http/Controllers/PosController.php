@@ -27,14 +27,18 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 
 class PosController extends Controller
 {
+    //constructor
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     public function notaStruk($id)
     {
-        $sales1 = Sales::find(1);
-        dd($sales1);
-        //ambil data dari api
-        $response = Http::get('http://dashboard.kassabsyariah.com/api/pos/nota/'.$id);
-
-        $sales = Sales::find($response['data']['penjualan']['sales_id']);
+        // //ambil data dari api
+        // $response = Http::get('http://dashboard.kassabsyariah.com/api/pos/nota/'.$id);
+        $penjualan = Penjualan::find($id);
+        $sales = Sales::find();
         $items = $response['data']['items'];
 
         $connector = new WindowsPrintConnector("POS-80");

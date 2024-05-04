@@ -18,6 +18,4 @@ use App\Http\Controllers\ReportController;
 
 Route::apiResource('omset', ReportController::class);
 
-Route::get('/pos/nota/{id}', [PosController::class, 'notaPenjualan'])->name('pos.notaPenjualan');
-
 Route::get('/omset', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');

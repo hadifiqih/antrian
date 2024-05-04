@@ -10,16 +10,17 @@ use App\Notifications\AntrianWorkshop;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StokController;
 use App\Http\Controllers\UserController;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\BahanController;
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\OrderController;
+
 use Illuminate\Auth\Events\PasswordReset;
 
 use App\Http\Controllers\BarangController;
-
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AntrianController;
@@ -313,11 +314,13 @@ Route::controller(PosController::class)->group(function(){
     //Fungsi tambahan
     Route::get('/pos/omset-today/{bulan}', 'penjualanToday')->name('pos.penjualanToday');
     Route::get('/pos/omset-bulanan/{bulan}', 'penjualanBulanan')->name('pos.penjualanBulanan');
-
     Route::get('/pos/omset-item-bulanan/{bulan}', 'penjualanItemBulanan')->name('pos.penjualanItemBulanan');
     Route::get('/pos/omset-laba/{bulan}', 'labaBulanan')->name('pos.labaBulanan');
-    //Api POS
-    Route::get('/nota/{id}', 'notaStruk')->name('pos.notaStruk');
+})->middleware('auth');
+
+Route::controller(StokController::class)->group(function(){
+    Route::get('/stok/daftar-stok', 'daftarStok')->name('daftarStok');
+    Route::get('/stok/daftar-stok-json', 'daftarStokJson')->name('daftarStokJson');
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){
