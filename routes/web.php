@@ -319,8 +319,13 @@ Route::controller(PosController::class)->group(function(){
 })->middleware('auth');
 
 Route::controller(StokController::class)->group(function(){
+    Route::get('/stok/get-all-products', 'showAllProducts')->name('stok.showAllProducts');
     Route::get('/stok/daftar-stok', 'daftarStok')->name('daftarStok');
     Route::get('/stok/daftar-stok-json', 'daftarStokJson')->name('daftarStokJson');
+    //Mutasi Stok
+    Route::get('/stok/mutasi-stok', 'mutasiStok')->name('mutasiStok');
+    Route::get('/stok/mutasi-stok-json', 'mutasiStokJson')->name('mutasiStokJson');
+    
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){

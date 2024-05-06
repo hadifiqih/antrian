@@ -15,25 +15,26 @@
             <div class="card card-primary card-outline">
                 <div class="card-header">
                     <h3 class="card-title">Daftar Stok</h3>
+                    <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#modalMutasiStok">
+                        <i class="fas fa-plus-circle"></i> Mutasi Stok
+                    </button>
                 </div>
                 <div class="card-body">
                     <table id="tableStok" class="table table-borderless table-striped">
                         <thead>
                             <tr>
                                 <th>SKU</th>
-                                <th>NAMA</th>
-                                <th>JENIS</th>
-                                <th>AWAL</th>
-                                <th>MASUK</th>
-                                <th>TERJUAL</th>
-                                <th>AKHIR</th>
-                                <th>SATUAN</th>
-                                <th>AKSI</th>
+                                <th>Nama</th>
+                                <th>Masuk</th>
+                                <th>Terjual</th>
+                                <th>Akhir</th>
+                                <th>Satuan</th>
                             </tr>
                         </thead>
                         <tbody>
                             
                         </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -42,7 +43,6 @@
 @endsection
 
 @section('script')
-
 <script>
     $(document).ready(function() {
         $('#tableStok').DataTable({
@@ -52,13 +52,10 @@
             columns: [
                 { data: 'sku', name: 'sku' },
                 { data: 'nama', name: 'nama' },
-                { data: 'jenis', name: 'jenis' },
-                { data: 'awal', name: 'awal' },
                 { data: 'masuk', name: 'masuk' },
                 { data: 'terjual', name: 'terjual' },
-                { data: 'akhir', name: 'akhir' },
-                { data: 'satuan', name: 'satuan' },
-                { data: 'aksi', name: 'aksi' }
+                { data: 'stok', name: 'stok' },
+                { data: 'satuan', name: 'satuan' }
             ]
         });
     });
