@@ -18,6 +18,23 @@
         height: 38px !important;
     }
 </style>
+
+@if(session('success'))
+<div class="alert alert-success alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h5><i class="icon fas fa-check"></i> Success!</h5>
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h5><i class="icon fas fa-times"></i> Error!</h5>
+    {{ session('error') }}
+</div>
+@endif
+
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -26,28 +43,36 @@
                     <h3 class="card-title">Mutasi Stok</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('simpanMutasi') }}" method="POST" enctype="text/plain">
+                    <form action="{{ route('simpanMutasi') }}" method="POST">
                         @csrf
                         <div class="form-group">
-                            <label for="skuNama">SKU / Nama Produk</label>
-                            <select id="skuNama" class="form-control" name="skuNama">
+                            <label for="produkId">SKU / Nama Produk<span class="text-danger">*</span></label>
+                            <select id="produkId" class="form-control" name="produkId" required>
                                 
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="jumlah">Jumlah</label>
-                            <input type="number" class="form-control" id="jumlah" name="jumlah" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="tipe">Tipe</label>
-                            <select class="form-control" id="tipe" name="tipe" required>
-                                <option value="1">Stok Masuk</option>
-                                <option value="2">Stok Keluar</option>
+                            <label for="tipe">Kategori Mutasi<span class="text-danger">*</span></label>
+                            <select class="form-control" id="kategori" name="kategori" required>
+                                <option value="" default>Pilih Kategori Mutasi</option>
+                                <option value="masuk">Mutasi Masuk</option>
+                                <option value="keluar">Mutasi Keluar</option>
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="tanggal">Jenis Mutasi<span class="text-danger">*</span></label>
+                            <select class="form-control" id="jenis" name="jenis" required>
+                                <option value="" default>Pilih Jenis Mutasi</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="jumlah">Jumlah<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="jumlah" name="jumlah" required>
+                        </div>
+                        <div class="form-group">
                             <label for="keterangan">Keterangan</label>
-                            <textarea class="form-control" id="keterangan" name="keterangan" required></textarea>
+                            <textarea class="form-control" id="keterangan" name="keterangan"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary btn-sm">Submit</button>
                     </form>
@@ -63,7 +88,7 @@
 <script>
     $(document).ready(function() {
         //select2
-        $('#skuNama').select2({
+        $('#produkId').select2({
             placeholder: 'Pilih SKU / Nama Produk',
             allowClear: true,
             ajax : {
@@ -81,6 +106,23 @@
                     };
                 },
                 cache : true
+            }
+        });
+
+        //option jenis mutasi
+        $('#kategori').change(function() {
+            var kategori = $(this).val();
+            var jenis = $('#jenis');
+            jenis.empty();
+            if(kategori == 'masuk') {
+                jenis.append('<option value="penambahan stok">Penambahan Stok</option>');
+                jenis.append('<option value="retur pembelian">Retur Pembelian</option>');
+                jenis.append('<option value="penyesuaian stok masuk">Penyesuaian Stok Masuk</option>');
+            } else {
+                jenis.append('<option value="penggunaan produksi">Penggunaan Produksi</option>');
+                jenis.append('<option value="kerusakan barang">Kerusakan Barang</option>');
+                jenis.append('<option value="penyesuaian stok keluar">Penyesuaian Stok Keluar</option>');
+                jenis.append('<option value="penghapusan stok">Penghapusan Stok</option>');
             }
         });
     });

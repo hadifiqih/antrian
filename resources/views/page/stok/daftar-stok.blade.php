@@ -15,9 +15,9 @@
             <div class="card card-primary card-outline">
                 <div class="card-header">
                     <h3 class="card-title">Daftar Stok</h3>
-                    <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#modalMutasiStok">
+                    <a href="{{ route('mutasiStok') }}" class="btn btn-primary btn-sm float-right">
                         <i class="fas fa-plus-circle"></i> Mutasi Stok
-                    </button>
+                    </a>
                 </div>
                 <div class="card-body">
                     <table id="tableStok" class="table table-borderless table-striped">
@@ -26,7 +26,7 @@
                                 <th>SKU</th>
                                 <th>Nama</th>
                                 <th>Masuk</th>
-                                <th>Terjual</th>
+                                <th>Terjual/Keluar</th>
                                 <th>Akhir</th>
                                 <th>Satuan</th>
                             </tr>

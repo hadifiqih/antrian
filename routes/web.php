@@ -326,6 +326,8 @@ Route::controller(StokController::class)->group(function(){
     Route::get('/stok/mutasi-stok', 'mutasiStok')->name('mutasiStok');
     Route::get('/stok/mutasi-stok-json', 'mutasiStokJson')->name('mutasiStokJson');
     
+    Route::get('/stok/daftar-mutasi', 'daftarMutasi')->name('daftarMutasi');
+    Route::post('/stok/simpan-mutasi', 'simpanMutasi')->name('simpanMutasi');
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){
