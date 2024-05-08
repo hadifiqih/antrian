@@ -29,13 +29,13 @@
                     <table id="tableMutasi" class="table table-borderless table-striped">
                         <thead>
                             <tr>
+                                <th>Tanggal</th>
                                 <th>SKU</th>
                                 <th>Nama</th>
                                 <th>Kategori</th>
                                 <th>Jenis</th>
                                 <th>Jumlah</th>
                                 <th>Keterangan</th>
-                                <th>Tanggal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,13 +59,13 @@
             serverSide: true,
             ajax: "{{ route('mutasiStokJson') }}",
             columns: [
+                { data: 'tanggal', name: 'tanggal' },
                 { data: 'sku', name: 'sku' },
                 { data: 'nama', name: 'nama' },
                 { data: 'kategori', name: 'kategori' },
                 { data: 'jenis', name: 'jenis' },
                 { data: 'jumlah', name: 'jumlah' },
-                { data: 'keterangan', name: 'keterangan' },
-                { data: 'tanggal', name: 'tanggal' }
+                { data: 'keterangan', name: 'keterangan' }
             ]
         });
     });

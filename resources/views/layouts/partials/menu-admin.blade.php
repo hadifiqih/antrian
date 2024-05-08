@@ -25,8 +25,8 @@
             </li>
         </ul>
         </li>
-        <li class="nav-item {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') ? 'active' : '' }}">
+        <li class="nav-item {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') ? 'active' : '' }}">
               <i class="nav-icon fas fa-box"></i>
                 <p>
                     Kelola Stok
@@ -38,7 +38,15 @@
                     <a href="{{ route('daftarStok') }}" class="nav-link {{ request()->routeIs('daftarStok') ? 'active' : '' }}">
                         <i class="far fa-circle nav-icon"></i>
                         <p>
-                            Daftar Stok
+                            Data Stok
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('daftarMutasi') }}" class="nav-link {{ request()->routeIs('daftarMutasi') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>
+                            Data Mutasi Stok
                         </p>
                     </a>
                 </li>
@@ -46,7 +54,7 @@
                     <a href="{{ route('mutasiStok') }}" class="nav-link {{ request()->routeIs('mutasiStok') ? 'active' : '' }}">
                         <i class="far fa-circle nav-icon"></i>
                         <p>
-                            Mutasi Stok
+                           Tambah Mutasi Stok
                         </p>
                     </a>
                 </li>

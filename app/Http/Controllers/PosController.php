@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Keranjang;
 use App\Models\Penjualan;
 use App\Models\StokBahan;
+use App\Models\MutasiStok;
 use Mike42\Escpos\Printer;
 use App\Models\ProdukHarga;
 use App\Models\ProdukGrosir;
@@ -15,8 +16,8 @@ use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
 use App\Models\KeranjangItem;
 use App\Models\PenjualanDetail;
-use App\Models\SumberPelanggan;
 
+use App\Models\SumberPelanggan;
 use App\Http\Resources\NotaResource;
 use Illuminate\Support\Facades\Http;
 use Mike42\Escpos\CapabilityProfile;
@@ -740,6 +741,16 @@ class PosController extends Controller
                 $stok = StokBahan::where('produk_id', $item->produk_id)->where('cabang_id', $cabang)->first();
                 $stok->jumlah_stok -= $item->jumlah;
                 $stok->save();
+
+                //buat mutasi stok
+                $mutasi = new MutasiStok;
+                $mutasi->produk_id = $item->produk_id;
+                $mutasi->cabang_id = $cabang;
+                $mutasi->kategori_mutasi = 'keluar';
+                $mutasi->jenis_mutasi = 'penjualan';
+                $mutasi->jumlah_stok = $item->jumlah;
+                $mutasi->keterangan = 'Penjualan : '. $invoice;
+                $mutasi->save();
             }
 
             //hapus item keranjang

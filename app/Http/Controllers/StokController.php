@@ -129,7 +129,7 @@ class StokController extends Controller
         //yajra datatable
         return Datatables::of($mutasi)
             ->addColumn('tanggal', function ($mutasi) {
-                return date('d-m-Y', strtotime($mutasi->created_at));
+                return date('d F Y', strtotime($mutasi->created_at));
             })
             ->addColumn('sku', function ($mutasi) {
                 return $mutasi->produk->kode_produk;
@@ -139,9 +139,9 @@ class StokController extends Controller
             })
             ->addColumn('kategori', function ($mutasi) {
                 if($mutasi->kategori_mutasi == 'masuk'){
-                    return '<span class="badge badge-success">Masuk</span>';
+                    return '<span class="badge badge-success">Stok Masuk</span>';
                 }else{
-                    return '<span class="badge badge-danger">Keluar</span>';
+                    return '<span class="badge badge-danger">Stok Keluar</span>';
                 }
             })
             ->addColumn('jenis', function ($mutasi) {

@@ -115,14 +115,18 @@
             var jenis = $('#jenis');
             jenis.empty();
             if(kategori == 'masuk') {
-                jenis.append('<option value="penambahan stok">Penambahan Stok</option>');
+                jenis.append('<option value="pembelian">Pembelian</option>');
+                jenis.append('<option value="penerimaan barang">Penerimaan Barang</option>');
                 jenis.append('<option value="retur pembelian">Retur Pembelian</option>');
+                jenis.append('<option value="hibah">Hibah</option>');
                 jenis.append('<option value="penyesuaian stok masuk">Penyesuaian Stok Masuk</option>');
             } else {
+                jenis.append('<option value="penjualan">Penjualan</option>');
+                jenis.append('<option value="pengiriman barang">Pengiriman Barang</option>');
+                jenis.append('<option value="retur penjualan">Retur Penjualan</option>');
                 jenis.append('<option value="penggunaan produksi">Penggunaan Produksi</option>');
                 jenis.append('<option value="kerusakan barang">Kerusakan Barang</option>');
                 jenis.append('<option value="penyesuaian stok keluar">Penyesuaian Stok Keluar</option>');
-                jenis.append('<option value="penghapusan stok">Penghapusan Stok</option>');
             }
         });
     });
