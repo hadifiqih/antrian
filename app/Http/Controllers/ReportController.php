@@ -298,24 +298,24 @@ class ReportController extends Controller
         $totalPacking = 0;
         $totalOngkir = 0;
         $totalPasang = 0;
+        $pajak = 0;
         $diskon = 0;
 
         foreach ($items as $item) {
             $totalHarga += $item->price * $item->qty;
         }
+        
+        $diskon = $antrian->pembayaran->diskon;
+        $pajak = $antrian->ppn + $antrian->pph;
 
-        $infoBayar = Pembayaran::where('ticket_order', $tiket)->first();
-        $totalPacking = $infoBayar->biaya_packing;
-        $totalPasang = $infoBayar->biaya_pasang;
-        $diskon = $infoBayar->diskon;
+        $totalPasang = $antrian->pembayaran->biaya_pasang;
+        $totalOngkir = $antrian->pengiriman->count() > 0  ? $antrian->pengiriman->ongkir : 0;
+        $totalPacking = $antrian->pembayaran->biaya_packing;
 
-        $infoPengiriman = Pengiriman::where('ticket_order', $tiket)->first();
-        $totalOngkir = $infoPengiriman->ongkir ?? 0;
+        $grandTotal = $totalHarga + $totalPasang + $totalOngkir + $totalPacking + $pajak - $diskon;
+        $sisaTagihan = $grandTotal - $antrian->pembayaran->dibayarkan;
 
-        $grandTotal = $totalHarga + $totalPacking + $totalOngkir + $totalPasang - $diskon;
-        $sisaTagihan = $grandTotal - $infoBayar->dibayarkan;
-
-        return view('page.report.faktur-penjualan', compact('antrian', 'items', 'totalHarga', 'totalPacking', 'totalOngkir', 'totalPasang', 'diskon', 'grandTotal', 'sisaTagihan', 'infoBayar'));
+        return view('page.report.faktur-penjualan', compact('sales' ,'antrian', 'items', 'totalHarga', 'totalPacking', 'totalOngkir', 'totalPasang', 'diskon', 'grandTotal', 'sisaTagihan'));
     }
 
     public function index()

@@ -81,42 +81,77 @@
             <div class="row">
                 <div class="col-md-6"></div>
                 <div class="col-md-6">
+
+                    @if($antrian->cekApakahAdaPengiriman() == true)
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-right">Diskon : </h6>
+                            <h6 class="text-right">Biaya Ongkir : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp {{ number_format($diskon, 0, ',', '.') }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($antrian->pengiriman->ongkir, 0, ',', '.') }}</h6>
                         </div>
                     </div>
-                    @if($penjualan->ppn > 0)
+                    @endif
+
+                    @if($antrian->cekApakahAdaBiayaPasang() == true)
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-right">Biaya Pasang : </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center">Rp {{ number_format($antrian->pembayaran->biaya_pasang, 0, ',', '.') }}</h6>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    @if($antrian->cekApakahAdaBiayaPacking() === true)
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-right">Biaya Packing : </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center">Rp {{ number_format($antrian->pembayaran->biaya_packing, 0, ',', '.') }}</h6>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($antrian->ppn > 0)
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-right">Pajak PPN(11%) : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp {{ $penjualan->ppn }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($antrian->ppn, 0, ',', '.') }}</h6>
                         </div>
                     </div>
                     @endif
 
-                    @if($penjualan->pph > 0)
+                    @if($antrian->pph > 0)
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-right">Pajak PPh(2,5%) : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp {{ $penjualan->pph }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($antrian->pph, 0, ',', '.') }}</h6>
                         </div>
                     </div>
                     @endif
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-right text-danger">Diskon : </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center text-danger">Rp {{ number_format($diskon, 0, ',', '.') }}</h6>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-right">Grand Total : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h5 class="text-center font-weight-bold text-success">Rp {{ number_format($total, 0, ',', '.') }}</h5>
+                            <h5 class="text-center font-weight-bold text-success">Rp {{ number_format($grandTotal, 0, ',', '.') }}</h5>
                         </div>
                     </div>
                 </div>
@@ -125,13 +160,14 @@
             <div class="row">
                 <div class="col-md-6">
                     <h6>Keterangan : </h6>
-                    <h6 class="font-weight-bold">{{ $penjualan->keterangan == 'datang' ? 'Datang ke Toko' : 'Dikirim' }}</h6>
-                    <h6>{{ $penjualan->customer->nama }} - {{ $penjualan->telepon }}</h6>
-                    <h6>{{ $penjualan->alamat }}</h6>
+                    @if($antrian->pembayaran->status_pembayaran == 1)
+                    <h6 class="font-weight-bold">Down Payment (DP) : Rp {{ number_format($antrian->pembayaran->dibayarkan,0,',','.') }}</h6>
+                    @endif
+                    <h6 class="font-weight-bold">{{ $antrian->is_priority == 1 ? '⭐ PRIORITAS' : 'Tidak Prioritas' }}</h6>
                 </div>
                 <div class="col-md-6">
                     <h6>Metode Pembayaran : </h6>
-                    <h6 class="font-weight-bold">{{ ucwords($penjualan->metode_pembayaran) }} - {{ $rekening }}</h6>
+                    <h6 class="font-weight-bold">{{ ucwords($antrian->pembayaran->metode_pembayaran) }} - {{ $antrian->pembayaran->status_pembayaran == 2 ? 'Lunas' : 'Belum Lunas' }}</h6>
                 </div>
             </div>
         </div>

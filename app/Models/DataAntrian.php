@@ -114,4 +114,29 @@ class DataAntrian extends Model
     {
         return $this->hasMany(Pengiriman::class, 'ticket_order', 'ticket_order');
     }
+
+    public function cekApakahAdaPengiriman()
+    {
+        return $this->pengiriman()->count();
+    }
+
+    public function cekApakahAdaBiayaPasang()
+    {
+        if($this->pembayaran->biaya_pasang == 0)
+        {
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function cekApakahAdaBiayaPacking()
+    {
+        if($this->pembayaran->biaya_packing == 0)
+        {
+            return false;
+        }else{
+            return true;
+        }
+    }
 }
