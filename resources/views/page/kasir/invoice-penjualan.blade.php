@@ -133,8 +133,10 @@
                 <div class="col-md-6">
                     <h6>Keterangan : </h6>
                     <h6 class="font-weight-bold">{{ $penjualan->keterangan == 'datang' ? 'Datang ke Toko' : 'Dikirim' }}</h6>
+                    @if($penjualan->keterangan == 'dikirim')
                     <h6>{{ $penjualan->customer->nama }} - {{ $penjualan->telepon }}</h6>
                     <h6>{{ $penjualan->alamat }}</h6>
+                    @endif
                 </div>
                 <div class="col-md-6">
                     <h6>Metode Pembayaran : </h6>

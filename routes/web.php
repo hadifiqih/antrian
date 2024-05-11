@@ -177,7 +177,6 @@ Route::controller(ReportController::class)->group(function(){
     Route::post('/report-workshop-pdf', 'exportLaporanWorkshopPDF')->name('laporan-workshop-pdf');
     Route::get('/cetak-espk/{id}', 'cetakEspk')->name('cetak-espk');
     Route::get('/sales/report', 'reportSales')->name('report.sales');
-    Route::post('/sales/report', 'reportSalesByDate')->name('report.salesByDate');
     Route::get('/report-form-order/{id}', 'reportFormOrder')->name('report.formOrder');
     //Admin Keuangan
     Route::get('/antrian/omset-global-sales', 'omsetGlobalSales')->name('omset.globalSales');

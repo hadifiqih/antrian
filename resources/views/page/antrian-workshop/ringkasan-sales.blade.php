@@ -15,9 +15,6 @@
             <div class="col-md-3">
                 <h3 class="card-title text-bold">Ringkasan Sales</h3>
             </div>
-            <div class="col-md-9">
-                <span class="text-muted d-flex justify-content-end">Bulan : {{ date('F - Y') }}</span>
-            </div>
         </div>
 
     </div>
@@ -48,27 +45,24 @@
             <div class="col-md-1"></div>
             {{-- Pilih tanggal --}}
             <div class="col-md-5">
-                <form action="{{ route('report.salesByDate')}}" method="POST">
-                    @csrf
-                    <div class="form-group d-flex justify-content-end">
-                        <label for="tanggal" class="mr-5">Bulan</label>
-                        <select name="bulan" id="bulan" class="form-control form-control-sm">
-                            <option value="">Pilih Bulan</option>
-                            <option value="01">Januari</option>
-                            <option value="02">Februari</option>
-                            <option value="03">Maret</option>
-                            <option value="04">April</option>
-                            <option value="05">Mei</option>
-                            <option value="06">Juni</option>
-                            <option value="07">Juli</option>
-                            <option value="08">Agustus</option>
-                            <option value="09">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Desember</option>
-                        </select>
-                    </div>
-                </form>
+                <div class="form-group d-flex justify-content-end">
+                    <label for="tanggal" class="mr-5">Bulan</label>
+                    <select name="bulan" id="bulan" class="form-control form-control-sm">
+                        <option value="">Pilih Bulan</option>
+                        <option value="01" {{ $bulan == '01' ? 'selected' : '' }}>Januari</option>
+                        <option value="02" {{ $bulan == '02' ? 'selected' : '' }}>Februari</option>
+                        <option value="03" {{ $bulan == '03' ? 'selected' : '' }}>Maret</option>
+                        <option value="04" {{ $bulan == '04' ? 'selected' : '' }}>April</option>
+                        <option value="05" {{ $bulan == '05' ? 'selected' : '' }}>Mei</option>
+                        <option value="06" {{ $bulan == '06' ? 'selected' : '' }}>Juni</option>
+                        <option value="07" {{ $bulan == '07' ? 'selected' : '' }}>Juli</option>
+                        <option value="08" {{ $bulan == '08' ? 'selected' : '' }}>Agustus</option>
+                        <option value="09" {{ $bulan == '09' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ $bulan == '10' ? 'selected' : '' }}>Oktober</option>
+                        <option value="11" {{ $bulan == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ $bulan == '12' ? 'selected' : '' }}>Desember</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="table-responsive">

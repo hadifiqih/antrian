@@ -496,6 +496,7 @@ class ReportController extends Controller
     public function reportSales()
     {
         $salesId = auth()->user()->id;
+        $bulan = date('m');
 
         $totalOmset = 0;
         $totalOmsetToday = 0;
@@ -527,31 +528,7 @@ class ReportController extends Controller
             $totalOmsetToday += $antriansToday->price * $antriansToday->qty;
         }
 
-        return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'totalOmsetToday'));
-    }
-
-    public function reportSalesByDate()
-    {
-        if(request()->has('tanggal')) {
-            $date = request('tanggal');
-        } else {
-            $date = date('Y-m-d');
-        }
-
-        $sales = Sales::where('user_id', auth()->user()->id)->first();
-        $salesId = $sales->id;
-
-        $antrians = Antrian::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
-            ->whereDate('created_at', $date)
-            ->where('sales_id', $salesId)
-            ->get();
-
-        $totalOmset = 0;
-        foreach ($antrians as $antrian) {
-            $totalOmset += $antrian->omset;
-        }
-
-        return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'date'));
+        return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'totalOmsetToday', 'bulan'));
     }
 
     public function reportFormOrder($id)
