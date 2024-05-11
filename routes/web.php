@@ -306,6 +306,8 @@ Route::controller(PosController::class)->group(function(){
     Route::get('/pos/checkout/{cart_id}', 'checkoutCart')->name('pos.checkout');
     Route::get('/pos/checkout-json/{cart_id}', 'checkoutCartJson')->name('pos.checkoutJson');
     Route::post('/pos/buat-pesanan', 'buatPesanan')->name('pos.buatPesanan');
+    //Faktur
+    Route::get('/pos/detail-transaksi/{id}', 'detailTransaksi')->name('pos.detailTransaksi');
     Route::get('/pos/faktur/{id}', 'tampilFaktur')->name('pos.faktur');
     Route::get('/pos/faktur-print/{id}', 'printFaktur')->name('pos.printFaktur');
     Route::get('/pos/nota-print/{id}', 'printNota')->name('pos.printNota');

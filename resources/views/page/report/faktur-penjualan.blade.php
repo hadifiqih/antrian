@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Invoice Penjualan Jasa| CV. Kassab Syariah')
+@section('title', 'Invoice Penjualan Jasa | CV. Kassab Syariah')
 
 @section('username', Auth::user()->name)
 
@@ -35,15 +35,22 @@
                     </address>
                 </div>
                 <div class="col-md-6">
-                    <address>
-                        <strong>DITERBITKAN KEPADA</strong><br>
-                        Pembeli :
-                        <strong>{{ $antrian->customer->nama }}</strong><br>
-                        Tanggal Pembelian : 
-                        <strong>{{ date_format($antrian->created_at, 'd F Y') }}</strong><br>
-                        Alamat : {{ $antrian->customer->alamat ?? '-' }}<br>
-                        Telp: {{ $antrian->customer->telepon ?? '-'}}
-                    </address>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <address>
+                                <strong>Pembeli</strong><br>
+                                <strong>{{ $antrian->customer->nama }}</strong><br>
+                                {{ ucwords($antrian->customer->alamat) }}<br>
+                                Telp: {{ $antrian->customer->telepon }}
+                            </address>
+                        </div>
+                        <div class="col-md-6">
+                            <address>
+                                <strong>Tanggal Penjualan</strong><br>
+                                {{ date_format($antrian->created_at, 'd F Y') }}<br>
+                            </address>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">

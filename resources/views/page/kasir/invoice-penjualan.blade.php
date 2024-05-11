@@ -35,15 +35,22 @@
                     </address>
                 </div>
                 <div class="col-md-6">
-                    <address>
-                        <strong>DITERBITKAN KEPADA</strong><br>
-                        Pembeli :
-                        <strong>{{ $penjualan->customer->nama }}</strong><br>
-                        Tanggal Pembelian : 
-                        <strong>{{ date_format($penjualan->created_at, 'd F Y') }}</strong><br>
-                        Alamat : {{ $penjualan->customer->alamat ?? '-' }}<br>
-                        Telp: {{ $penjualan->customer->telepon ?? '-'}}
-                    </address>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <address>
+                                <strong>Pembeli</strong><br>
+                                <strong>{{ $penjualan->customer->nama }}</strong><br>
+                                {{ ucwords($penjualan->customer->alamat) }}<br>
+                                Telp: {{ $penjualan->customer->telepon }}
+                            </address>
+                        </div>
+                        <div class="col-md-6">
+                            <address>
+                                <strong>Tanggal Penjualan</strong><br>
+                                {{ date_format($penjualan->created_at, 'd F Y') }}<br>
+                            </address>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -95,7 +102,7 @@
                             <h6 class="text-right">Pajak PPN(11%) : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp {{ $penjualan->ppn }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($penjualan->ppn,0,',','.') }}</h6>
                         </div>
                     </div>
                     @endif
@@ -106,7 +113,7 @@
                             <h6 class="text-right">Pajak PPh(2,5%) : </h6>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-center">Rp {{ $penjualan->pph }}</h6>
+                            <h6 class="text-center">Rp {{ number_format($penjualan->pph,0,',','.') }}</h6>
                         </div>
                     </div>
                     @endif

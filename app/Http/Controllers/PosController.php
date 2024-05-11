@@ -910,7 +910,7 @@ class PosController extends Controller
             })
             ->addColumn('action', function($row){
                 $actionBtn = '<div class="btn-group">';
-                $actionBtn .= '<a href="'.route('pos.faktur', $row->id).'" class="btn btn-primary btn-sm"><i class="fas fa-list-alt"></i> Invoice</a>';
+                $actionBtn .= '<a href="'.route('pos.detailTransaksi', $row->id).'" class="btn btn-primary btn-sm"><i class="fas fa-list-alt"></i> Invoice</a>';
                 $actionBtn .= '<button onclick="printStruk('.$row->id.')" class="btn btn-info btn-sm"><i class="fas fa-print"></i> Print Nota</button>';
                 $actionBtn .= '</div>';
                 return $actionBtn;
@@ -1224,5 +1224,14 @@ class PosController extends Controller
         ];
 
         return NotaResource::make($data);
+    }
+
+    public function detailTransaksi($id)
+    {
+        $penjualan = Penjualan::find($id);
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+        $sales = Sales::find($penjualan->sales_id);
+
+        return view('page.kasir.detail-transaksi', compact('penjualan', 'items', 'sales'));
     }
 }
