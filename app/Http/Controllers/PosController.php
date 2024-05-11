@@ -1232,6 +1232,8 @@ class PosController extends Controller
         $items = PenjualanDetail::where('penjualan_id', $id)->get();
         $sales = Sales::find($penjualan->sales_id);
 
+        
+
         return view('page.kasir.detail-transaksi', compact('penjualan', 'items', 'sales'));
     }
 }
