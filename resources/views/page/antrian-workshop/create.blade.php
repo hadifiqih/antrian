@@ -67,26 +67,6 @@
                             </tfoot>
                         </table>
 
-                        <div class="row mt-3">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="ppn">
-                                    <label class="custom-control-label" for="ppn">Pajak PPN(11%)</label>
-                                    </div>
-                                </div>
-                            </div>
-              
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="pph">
-                                    <label class="custom-control-label" for="pph">Pajak PPH(2,5%)</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                             <div class="form-group">
                                 <label for="packing">Biaya Packing</label>
                                 <input type="text" class="form-control maskRupiah" id="packing" placeholder="Contoh : Rp 100.000" name="biayaPacking" value="{{ old('packing') }}">
@@ -100,6 +80,36 @@
                             <div class="form-group">
                                 <label for="diskon">Diskon / Potongan Harga</label>
                                 <input type="text" class="form-control maskRupiah" id="diskon" placeholder="Contoh : Rp 100.000" name="diskon" value="{{ old('diskon') }}">
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="ppn">Pajak PPN</label>
+                                        {{-- input text for PPN --}}
+                                        <input type="text" class="form-control maskRupiah" id="ppn" placeholder="Contoh : Rp 100.000" name="ppn" value="{{ old('ppn') }}" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="usePPN">
+                                            <label class="custom-control-label" for="usePPN">Gunakan PPN</label>
+                                        </div>
+                                    </div>
+                                </div>
+                  
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="ppn">Pajak PPh</label>
+                                        {{-- input text for PPN --}}
+                                        <input type="text" class="form-control maskRupiah" id="pph" placeholder="Contoh : Rp 100.000" name="pph" value="{{ old('pph') }}" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="usePPh">
+                                            <label class="custom-control-label" for="usePPh">Gunakan PPh</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -383,6 +393,22 @@
         $('#modalTelepon').on('keyup', function(){
             var phone = $(this).val();
             $(this).val(formatPhoneNumber(phone));
+        });
+
+        $('#usePPN').on('change', function(){
+            if($(this).is(':checked')){
+                $('#ppn').attr('disabled', false);
+            }else{
+                $('#ppn').attr('disabled', true);
+            }
+        });
+
+        $('#usePPh').on('change', function(){
+            if($(this).is(':checked')){
+                $('#pph').attr('disabled', false);
+            }else{
+                $('#pph').attr('disabled', true);
+            }
         });
 
         // ketika isOngkir dicentang maka divAlamatKirim, divOngkir, divEkspedisi akan muncul
@@ -692,19 +718,17 @@
             var ongkir = parseInt($('#ongkir').val().replace(/[^0-9]/g, '')) || 0;
             var pasang = parseInt($('#pasang').val().replace(/[^0-9]/g, '')) || 0;
             var diskon = parseInt($('#diskon').val().replace(/[^0-9]/g, '')) || 0;
-            var ppn = $('#ppn').prop('checked');
-            var pph = $('#pph').prop('checked');
+            var ppn = $('#ppn').val();
+            var pph = $('#pph').val();
 
             var totalAll = parseInt($('#subtotal').text().replace(/[^0-9]/g, '')) || 0;
 
             var pajak = 0;
-            if (ppn) {
-                // Menghitung PPN
-                pajak += Math.floor((totalAll + packing + ongkir + pasang - diskon) * 0.11); // 11% PPN
+            if(ppn != '' || ppn != null || ppn != 0){
+                pajak += parseInt(ppn.replace(/[^0-9]/g, '')) || 0;
             }
-            if (pph) {
-                // Menghitung PPH
-                pajak += Math.floor((totalAll + packing + ongkir + pasang - diskon) * 0.025); // 2,5% PPH
+            if(pph != '' || pph != null || pph != 0){
+                pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
             }
 
             totalAll += packing + ongkir + pasang - diskon + pajak;

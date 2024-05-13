@@ -445,8 +445,8 @@ class AntrianController extends Controller
             'ticket_order' => $ticketOrder,
             'sales_id' => auth()->user()->sales->id,
             'customer_id' => $request->input('customer_id'),
-            'ppn' => $request->input('ppn') ? CustomHelper::removeCurrencyFormat(round($request->input('totalAllInput') * 0.11)) : 0,
-            'pph' => $request->input('pph') ? CustomHelper::removeCurrencyFormat(round($request->input('totalAllInput') * 0.025)) : 0,
+            'ppn' => $request->input('ppn') != '' ? CustomHelper::removeCurrencyFormat($request->input('ppn')) : 0,
+            'pph' => $request->input('pph') != '' ? CustomHelper::removeCurrencyFormat($request->input('pph')) : 0,
             'status' => 1,
         ]);
 
