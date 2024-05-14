@@ -76,22 +76,6 @@ class PosController extends Controller
         $printer->text("-----------------------------------------------\n");
         $printer->text(buatBaris2Kolom('Subtotal', CustomHelper::addCurrencyFormat($penjualan->total)));
         $printer->text(buatBaris2Kolom('Diskon', CustomHelper::addCurrencyFormat($penjualan->diskon)));
-        if($penjualan->ppn != 0){
-            $printer->text(buatBaris2Kolom('PPN(11%)', CustomHelper::addCurrencyFormat($penjualan->ppn)));
-        }
-        if($penjualan->pph != 0){
-            $printer->text(buatBaris2Kolom('PPh(2,5%)', CustomHelper::addCurrencyFormat($penjualan->pph)));
-        }
-        $printer->text("-----------------------------------------------\n");
-        if($penjualan->ppn != 0 || $penjualan->pph != 0){
-            $printer->setEmphasis(true);
-            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon + $penjualan->ppn + $penjualan->pph)));
-            $printer->setEmphasis(false);
-        }else{
-            $printer->setEmphasis(true);
-            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon)));
-            $printer->setEmphasis(false);
-        }
         $printer->text("-----------------------------------------------\n");
         $printer->text(buatBaris2Kolom('Cash/Transfer', CustomHelper::addCurrencyFormat($penjualan->diterima)));
         $printer->text(buatBaris2Kolom('Kembali', CustomHelper::addCurrencyFormat($penjualan->diterima - ($penjualan->total - $penjualan->diskon))));
@@ -434,7 +418,6 @@ class PosController extends Controller
 
         return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil dihapus!');
     }
-
     //--------------------------------------------------------------------------------------------
     //Fungsi untuk Keranjang
     //--------------------------------------------------------------------------------------------
@@ -686,6 +669,7 @@ class PosController extends Controller
         $sales = auth()->user()->sales->id;
         $customer = $request->customer_id;
         $date = date('ym');
+        $month = date('m');
 
         $keranjang = Keranjang::where('sales_id', $sales)->where('customer_id', $customer)->first();
         $items = KeranjangItem::getItemByIdCart($keranjang->id);
@@ -718,8 +702,8 @@ class PosController extends Controller
         $penjualan->diterima = CustomHelper::removeCurrencyFormat($request->total_bayar);
         $penjualan->keterangan = $request->keterangan;
         $penjualan->metode_pembayaran = $request->metode;
-        $penjualan->ppn = $request->ppn ? $request->total * 0.11 : 0; //ppn 11%
-        $penjualan->pph = $request->pph ? $request->total * 0.025 : 0; //pph 2,5%
+        $penjualan->ppn = 0; //ppn 11%
+        $penjualan->pph = 0; //pph 2,5%
         $penjualan->rekening = $request->rekening == null || $request->rekening == "" ? null : $request->rekening;
         $penjualan->alamat = $request->alamat == null || $request->alamat == "" ? null : $request->alamat;
         $penjualan->telepon = $request->telepon == null || $request->telepon == "" ? null : $request->telepon;
@@ -780,9 +764,6 @@ class PosController extends Controller
             $subtotal = ($item->harga * $item->jumlah) - $item->diskon;
             $total += $subtotal;
         }
-
-        //tambahkan ppn dan pph
-        $total += $penjualan->ppn + $penjualan->pph;
 
         $rekening = $penjualan->rekening;
         if($rekening == 'tunai'){
@@ -1180,22 +1161,6 @@ class PosController extends Controller
         $printer->text("-----------------------------------------------\n");
         $printer->text(buatBaris2Kolom('Subtotal', CustomHelper::addCurrencyFormat($penjualan->total)));
         $printer->text(buatBaris2Kolom('Diskon', CustomHelper::addCurrencyFormat($penjualan->diskon)));
-        if($penjualan->ppn != 0){
-            $printer->text(buatBaris2Kolom('PPN(11%)', CustomHelper::addCurrencyFormat($penjualan->ppn)));
-        }
-        if($penjualan->pph != 0){
-            $printer->text(buatBaris2Kolom('PPh(2,5%)', CustomHelper::addCurrencyFormat($penjualan->pph)));
-        }
-        $printer->text("-----------------------------------------------\n");
-        if($penjualan->ppn != 0 || $penjualan->pph != 0){
-            $printer->setEmphasis(true);
-            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon + $penjualan->ppn + $penjualan->pph)));
-            $printer->setEmphasis(false);
-        }else{
-            $printer->setEmphasis(true);
-            $printer->text(buatBaris2Kolom('Grand Total', CustomHelper::addCurrencyFormat($penjualan->total - $penjualan->diskon)));
-            $printer->setEmphasis(false);
-        }
         $printer->text("-----------------------------------------------\n");
         $printer->text(buatBaris2Kolom('Cash/Transfer', CustomHelper::addCurrencyFormat($penjualan->diterima)));
         $printer->text(buatBaris2Kolom('Kembali', CustomHelper::addCurrencyFormat($penjualan->diterima - ($penjualan->total - $penjualan->diskon))));

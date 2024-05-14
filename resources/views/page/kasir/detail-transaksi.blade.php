@@ -79,7 +79,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <h6 class="font-weight-bold">Metode Pembayaran</h6>
-                    <p>{{ ucwords($penjualan->metode_pembayaran) }} - {{ strtoupper($penjualan->rekening) }}</p>
+                    <p>{{ ucwords($penjualan->metode_pembayaran) }} - {{ $penjualan->rekening == 'tunai' ? strtoupper($penjualan->rekening) : 'Transfer ke Bank ' . strtoupper($penjualan->rekening) }}</p>
                 </div>
                 <div class="col-md-4">
                     <h6 class="font-weight-bold">Tanggal Transaksi</h6>

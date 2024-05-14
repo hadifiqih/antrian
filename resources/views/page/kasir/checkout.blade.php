@@ -80,26 +80,6 @@
             </div>
 
             <div class="row">
-              <div class="col-6">
-                <div class="form-group">
-                  <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="pajak">
-                    <label class="custom-control-label" for="pajak">Pajak PPN(11%)</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="form-group">
-                  <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="pph">
-                    <label class="custom-control-label" for="pph">Pajak PPH(2,5%)</label>
-                  </div>
-                </div>
-              </div>
-          </div>
-
-            <div class="row">
               <div class="col-md-3">
                 <div class="form-group">
                   <label for="metode">Metode Pembayaran</label>
@@ -162,28 +142,6 @@
 
     $(document).ready(function() {
       $('#totalBayar').maskMoney({thousands:'.', decimal:',', precision:0});
-
-      $('#pajak').on('change', function() {
-        var total = parseInt("{{ $total }}".replace(/\./g, '').replace('Rp ', ''));
-        // Hitung pajak
-        var pajak = $(this).is(':checked') ? total * 0.11 : 0;
-        // Hitung PPH
-        var pph = $('#pph').is(':checked') ? total * 0.025 : 0;
-        // Hitung total
-        var grandTotal = total + pajak + pph;
-        $('#totalItems').text(formatRupiah(Math.round(grandTotal)));
-      });
-
-      $('#pph').on('change', function() {
-        var total = parseInt("{{ $total }}".replace(/\./g, '').replace('Rp ', ''));
-        // Hitung pajak
-        var pajak = $('#pajak').is(':checked') ? total * 0.11 : 0;
-        // Hitung PPH
-        var pph = $(this).is(':checked') ? total * 0.025 : 0;
-        // Hitung total
-        var grandTotal = total + pajak + pph;
-        $('#totalItems').text(formatRupiah(Math.round(grandTotal)));
-      });
 
       //Datatable Items
       $('#tableItems').DataTable({
@@ -299,8 +257,6 @@
             telepon: $('#telepon').val(),
             alamat: $('#alamat').val(),
             metode: $('#metode').val(),
-            ppn: $('#pajak').is(':checked') ? 1 : 0,
-            pph: $('#pph').is(':checked') ? 1 : 0,
             rekening: $('#rekening').val(),
             total_bayar: $('#totalBayar').val(),
             total: total

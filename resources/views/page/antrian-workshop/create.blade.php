@@ -88,6 +88,7 @@
                                         <label for="ppn">Pajak PPN</label>
                                         {{-- input text for PPN --}}
                                         <input type="text" class="form-control maskRupiah" id="ppn" placeholder="Contoh : Rp 100.000" name="ppn" value="{{ old('ppn') }}" disabled>
+                                        <p class="font-italic text-sm text-secondary">*Penggunaan Pajak PPN diambil dari total jual produk</p>
                                     </div>
                                     <div class="form-group">
                                         <div class="custom-control custom-switch">
@@ -102,6 +103,7 @@
                                         <label for="ppn">Pajak PPh</label>
                                         {{-- input text for PPN --}}
                                         <input type="text" class="form-control maskRupiah" id="pph" placeholder="Contoh : Rp 100.000" name="pph" value="{{ old('pph') }}" disabled>
+                                        <p class="font-italic text-sm text-secondary">*Penggunaan Pajak PPh diambil dari total biaya pasang</p>
                                     </div>
                                     <div class="form-group">
                                         <div class="custom-control custom-switch">
