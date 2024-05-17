@@ -276,11 +276,6 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.modal.modal-form-spk', compact('antrian', 'dataKerja', 'order', 'customer', 'sales', 'job', 'barang', 'cabang'));
     }
 
-    public function cetakStruk()
-    {
-
-    }
-
     //--------------------------------------------------------------------------
     //Filter antrian berdasarkan kategori pekerjaan
     //--------------------------------------------------------------------------
@@ -298,15 +293,16 @@ class AntrianController extends Controller
     //Fungsi untuk menampilkan halaman tambah antrian service
     //--------------------------------------------------------------------------
 
-    public function serviceIndex(){
+    public function serviceIndex()
+    {
         $servisBaru = Anservice::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
         ->get();
 
         return view('page.antrian-service.index', compact('servisBaru'));
     }
 
-    public function serviceCreate(){
-
+    public function serviceCreate()
+    {
         return view('page.antrian-service.create');
     }
 
@@ -445,6 +441,7 @@ class AntrianController extends Controller
             'ticket_order' => $ticketOrder,
             'sales_id' => auth()->user()->sales->id,
             'customer_id' => $request->input('customer_id'),
+            'termasuk_pajak' => $request->input('termasukPajak'),
             'ppn' => $request->input('ppn') != '' ? CustomHelper::removeCurrencyFormat($request->input('ppn')) : 0,
             'pph' => $request->input('pph') != '' ? CustomHelper::removeCurrencyFormat($request->input('pph')) : 0,
             'status' => 1,
@@ -504,26 +501,31 @@ class AntrianController extends Controller
         return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
     }
 
+    public function penugasanOtomatis()
+    {
+        
+    }
+
     public function store(Request $request)
     {
-        $user = User::where('role', 'admin')->first();
-        $user->notify(new AntrianWorkshop($antrian, $order, $payment));
-        // Menampilkan push notifikasi saat selesai
-        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
-            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
-            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
-        ));
+        // $user = User::where('role', 'admin')->first();
+        // $user->notify(new AntrianWorkshop($antrian, $order, $payment));
+        // // Menampilkan push notifikasi saat selesai
+        // $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+        //     "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+        //     "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        // ));
 
-        $publishResponse = $beamsClient->publishToInterests(
-            array('admin'),
-            array("web" => array("notification" => array(
-              "title" => "📣 Cek sekarang, ada antrian baru !",
-              "body" => "Cek antrian workshop sekarang, jangan sampai lupa diantrikan ya !",
-            )),
-        ));
+        // $publishResponse = $beamsClient->publishToInterests(
+        //     array('admin'),
+        //     array("web" => array("notification" => array(
+        //       "title" => "📣 Cek sekarang, ada antrian baru !",
+        //       "body" => "Cek antrian workshop sekarang, jangan sampai lupa diantrikan ya !",
+        //     )),
+        // ));
 
-        return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
-     }
+        // return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
+    }
 
     public function edit($id)
     {

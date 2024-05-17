@@ -29,7 +29,7 @@
                             <option value="" selected>Pilih Pelanggan</option>
                         </select>
                     </div>
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -82,42 +82,70 @@
                                 <input type="text" class="form-control maskRupiah" id="diskon" placeholder="Contoh : Rp 100.000" name="diskon" value="{{ old('diskon') }}">
                             </div>
 
+                            {{-- Menggunakan pajak ? --}}
                             <div class="row mt-3">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label for="ppn">Pajak PPN</label>
-                                        {{-- input text for PPN --}}
-                                        <input type="text" class="form-control maskRupiah" id="ppn" placeholder="Contoh : Rp 100.000" name="ppn" value="{{ old('ppn') }}" disabled>
-                                        <p class="font-italic text-sm text-secondary">*Penggunaan Pajak PPN diambil dari total jual produk</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" class="custom-control-input" id="usePPN">
-                                            <label class="custom-control-label" for="usePPN">Gunakan PPN</label>
+                                        <div class="custom-control custom-switch custom-switch-on-primary">
+                                            <input type="checkbox" class="custom-control-input" id="usePajak" value="{{ old('usePajak') }}">
+                                            <label class="custom-control-label" for="usePajak">Menggunakan Pajak</label>
                                         </div>
                                     </div>
                                 </div>
-                  
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label for="ppn">Pajak PPh</label>
-                                        {{-- input text for PPN --}}
-                                        <input type="text" class="form-control maskRupiah" id="pph" placeholder="Contoh : Rp 100.000" name="pph" value="{{ old('pph') }}" disabled>
-                                        <p class="font-italic text-sm text-secondary">*Penggunaan Pajak PPh diambil dari total biaya pasang</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" class="custom-control-input" id="usePPh">
-                                            <label class="custom-control-label" for="usePPh">Gunakan PPh</label>
+                                        <div class="custom-control custom-switch custom-switch-on-primary">
+                                            <input type="checkbox" class="custom-control-input" id="isOngkir" name="isOngkir" value="{{ old('isOngkir') }}">
+                                            <label for="isOngkir" class="custom-control-label">Menggunakan Pengiriman</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <div class="custom-control custom-checkbox">
-                                    <input class="custom-control-input custom-control-input-danger" type="checkbox" id="isOngkir" name="isOngkir" value="{{ old('isOngkir') }}">
-                                    <label for="isOngkir" class="custom-control-label">Menggunakan Pengiriman ?</label>
+                            <div id="divPajak">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="ppn">Pajak PPN</label>
+                                            {{-- input text for PPN --}}
+                                            <input type="text" class="form-control maskRupiah" id="ppn" placeholder="Contoh : Rp 100.000" name="ppn" value="{{ old('ppn') }}" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-switch custom-switch-on-primary">
+                                                <input type="checkbox" class="custom-control-input" id="usePPN">
+                                                <label class="custom-control-label" for="usePPN">Gunakan PPN</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                    
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="ppn">Pajak PPh</label>
+                                            {{-- input text for PPN --}}
+                                            <input type="text" class="form-control maskRupiah" id="pph" placeholder="Contoh : Rp 100.000" name="pph" value="{{ old('pph') }}" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-switch custom-switch-on-primary">
+                                                <input type="checkbox" class="custom-control-input" id="usePPh">
+                                                <label class="custom-control-label" for="usePPh">Gunakan PPh</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="form-group pl-2">
+                                        <h6 class="font-weight-bold">Total harga sudah termasuk pajak?</h6>
+                                        <div class="form-check">
+                                            <input class="form-check-input" id="radio1" value="1" type="radio" name="termasukPajak">
+                                            <label class="form-check-label">Ya</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" id="radio2" value="0" type="radio" name="termasukPajak">
+                                            <label class="form-check-label">Tidak</label>
+                                        </div>
+                                        <h6 class="mt-1 text-sm font-italic text-secondary">*Jika total harga belum termasuk pajak, maka total harga akan ditambakan pajak.</h6>
+                                    </div>
                                 </div>
                             </div>
 
@@ -361,14 +389,12 @@
         $('#ekspedisi').val('');
         $('#namaEkspedisi').val('');
         $('#noResi').val('');
-        console.log('resetFormValues');
     }
 
     function addRequiredAttributes() {
         $('#alamatKirim').attr('required', true);
         $('#ongkir').attr('required', true);
         $('#ekspedisi').attr('required', true);
-        console.log('addRequiredAttributes');
     }
 
     function updateTotalWithoutShipping() {
@@ -381,7 +407,6 @@
         $('#totalAll').html('Rp ' + totalTanpaOngkir.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
         $('#totalAllInput').val(totalTanpaOngkir);
         $('#sisaPembayaran').html('Rp ' + $('#totalAllInput').val());
-        console.log('updateTotalWithoutShipping');
     }
 
     function removeRequiredAttributes() {
@@ -391,10 +416,30 @@
 
     $(document).ready(function() {
         var pelanggan = $('#customer_id').val();
+
+        $('#divPajak').hide();
+
+        //find atribut name termasukPajak
+        $('input[name=termasukPajak]').on('change', function(){
+            var termasukPajak = $('input[name=termasukPajak]:checked').val();
+            if(termasukPajak == 0){
+                calculateTotal();
+            }else{
+                calculateTotal();
+            }
+        });
         
         $('#modalTelepon').on('keyup', function(){
             var phone = $(this).val();
             $(this).val(formatPhoneNumber(phone));
+        });
+
+        $('#usePajak').on('change', function(){
+            if($(this).is(':checked')){
+                $('#divPajak').show();
+            }else{
+                $('#divPajak').hide();
+            }
         });
 
         $('#usePPN').on('change', function(){
@@ -733,7 +778,12 @@
                 pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
             }
 
-            totalAll += packing + ongkir + pasang - diskon + pajak;
+            if($('input[name=termasukPajak]:checked').val() == 0){
+                totalAll += packing + ongkir + pasang - diskon - pajak;
+            }else{
+                totalAll += packing + ongkir + pasang - diskon + pajak;
+            }
+            
             var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia
             $('#totalAll').html('Rp ' + formattedTotal);
             $('#totalAllInput').val(totalAll);
