@@ -342,6 +342,12 @@ class DesignController extends Controller
         ]);
     }
 
+    public function penugasanDesainerOtomatis(string $queueId)
+    {
+        $design = DesignQueue::find($queueId);
+        $produk = $design->job_id;
+    }
+
     public function tambahDesain()
     {
         return view('page.antrian-desain.tambah-desain');

@@ -778,10 +778,14 @@
                 pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
             }
 
-            if($('input[name=termasukPajak]:checked').val() == 0){
-                totalAll += packing + ongkir + pasang - diskon - pajak;
+            if($('divPajak').is(':visible')) {
+                if($('input[name=termasukPajak]:checked').val() == 0){
+                    totalAll += packing + ongkir + pasang - diskon - pajak;
+                }else{
+                    totalAll += packing + ongkir + pasang - diskon + pajak;
+                }
             }else{
-                totalAll += packing + ongkir + pasang - diskon + pajak;
+                totalAll += packing + ongkir + pasang - diskon;
             }
             
             var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia

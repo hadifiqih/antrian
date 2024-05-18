@@ -46,6 +46,7 @@
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Pilih Desainer</h5>
+            <button onclick="penugasanOtomatis()" class="btn btn-primary btn-sm float-right"><i class="fa-solid fa-wand-magic-sparkles"></i> Penugasan Otomatis</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -79,6 +80,7 @@
 @endsection
 
 @section('script')
+<script src="https://kit.fontawesome.com/a49a4a7eca.js" crossorigin="anonymous"></script>
 <script>
     function pilihDesainer(userId) {
         let csrf_token = $('meta[name="csrf-token"]').attr('content');
@@ -125,5 +127,57 @@
             }
         });
     }
+
+    function penugasanOtomatis(){
+        let csrf_token = $('meta[name="csrf-token"]').attr('content');
+        let queueId = {{ $design->id }};
+
+        //Swal.fire confirm
+        Swal.fire({
+            title: 'Apakah Anda Yakin?',
+            text: "Desainer akan dipilih secara otomatis berdasarkan jumlah antrian terendah & kemampuan desain!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oke!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/design/penugasan-otomatis/" + queueId,
+                    type: "GET",
+                    success: function(response) {
+                        if (response.status == 'success') {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: response.message,
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            setTimeout(() => {
+                                window.location.href = "{{ route('design.indexDesain') }}";
+                            }, 1500);
+                        } else {
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: response.message,
+                                icon: 'error',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('#tableNamaDesainer').DataTable();
+
+
+    });
 </script>
 @endsection
