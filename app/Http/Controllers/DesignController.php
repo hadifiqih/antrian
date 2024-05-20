@@ -10,6 +10,7 @@ use App\Models\Antrian;
 use App\Models\Employee;
 use App\Models\DesignQueue;
 use Illuminate\Http\Request;
+use App\Models\DesignerSkill;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
@@ -346,6 +347,7 @@ class DesignController extends Controller
     {
         $design = DesignQueue::find($queueId);
         $produk = $design->job_id;
+
     }
 
     public function tambahDesain()
@@ -430,5 +432,22 @@ class DesignController extends Controller
         return redirect()->route('estimator.index')->with('success', 'File berhasil diupload');
 
     }
-    //
+
+    public function getSkillByUser($id)
+    {
+        $hasSkill = DesignerSkill::where('designer_id', $id)->get();
+
+        $savedSkill = [];
+        foreach($hasSkill as $skill){
+            //for response job_id dan job_name
+            $job = Job::find($skill->job_id);
+            $savedSkill[] = [
+                'job_id' => $job->id,
+                'job_name' => $job->job_name,
+            ];
+        }
+
+        return response()->json($savedSkill);
+    }
+    
 }

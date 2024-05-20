@@ -1,17 +1,28 @@
 @extends('layouts.app')
 
-@section('title', 'Profile')
+@section('title', 'Perbarui Profil')
 
 @section('username', Auth::user()->name)
 
-@section('page', 'Profile')
+@section('page', 'Profil')
 
-@section('breadcrumb', 'Profile')
+@section('breadcrumb', 'Ubah Profil')
 
 @section('style')
 {{-- Link CSS Cropper from node_modules --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<style>
+    .select2-selection__choice {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: #fff !important;
+        padding: 0 10px !important;
+    }
+    .select2-selection__choice__remove {
+        color: #fff !important;
+        
+    }
+</style>
 @endsection
 
 @section('content')
@@ -31,10 +42,12 @@
 @endif
 
 <div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
     <div class="row">
         <div class="col-md-12">
             <!-- Profile Image -->
-            <div class="card card-primary card-outline">
+            <div class="card">
                 <div class="card-body box-profile">
                     <div class="text-center">
                         <img id="image" class="profile-user-img img-fluid img-circle" src="{{ Auth::user()->employee->photo == null ? asset('adminlte/dist/img/user-kosong.png') :  asset('storage/profile/'. Auth::user()->employee->photo)  }}" alt="User profile picture">
@@ -47,27 +60,27 @@
                                 <i class="fas fa-edit"></i> Ubah Foto
                             </label>
                         </div>
-                  <h5 class="text-primary m-0">Informasi Akun</h5>
-                  <hr>
-                  <form action="{{ route('employee.update', Auth::user()->id) }}" method="POST">
+                <h5 class="text-primary m-0">Informasi Akun</h5>
+                <hr>
+                <form action="{{ route('employee.update', Auth::user()->id) }}" method="POST">
                     @csrf
                     @method('PUT')
-                  <div class="mb-3">
+                <div class="mb-3">
                     <label for="nama" class="form-label">Nama Lengkap<span class="text-danger">*</span></label>
                     <input type="nama" class="form-control" id="nama" name="nama" value="{{ Auth::user()->name }}">
-                  </div>
+                </div>
 
-                  <div class="mb-3">
+                <div class="mb-3">
                     <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
                     <input type="email" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}" autocomplete="on">
-                  </div>
+                </div>
 
-                  <div class="mb-3">
+                <div class="mb-3">
                     <label for="telepon" class="form-label">Telepon<span class="text-danger">*</span></label>
                     <input type="tel" class="form-control" id="telepon" name="telepon" value="{{ Auth::user()->phone }}">
-                  </div>
+                </div>
 
-                  <div class="form-group">
+                <div class="form-group">
                     <label for="divisi" class="form-label">Divisi<span class="text-danger">*</span></label>
                     <select id="divisi" class="custom-select rounded-1" name="divisi">
                         <option value='' {{ Auth::user()->employee->divisi == null ? 'selected disabled' : '' }}>Pilih Divisi</option>
@@ -78,7 +91,10 @@
                         <option value="logistik" {{ Auth::user()->employee->division == 'Logistik' ? 'selected' : '' }}>Logistik & Pengiriman</option>
                     </select>
                 </div>
-
+            </div>
+        </div>
+            <div class="card">
+                <div class="card-body">
                 <h5 class="text-primary m-0">Data Identitas</h5>
                 <hr>
 
@@ -142,7 +158,11 @@
                     <label for="tanggalMulaiKerja" class="form-label">Tanggal Mulai Kerja<span class="text-danger">*</span></label>
                     <input type="{{ $employee->joining_date == null ? 'date' : 'text' }}" class="form-control" id="tanggalMulaiKerja" value="{{ $employee->joining_date == null ? '' : $employee->joining_date }}" name="tanggalMulaiKerja" {{ $employee->joining_date == null ? '' : 'readonly' }}>
                 </div>
+            </div>
+            </div>
 
+            <div class="card">
+                <div class="card-body">
                 <h5 class="text-primary m-0">Informasi Bank</h5>
                 <hr>
 
@@ -169,54 +189,40 @@
                     <label for="nomerRekening" class="form-label">Nomer Rekening<span class="text-danger">*</span></label>
                     <input type="number" class="form-control" id="nomerRekening" name="nomerRekening" value="{{ $employee->bank_account }}" placeholder="{{ $employee->bank_account == null ? 'Contoh : 1234567890' : '' }}">
                 </div>
-
-                  <button type="submit" class="btn btn-primary btn-block"><b>Simpan</b></button>
-                </form>
                 </div>
-                {{-- Modall --}}
-                <div class="modal fade" id="modal-photo">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h4 class="modal-title">Upload Foto</h4>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="img-container">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <img class="img-fluid" id="img-preview" src="" alt=""/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer justify-cbontent-between">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-                          <button type="button" class="btn btn-primary crop" id="crop">Perbarui</button>
-                        </div>
-                      </div>
-                      <!-- /.modal-content -->
-                    </div>
-                    <!-- /.modal-dialog -->
-                  </div>
-                  <!-- /.modal -->
-                <!-- /.card-body -->
-              </div>
-              <!-- /.card -->
+                </div>
+                <input type="submit" class="btn btn-primary btn-block" value="Simpan"></input>
+            </form>
         </div>
     </div>
 </div>
+</div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="text-primary">Kemampuan Desain</h5>
+                    <hr>
+
+                    <div class="form-group mb-3">
+                        <label for="skill" class="form-label">Produk apa saja yang dapat Anda desain ?<span class="text-danger">*</span></label>
+                        <select id="skill" class="custom-select rounded-1 select2" name="skill" style="width: 100%" multiple="multiple" >
+                            
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-sm btn-primary" id="btnSubmitSkill">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@includeIf('auth.modal.modal-upload-photo')
 @endsection
 
 @section('script')
-<script>
-    $(function () {
-      bsCustomFileInput.init();
-    });
-</script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     function readURL(input){
         if(input.files && input.files[0]){
@@ -234,6 +240,57 @@
 
     $("#photo").change(function(){
         readURL(this);
+    });
+    
+    $(function () {
+        bsCustomFileInput.init();
+    });
+
+    $(document).ready(function(){
+        var userLogin = {{ Auth::user()->id }};
+
+        $('.select2').select2({
+            placeholder: 'Pilih produk',
+            allowClear: true,
+            ajax: {
+                url: '{{ route("getAllJobs") }}',
+                dataType: 'json',
+                delay: 250,
+                processResults: function(data){
+                    return {
+                        results: $.map(data, function(item){
+                            return {
+                                text: item.job_name,
+                                id: item.id
+                            }
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '',
+            success: function(data){
+                data.forEach(function(job){
+                    var option = new Option(job.job_name, job.id, true, true);
+                    $('#skill').append(option).trigger('change');
+                });
+            }
+        });
+        });
+
+        var option = new Option(data.job_name, data.job_id, true, true);
+        $('#skill').append(option).trigger('change');
+
+        $('#skill').trigger({
+            type: 'select2:select',
+            params: {
+                data: data
+            }
+        });
     });
 </script>
 <script>

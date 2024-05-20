@@ -219,6 +219,8 @@ Route::controller(DesignController::class)->group(function(){
     Route::get('/json-antrian-selesai', 'indexSelesaiDatatables')->name('design.indexSelesaiDatatables');
     Route::get('/json-antrian-penugasan-desain', 'indexPenugasanDatatables')->name('design.indexPenugasanDatatables');
     Route::get('/json-antrian-penugasan-selesai', 'indexPenugasanSelesaiDatatables')->name('design.indexPenugasanSelesaiDatatables');
+
+    Route::get('/design/get-skill-by-id/{id}', 'getSkillById')->name('getSkillByIdUser');
 })->middleware('auth');
 
 Route::controller(EmployeeController::class)->group(function(){

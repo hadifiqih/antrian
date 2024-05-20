@@ -142,7 +142,7 @@
     <div class="brand-link">
       <img src="{{ asset('adminlte') }}/dist/img/antree-logo.png" alt="AdminLTE Logo" class="brand-image elevation-3" style="opacity: .8" width="30">
       <span class="brand-text font-weight-light">Antree</span>
-      <span class="float-right" onclick="confirmLogout()"><i class="fas fa-sign-out-alt text-danger"></i></span>
+      <span id="iconLogout" class="float-right" onclick="confirmLogout()"><i class="fas fa-sign-out-alt text-danger"></i></span>
     </div>
 
     <!-- Sidebar -->
@@ -247,7 +247,6 @@
 <!-- ./wrapper -->
 
 <!-- REQUIRED SCRIPTS -->
-
 <!-- jQuery -->
 <script src="{{ asset('adminlte') }}/plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap -->
@@ -274,16 +273,44 @@
 {{-- DayJS --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.7/dayjs.min.js"></script>
 
-<!-- OPTIONAL SCRIPTS -->
-<script src="{{ asset('adminlte') }}/dist/js/qz-tray.js"></script>
-
+<!-- PusherJS -->
+<script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 <script>
-  //connect to QZ Tray
-  // qz.websocket.connect().then(() => {
-  //   console.log('Connected to QZ Tray');
-  // }).catch((err) => {
-  //   console.error(err);
-  // });
+  function notif(data) {
+    if(data.message.title == 'Antrian Workshop') {
+        $(document).Toasts('create', {
+        class: 'bg-warning',
+        body: data.message.body,
+        title: data.message.title,
+        icon: 'fas fa-envelope fa-lg',
+        });
+    }else if(data.message.title == 'Antrian Desain') {
+        $(document).Toasts('create', {
+        class: 'bg-info',
+        body: data.message.body,
+        title: data.message.title,
+        icon: 'fas fa-envelope fa-lg',
+        });
+    }
+  }
+
+  function confirmLogout(){
+    const confirmation = confirm('Apakah Anda yakin ingin keluar?');
+    if (confirmation) {
+      // Redirect to the logout URL if the user clicks "OK"
+      window.location.href = "{{ route('auth.logout') }}";
+    }
+  }
+
+  function sendReminder() {
+      $.ajax({
+          type: "GET",
+          url: "{{ route('antrian.reminder') }}",
+          success: function (response) {
+              console.log(response);
+          }
+      })
+  }
 
   //print function
   function printData() {
@@ -303,43 +330,24 @@
       console.error(err);
     });
   }
-</script>
 
-<script>
-    function notif(data) {
-        if(data.message.title == 'Antrian Workshop') {
-            $(document).Toasts('create', {
-            class: 'bg-warning',
-            body: data.message.body,
-            title: data.message.title,
-            icon: 'fas fa-envelope fa-lg',
-            });
-        }else if(data.message.title == 'Antrian Desain') {
-            $(document).Toasts('create', {
-            class: 'bg-info',
-            body: data.message.body,
-            title: data.message.title,
-            icon: 'fas fa-envelope fa-lg',
-            });
+  $(document).ready(function () {
+    bsCustomFileInput.init();
+
+    var targetWaktu = '16:45'
+
+    var interval = 60000;
+
+    function checkTime(){
+            var waktuSekarang = dayjs().format('HH:mm');
+            if(waktuSekarang == targetWaktu){
+                sendReminder();
+            }
         }
-
-    };
+    setInterval(checkTime, interval);
+  });
 </script>
-<script>
-    $(function () {
-        bsCustomFileInput.init();
-    });
 
-    function confirmLogout(){
-        const confirmation = confirm('Apakah Anda yakin ingin keluar?');
-        if (confirmation) {
-          // Redirect to the logout URL if the user clicks "OK"
-          window.location.href = "{{ route('auth.logout') }}";
-        }
-    }
-
-</script>
-<script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 <script>
     const beamsClient = new PusherPushNotifications.Client({
       instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
@@ -376,38 +384,9 @@
     beamsClient.setDeviceInterests(['hello'])
     @endif
     )
-
     .then(() => beamsClient.getDeviceInterests())
     .then(interests => console.log('Successfully registered and subscribed!', interests))
     .catch(console.error);
-
 </script>
-
-<script>
-    function sendReminder() {
-            $.ajax({
-                type: "GET",
-                url: "{{ route('antrian.reminder') }}",
-                success: function (response) {
-                    console.log(response);
-                }
-            })
-        }
-    $(document).ready(function() {
-        var targetWaktu = '16:45'
-
-        var interval = 60000;
-
-        function checkTime(){
-            var waktuSekarang = dayjs().format('HH:mm');
-            if(waktuSekarang == targetWaktu){
-                sendReminder();
-            }
-        }
-
-        setInterval(checkTime, interval);
-    });
-</script>
-
 </body>
 </html>
