@@ -34,7 +34,7 @@
 <div class="container">
     <ul class="nav nav-tabs mb-2" id="custom-content-below-tab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="custom-content-below-proses-tab" data-toggle="pill" href="#custom-content-below-proses" role="tab" aria-controls="custom-content-below-proses" aria-selected="true">Proses Desain</a>
+            <a class="nav-link active" id="custom-content-below-proses-tab" data-toggle="pill" href="#custom-content-below-proses" role="tab" aria-controls="custom-content-below-proses" aria-selected="true">Menunggu Diantrikan</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="custom-content-below-selesai-tab" data-toggle="pill" href="#custom-content-below-selesai" role="tab" aria-controls="custom-content-below-selesai" aria-selected="false">Selesai Desain</a>

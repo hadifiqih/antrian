@@ -197,6 +197,7 @@
     </div>
 </div>
 </div>
+@if(Auth::user()->role_id == 16 || Auth::user()->role_id == 17)
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -217,6 +218,7 @@
             </div>
         </div>
     </div>
+@endif
 </div>
 @includeIf('auth.modal.modal-upload-photo')
 @endsection
@@ -272,24 +274,61 @@
 
         $.ajax({
             type: 'GET',
-            url: '',
+            url: '/design/get-skill-by-id/' + userLogin,
             success: function(data){
                 data.forEach(function(job){
-                    var option = new Option(job.job_name, job.id, true, true);
+                    var option = new Option(job.job_name, job.job_id, true, true);
                     $('#skill').append(option).trigger('change');
+
+                    $('#skill').trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
                 });
             }
         });
-        });
 
-        var option = new Option(data.job_name, data.job_id, true, true);
-        $('#skill').append(option).trigger('change');
+        $('#btnSubmitSkill').on('click', function(){
+            var skill = $('#skill').val();
+            $('#btnSubmitSkill').attr('disabled', true);
 
-        $('#skill').trigger({
-            type: 'select2:select',
-            params: {
-                data: data
-            }
+            $.ajax({
+                type: 'POST',
+                url: '/design/add-skill',
+                data: {
+                    '_token': $('meta[name="csrf-token"]').attr('content'),
+                    'skill': skill,
+                    'user_id': userLogin
+                },
+                success: function(data){
+                    var Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Kemampuan desain berhasil diperbarui!'
+                    });
+                },
+                error: function(data){
+                    var Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000
+                    });
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Kemampuan desain gagal diperbarui!'
+                    });
+
+                    $('#btnSubmitSkill').attr('disabled', false);
+                }
+            });
         });
     });
 </script>

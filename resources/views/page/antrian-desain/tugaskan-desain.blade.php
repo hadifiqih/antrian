@@ -129,46 +129,30 @@
     }
 
     function penugasanOtomatis(){
-        let csrf_token = $('meta[name="csrf-token"]').attr('content');
-        let queueId = {{ $design->id }};
-
-        //Swal.fire confirm
         Swal.fire({
-            title: 'Apakah Anda Yakin?',
-            text: "Desainer akan dipilih secara otomatis berdasarkan jumlah antrian terendah & kemampuan desain!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oke!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "/design/penugasan-otomatis/" + queueId,
-                    type: "GET",
-                    success: function(response) {
-                        if (response.status == 'success') {
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message,
-                                icon: 'success',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
+            title: 'Loading...',
+            text: 'Sedang memilih rekomendasi desainer...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-                            setTimeout(() => {
-                                window.location.href = "{{ route('design.indexDesain') }}";
-                            }, 1500);
-                        } else {
-                            Swal.fire({
-                                title: 'Gagal!',
-                                text: response.message,
-                                icon: 'error',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        }
-                    }
+        $.ajax({
+            url: "/design/penugasan-otomatis/" + {{ $design->id }},
+            type: "GET",
+            success: function(response) {
+                // Tutup dialog loading ketika respons diterima
+                Swal.close();
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat memilih desainer!',
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timer: 1500
                 });
             }
         });
@@ -176,8 +160,6 @@
 
     $(document).ready(function() {
         $('#tableNamaDesainer').DataTable();
-
-
     });
 </script>
 @endsection

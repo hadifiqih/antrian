@@ -343,11 +343,54 @@ class DesignController extends Controller
         ]);
     }
 
-    public function penugasanDesainerOtomatis(string $queueId)
+    public function penugasanOtomatis(string $queueId)
     {
         $design = DesignQueue::find($queueId);
         $produk = $design->job_id;
 
+        $designer = DesignerSkill::where('job_id', $produk)->get();
+
+        if($designer->count() == 0){
+            return response()->json([
+                'status' => 404,
+                'message' => 'Desainer tidak ditemukan!'
+            ]);
+        }else{
+            if($designer->count() == 1){
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Desainer ditemukan!',
+                    'desainer' => $designer[0]->designer_id
+                ]);
+            }else{
+                $selectedDesigner = null;
+                $minAntrian = PHP_INT_MAX;
+
+                foreach ($designer as $des) {
+                    $queueCount = DesignQueue::where('designer_id', $des->designer_id)
+                                    ->where('status', 1)
+                                    ->count();
+    
+                    if ($queueCount < $minQueueCount) {
+                        $minQueueCount = $queueCount;
+                        $selectedDesigner = $des->designer_id;
+                    }
+                }
+    
+                if ($selectedDesigner !== null) {
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Desainer ditemukan!',
+                        'desainer' => $selectedDesigner
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 500,
+                        'message' => 'Terjadi kesalahan saat menugaskan desainer!'
+                    ]);
+                }
+            }
+        }
     }
 
     public function tambahDesain()
@@ -433,7 +476,7 @@ class DesignController extends Controller
 
     }
 
-    public function getSkillByUser($id)
+    public function getSkillById($id)
     {
         $hasSkill = DesignerSkill::where('designer_id', $id)->get();
 
@@ -449,5 +492,27 @@ class DesignController extends Controller
 
         return response()->json($savedSkill);
     }
-    
+
+    public function addSkill(Request $request)
+    {
+        $arraySkill = $request->skill;
+        $designer = $request->user_id;
+
+        foreach($arraySkill as $skill){
+            $checkSkill = DesignerSkill::where('designer_id', $designer)->where('job_id', $skill)->first();
+            if($checkSkill){
+                continue;
+            }else{
+                $newSkill = new DesignerSkill;
+                $newSkill->designer_id = $designer;
+                $newSkill->job_id = $skill;
+                $newSkill->save();
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Skill berhasil ditambahkan!'
+        ]);
+    }
 }
