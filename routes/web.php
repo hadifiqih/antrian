@@ -133,7 +133,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/order', [OrderController::class, 'index'])->name('order.index');
 });
 
-Route::group(['middleware' => 'checkrole:admin'], function () {
+// Route::group(['middleware' => 'checkrole:admin'], function () {
+Route::group(['middleware' => 'auth'], function () {
     //Menuju Design Controller (Admin)
     Route::get('/antrian/{id}/edit', [AntrianController::class, 'edit'])->name('antrian.edit');
     Route::put('/antrian/{id}', [AntrianController::class, 'update'])->name('antrian.update');
@@ -201,7 +202,9 @@ Route::controller(ReportController::class)->group(function(){
 Route::controller(DesignController::class)->group(function(){
     Route::post('/design/simpan-file-produksi', 'simpanFileProduksi')->name('simpanFileProduksi');
     Route::get('/design/download-file/{id}', 'downloadFile')->name('design.downloadFile');
-
+    //Route Penugasan Otomatis
+    Route::get('/rekomendasi-desainer-otomatis/{id}', 'penugasanOtomatis')->name('design.penugasanOtomatis');
+    //Route Desain
     Route::get('/design/tambah-desain', 'tambahDesain')->name('design.tambahDesain');
     Route::get('/design/edit-desain/{id}', 'editDesain')->name('design.editDesain');
     Route::post('/design/simpan-desain', 'storeAddDesain')->name('storeAddDesain');
@@ -222,8 +225,7 @@ Route::controller(DesignController::class)->group(function(){
     //Route Skill
     Route::get('/design/get-skill-by-id/{id}', 'getSkillById')->name('getSkillByIdUser');
     Route::post('/design/add-skill', 'addSkill')->name('addSkill');
-    //Route Penugasan Otomatis
-    Route::get('/design/penugasan-otomatis/{$queueId}', 'penugasanOtomatis')->name('design.penugasanOtomatis');
+
 })->middleware('auth');
 
 Route::controller(EmployeeController::class)->group(function(){

@@ -885,9 +885,9 @@ class AntrianController extends Controller
         $publishResponse = $beamsClient->publishToInterests(
             array("sales"),
             array("web" => array("notification" => array(
-              "title" => "Antree",
-              "body" => "Yuhuu! Pekerjaan dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ."), dari sales ". $antrian->sales->sales_name ." udah selesai !",
-              "deep_link" => "https://app.kassabsyariah.com/",
+                "title" => "Antree",
+                "body" => "Yuhuu! Pekerjaan dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ."), dari sales ". $antrian->sales->sales_name ." udah selesai !",
+                "deep_link" => "https://app.kassabsyariah.com/",
             )),
         ));
 

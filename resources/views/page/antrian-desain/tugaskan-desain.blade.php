@@ -46,7 +46,7 @@
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Pilih Desainer</h5>
-            <button onclick="penugasanOtomatis()" class="btn btn-primary btn-sm float-right"><i class="fa-solid fa-wand-magic-sparkles"></i> Penugasan Otomatis</button>
+            <button onclick="penugasanOtomatis({{ $design->id }})" class="btn btn-primary btn-sm float-right"><i class="fa-solid fa-wand-magic-sparkles"></i> Penugasan Otomatis</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -128,7 +128,7 @@
         });
     }
 
-    function penugasanOtomatis(){
+    function penugasanOtomatis(queueId){
         Swal.fire({
             title: 'Loading...',
             text: 'Sedang memilih rekomendasi desainer...',
@@ -138,22 +138,34 @@
             }
         });
 
+        //Ajax request
         $.ajax({
-            url: "/design/penugasan-otomatis/" + {{ $design->id }},
+            url: "/rekomendasi-desainer-otomatis/" + queueId,
             type: "GET",
             success: function(response) {
-                // Tutup dialog loading ketika respons diterima
-                Swal.close();
-                console.log(response);
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    title: 'Gagal!',
-                    text: 'Terjadi kesalahan saat memilih desainer!',
-                    icon: 'error',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                if (response.status == '200') {
+                    Swal.fire({
+                        title: "Tetapkan sebagai desainer?",
+                        text: response.name + " akan ditetapkan sebagai desainer untuk antrian ini!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Ya, Tetapkan!"
+                        }).then((result) => {
+                        if (result.isConfirmed) {
+                            pilihDesainer(response.id);
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: response.message,
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
             }
         });
     }

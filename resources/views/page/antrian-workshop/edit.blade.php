@@ -53,6 +53,7 @@
         <div class="card mb-4">
             <div class="card-header">
                 <h2 class="card-title">Penugasan Pengerjaan</h2>
+                <button class="btn btn-primary" onclick="penugasanOtomatis({{ $antrian->id }})"><i class="fa-solid fa-wand-magic-sparkles"></i> Penugasan Otomatis</button>
             </div>
             <div class="card-body">
     <form id="formEditAntrian" action="{{ route('antrian.update', $antrian->id) }}" method="POST">

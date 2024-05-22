@@ -343,9 +343,9 @@ class DesignController extends Controller
         ]);
     }
 
-    public function penugasanOtomatis(string $queueId)
+    public function penugasanOtomatis(string $id)
     {
-        $design = DesignQueue::find($queueId);
+        $design = DesignQueue::find($id);
         $produk = $design->job_id;
 
         $designer = DesignerSkill::where('job_id', $produk)->get();
@@ -360,20 +360,24 @@ class DesignController extends Controller
                 return response()->json([
                     'status' => 200,
                     'message' => 'Desainer ditemukan!',
-                    'desainer' => $designer[0]->designer_id
+                    'desainer_id' => $designer[0]->designer_id,
+                    'name' => $designer[0]->designer->name ?? '-'
                 ]);
             }else{
                 $selectedDesigner = null;
-                $minAntrian = PHP_INT_MAX;
+                $minQueueCount = PHP_INT_MAX;
 
                 foreach ($designer as $des) {
-                    $queueCount = DesignQueue::where('designer_id', $des->designer_id)
-                                    ->where('status', 1)
-                                    ->count();
-    
-                    if ($queueCount < $minQueueCount) {
-                        $minQueueCount = $queueCount;
+                    $queueCount = DesignQueue::where('designer_id', $des->designer_id)->where('status', 1)->count();
+                    
+                    if ($queueCount == 0) {
                         $selectedDesigner = $des->designer_id;
+                        break;
+                    } else {
+                        if ($queueCount < $minQueueCount) {
+                            $minQueueCount = $queueCount;
+                            $selectedDesigner = $des->designer_id;
+                        }
                     }
                 }
     
@@ -381,7 +385,8 @@ class DesignController extends Controller
                     return response()->json([
                         'status' => 200,
                         'message' => 'Desainer ditemukan!',
-                        'desainer' => $selectedDesigner
+                        'desainer_id' => $selectedDesigner,
+                        'name' => User::find($selectedDesigner)->name
                     ]);
                 } else {
                     return response()->json([
