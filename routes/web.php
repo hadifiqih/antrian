@@ -353,7 +353,9 @@ Route::controller(AntrianController::class)->group(function(){
     Route::get('/design/download/{id}', 'downloadPrintFile')->name('design.download');
     Route::get('/design/download-file-pendukung/{id}', 'downloadFilePendukung')->name('design.downloadFilePendukung');
     Route::get('/design/download-create/{id}', 'downloadPrintFileCreate')->name('design.download.create');
+
     Route::get('/list-machines', 'getMachine')->name('mesin.search');
+    Route::get('/design/get-machine-by-idbarang/{id}', 'getMachineByIdBarang')->name('getMachineByIdBarang');
 
     Route::get('/estimator/index', 'estimatorIndex')->middleware('auth')->name('estimator.index');
 
@@ -367,6 +369,7 @@ Route::controller(AntrianController::class)->group(function(){
 
     Route::put('/biaya-produksi/selesai/{id}', 'biayaProduksiSelesai')->middleware('auth')->name('biaya.produksi.update');
     Route::get('/antrian/e-spk/{id}', 'printeSpk')->middleware('auth')->name('antrian.form-espk');
+    Route::get('/workshop/penugasan-otomatis', 'penugasanOtomatis')->middleware('auth')->name('workshop.penugasanOtomatis');
 })->middleware('auth');
 
 Route::controller(PaymentController::class)->group(function(){

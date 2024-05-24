@@ -501,9 +501,15 @@ class AntrianController extends Controller
         return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
     }
 
-    public function penugasanOtomatis()
+    public function penugasanOtomatis(Request $request)
     {
-        
+        $antrian = DataAntrian::find($request->input('id'));
+        $dataKerja = DataKerja::where('ticket_order', $antrian->ticket_order)->first();
+
+        $pekerjaTerpilih = [];
+        $pekerja = Employee::where('can_stempel', 1)->orWhere('can_adv', 1)->get();
+
+        return response()->json($pekerja);
     }
 
     public function store(Request $request)
@@ -527,7 +533,7 @@ class AntrianController extends Controller
         // return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
     }
 
-    public function edit($id)
+    public function editLama($id)
     {
         $antrian = DataAntrian::where('id', $id)->first();
 
@@ -558,10 +564,38 @@ class AntrianController extends Controller
             $isEdited = 1;
         }
 
-        return view('page.antrian-workshop.edit', compact('antrian', 'operatorId', 'finishingId', 'qualityId', 'cabangId', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
+        return view('page.antrian-workshop.edit', compact('barangs' ,'antrian', 'operatorId', 'finishingId', 'qualityId', 'cabangId', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
     }
 
-    public function update(Request $request, $id)
+    public function edit($id)
+    {
+        $antrian = DataAntrian::where('id', $id)->first();
+
+        $operators = Employee::where('can_stempel', 1)->orWhere('can_adv', 1)->get();
+        $qualitys = Employee::where('can_qc', 1)->get();
+
+        $machines = Machine::get();
+
+        $totalHargaBarang = 0;
+        $barangs = Barang::where('ticket_order', $antrian->ticket_order)->get();
+        foreach($barangs as $barang){
+            $totalHargaBarang += $barang->price * $barang->qty;
+        }
+        $totalHargaBarang = number_format($totalHargaBarang, 0, ',', '.');
+        $totalBarang = $barangs->sum('qty') . ' pcs';
+
+        $tempatCabang = Cabang::pluck('nama_cabang', 'id');
+
+        if($antrian->end_job == null){
+            $isEdited = 0;
+        }else{
+            $isEdited = 1;
+        }
+
+        return view('page.antrian-workshop.edit', compact('barangs' ,'antrian', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
+    }
+
+    public function updateLama(Request $request, $id)
     {
 
         $antrian = DataAntrian::find($id);
@@ -588,6 +622,102 @@ class AntrianController extends Controller
             $mesin = implode(',', $request->input('jenisMesin'));
             $dataKerja->machine_id = $mesin;
         }
+        $dataKerja->save();
+
+        //Jika input tempat adalah array, lakukan implode lalu simpan ke database
+        $tempat = implode(',', $request->input('cabang_id'));
+        $antrian->cabang_id = $tempat;
+
+        $antrian->admin_note = $request->input('admin_note');
+        $antrian->save();
+
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        ));
+
+        $users = [];
+
+        foreach($request->input('operator_id') as $operator){
+            $user = 'user-' . $operator;
+            $users[] = $user;
+        }
+
+        foreach($request->input('finishing_id') as $finisher){
+            $user = 'user-' . $finisher;
+            $users[] = $user;
+        }
+
+        foreach($request->input('qc_id') as $quality){
+            $user = 'user-' . $quality;
+            $users[] = $user;
+        }
+        // if($request->isEdited == 0){
+        //     foreach($users as $user){
+        //         $publishResponse = $beamsClient->publishToUsers(
+        //             array($user),
+        //             array("web" => array("notification" => array(
+        //             "title" => "📣 Cek sekarang, ada pekerjaan baru !",
+        //             "body" => "Cek pekerjaan baru sekarang, semangattt !",
+        //             )),
+        //         ));
+
+        //         $user = str_replace('user-', '', $user);
+        //         $user = User::find($user);
+        //         if($user != 'rekananSBY' || $user != 'rekananKDR' || $user != 'rekananMLG'){
+        //             $user->notify(new AntrianDiantrikan($antrian));
+        //         }
+        //     }
+        // }else{
+        //     foreach($users as $user){
+        //         if($user != 'user-rekananSBY' || $user != 'user-rekananKDR' || $user != 'user-rekananMLG'){
+        //             $publishResponse = $beamsClient->publishToUsers(
+        //                 array($user),
+        //                 array("web" => array("notification" => array(
+        //                 "title" => "📣 Hai, ada update antrian!",
+        //                 "body" => "Ada perubahan pada antrian " . $antrian->ticket_order . " (" . $antrian->order->title ."), cek sekarang !",
+        //                 )),
+        //             ));
+        //         }
+
+        //         $user = str_replace('user-', '', $user);
+        //         $user = User::find($user);
+        //         if($user != 'rekananSBY' || $user != 'rekananKDR' || $user != 'rekananMLG'){
+        //             $user->notify(new AntrianDiantrikan($antrian));
+        //         }
+        //     }
+        // }
+
+        return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $antrian = DataAntrian::find($id);
+        //Jika input operator adalah array, lakukan implode lalu simpan ke database
+        $operator = implode(',', $request->input('operator_id'));
+
+        //Jika input finisher adalah array, lakukan implode lalu simpan ke database
+        $finisher = implode(',', $request->input('finishing_id'));
+
+        //Jika input quality adalah array, lakukan implode lalu simpan ke database
+        $quality = implode(',', $request->input('qc_id'));
+
+        //Jika input mesin adalah array, lakukan implode lalu simpan ke database
+        if($request->input('jenisMesin')){
+            $mesin = implode(',', $request->input('jenisMesin'));
+        }
+
+        $dataKerja = new DataKerja;
+        $dataKerja->ticket_order = $antrian->ticket_order;
+        $dataKerja->barang_id = $antrian->job_id;
+        $dataKerja->operator_id = $operator;
+        $dataKerja->finishing_id = $finisher;
+        $dataKerja->qc_id = $quality;
+        $dataKerja->tgl_mulai = $request->input('start_job');
+        $dataKerja->tgl_selesai = $request->input('end_job');
+        $dataKerja->machine_id = $mesin ?? null;
         $dataKerja->save();
 
         //Jika input tempat adalah array, lakukan implode lalu simpan ke database
@@ -918,5 +1048,19 @@ class AntrianController extends Controller
         $antrian->save();
 
         return response()->json(['message' => 'Biaya Produksi berhasil disimpan !'], 200);
+    }
+
+    public function getMachineByIdBarang($id){
+        $mesin = DataKerja::where('barang_id', $request->input('id'))->first();
+        implode(',', $mesin->machine_id);
+
+        foreach($mesin as $m){
+            $response[] = array(
+                "id" => $m->id,
+                "text" => $m->machine_name
+            );
+        }
+
+        return response()->json($response);
     }
 }
