@@ -13,6 +13,16 @@
     .spesifikasi {
         white-space: pre-line;
     }
+    .select2-selection__choice {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: #fff !important;
+        padding: 0 10px !important;
+    }
+    .select2-selection__choice__remove {
+        color: #fff !important;
+        
+    }
 </style>
 
 <div class="container-fluid">
@@ -76,13 +86,16 @@
         </div>
         @if($operators != null)
         <div class="row">
+            @foreach($operators as $operator)
             <div class="col-md-3">
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $operatorId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('operator_id')->toArray();
+                            $operatorId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('operator_id')->first();
+                            $implodeOperatorId = explode(',', $operatorId);
+                            
                             if($operatorId != null){
-                                $isCheckedOperator = in_array($operator->id, $operatorId) ? 'checked' : '';
+                                $isCheckedOperator = in_array($operator->id, $implodeOperatorId) ? 'checked' : '';
                             } else {
                                 $isCheckedOperator = false;
                             }
@@ -92,11 +105,12 @@
                     </div>
                 </div>
             </div>
+            @endforeach
             <div class="col-md-3">
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $isOprRekanan = in_array('r', $operatorId) ? 'checked' : '';
+                            $isOprRekanan = in_array('r', $implodeOperatorId) ? 'checked' : '';
                         @endphp
                         <input name="operator_id[]" value="r" class="form-check-input" type="checkbox" {{ $isOprRekanan }}>
                         <label class="form-check-label"><span>Rekanan</span></label>
@@ -119,7 +133,8 @@
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $finishingId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('finishing_id')->toArray();
+                            $finishingId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->get();
+                            $finishingId = explode(',', $finishingId);
                             if($finishingId != null){
                                 $isCheckedFinishing = in_array($operator->id, $finishingId) ? 'checked' : '';
                             } else {
@@ -159,7 +174,8 @@
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $qualityId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('qc_id')->toArray();
+                            $qualityId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('qc_id')->first();
+                            $qualityId = explode(',', $qualityId);
                             if($qualityId != null){
                                 $isCheckedQC = is_array($qualityId) && in_array($qc->id, $qualityId);
                             } else {
@@ -189,15 +205,16 @@
                 <div class="col-md-3">
                     <div class="form-check">
                         @php
-                            $cabangId = $antrian->cabang_id ?? null;
+                            $cabangId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('cabang_id')->first();
+                            $cabangId = explode(',', $cabangId);
                             if($cabangId != null){
-                                $isCheckedCabang = is_array($cabangId) && in_array($cabang, $cabangId);
+                                $isCheckedCabang = is_array($cabangId) && in_array($cabang, $cabangId) ? 'checked' : '';
                             } else {
                                 $isCheckedCabang = false;
                             }
                         @endphp
-                        <input name="cabang_id[]" value="{{ $cabang }}" class="form-check-input" type="checkbox" {{ $isCheckedCabang ? 'checked' : '' }}>
-                        <label class="form-check-label">{{ $value }}</label>
+                        <input id="cabang{{ $barang->id }}" name="cabang_id" value="{{ $cabang }}" class="form-check-input" type="checkbox" {{ $isCheckedCabang }}>
+                        <label class="form-check-label" id="ca">{{ $value }}</label>
                     </div>
                 </div>
             @endforeach
@@ -208,7 +225,8 @@
         <div class="mb-3">
             <div class="form-group">
                 <label>Jenis Mesin :</label>
-                <select id="cariMesin{{ $barang->id }}" class="form-control select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
+                <select id="cariMesin{{ $barang->id }}" class="custom-select rounded-1 select2" multiple="multiple" name="jenisMesin" style="width: 100%">
+
                 </select>
                 @if($antrian->cabang_id != null)
                     <p class="text-sm text-danger font-italic mt-1">*Jika tidak ada perubahan, <strong>biarkan kosong.</strong></p>
@@ -218,13 +236,19 @@
 
         <div class="mb-3">
             {{-- Masukkan start job --}}
+            @php
+                $mulai = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('tgl_mulai')->first();
+            @endphp
             <label for="start_job" class="form-label">Mulai<span class="text-danger">*</span></label>
-            <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $antrian->dataKerja->tgl_mulai }}" required>
+            <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $mulai }}" required>
         </div>
         <div class="mb-3">
+            @php
+                $selesai = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('tgl_selesai')->first();
+            @endphp
             {{-- Masukkan Deadline --}}
             <label for="deadline" class="form-label">Deadline<span class="text-danger">*</span></label>
-            <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="end_job" value="{{ $antrian->dataKerja->tgl_selesai }}" required>
+            <input type="datetime-local" class="form-control" id="deadline" aria-describedby="deadline" name="end_job" value="{{ $selesai }}" required>
         </div>
         <div class="mb-3">
             {{-- Masukkan Keterangan --}}
@@ -234,7 +258,7 @@
 
         <input type="hidden" name="isEdited" value="{{ $isEdited }}">
         <div class="d-flex align-items-center">
-            <input id="submitEdit" type="submit" class="btn btn-primary" value="Submit"><span id="loader" class="loader m-2" style="display: none"></span>
+            <input id="submitEdit{{ $barang->id }}" type="submit" class="btn btn-primary" value="Submit"><span id="loader" class="loader m-2" style="display: none"></span>
         </div>
     </form>
                 </div>
@@ -318,16 +342,17 @@
                 }
             }
         });
+
         @foreach($barangs as $barang)
         $.ajax({
             type: 'GET',
             url: '/design/get-machine-by-idbarang/' + '{{ $barang->id }}',
             success: function(data){
                 data.forEach(function(mesin){
-                    var option = new Option(mesin.text, mesin.id, true, true);
-                    $('#skill').append(option).trigger('change');
+                    var option = new Option(mesin.nama, mesin.mid, true, true);
+                    $('#cariMesin{{ $barang->id }}').append(option).trigger('change');
 
-                    $('#skill').trigger({
+                    $('#cariMesin{{ $barang->id }}').trigger({
                         type: 'select2:select',
                         params: {
                             data: data
@@ -337,9 +362,6 @@
             }
         });
         @endforeach
-
     });
-
-
 </script>
 @endsection

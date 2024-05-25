@@ -10,10 +10,8 @@ use App\Models\Order;
 use App\Models\Sales;
 use App\Models\Barang;
 use App\Models\Cabang;
-use App\Models\Design;
 use App\Models\Antrian;
 use App\Models\Machine;
-use App\Models\Payment;
 use App\Models\Customer;
 use App\Models\Employee;
 
@@ -31,16 +29,12 @@ use App\Models\BiayaProduksi;
 use App\Models\Documentation;
 use App\Models\BuktiPembayaran;
 use App\Models\SumberPelanggan;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Notifications\AntrianWorkshop;
-use App\Http\Resources\AntrianResource;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\AntrianDiantrikan;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
-
 
 class AntrianController extends Controller
 {
@@ -67,25 +61,25 @@ class AntrianController extends Controller
         $productId = $request->get('produk');
         $branchId = $request->get('cabang');
         $salesId = $request->get('sales');
-     // Build the query with eager loading
+        // Build the query with eager loading
         $antrians = DataAntrian::with('sales', 'customer', 'job', 'barang', 'dataKerja', 'cabang', 'buktiBayar')
             ->where('status', 1) // Ensure active entries
             ->orderByDesc('created_at');
-     // Apply filters if any parameters are provided
+        // Apply filters if any parameters are provided
         if ($request->has('kategori') || $request->has('cabang') || $request->has('sales')) {
             if ($productId !== null) {
                 $antrians->whereHas('barang', function ($query) use ($productId) {
                     $query->where('job_id', $productId);
                 });
             }
-         if ($branchId !== null) {
+            if ($branchId !== null) {
                 $antrians->where('cabang_id', $branchId);
             }
-         if ($salesId !== null) {
+            if ($salesId !== null) {
                 $antrians->where('sales_id', $salesId);
             }
         }
-     // Execute the query and return results
+        // Execute the query and return results
         $antrians = $antrians->get();
 
         return DataTables::of($antrians)
@@ -100,23 +94,23 @@ class AntrianController extends Controller
                 return $antrian->customer->nama;
             })
             ->addColumn('endJob', function ($antrian) {
-                if($antrian->dataKerja->tgl_selesai == null){
+                if($antrian->dataKerja->tgl_selesai == null) {
                     return '<span class="text-danger">BELUM DIANTRIKAN</span>';
-                }else{
+                } else {
                     return '<span class="text-danger">'. $antrian->dataKerja->tgl_selesai .'</span>';
                 }
             })
             ->addColumn('operator', function ($antrian) {
-                if($antrian->dataKerja->operator_id == null){
+                if($antrian->dataKerja->operator_id == null) {
                     return '<span class="text-danger">OPERATOR KOSONG</span>';
-                }else{
+                } else {
                     //explode string operator
                     $operator = explode(',', $antrian->dataKerja->operator_id);
                     $namaOperator = [];
-                    foreach($operator as $o){
-                        if($o == 'r'){
+                    foreach($operator as $o) {
+                        if($o == 'r') {
                             $namaOperator[] = "<span class='text-primary'>Rekanan</span>";
-                        }else{
+                        } else {
                             $namaOperator[] = Employee::where('id', $o)->first()->name;
                         }
                     }
@@ -124,16 +118,16 @@ class AntrianController extends Controller
                 }
             })
             ->addColumn('finishing', function ($antrian) {
-                if($antrian->dataKerja->finishing_id == null){
+                if($antrian->dataKerja->finishing_id == null) {
                     return '<span class="text-danger">FINISHING KOSONG</span>';
-                }else{
+                } else {
                     //explode string finishing
                     $finishing = explode(',', $antrian->dataKerja->finishing_id);
                     $namaFinishing = [];
-                    foreach($finishing as $f){
-                        if($f == 'r'){
+                    foreach($finishing as $f) {
+                        if($f == 'r') {
                             $namaFinishing[] = "<span class='text-primary'>Rekanan</span>";
-                        }else{
+                        } else {
                             $namaFinishing[] = Employee::where('id', $f)->first()->name;
                         }
                     }
@@ -141,26 +135,26 @@ class AntrianController extends Controller
                 }
             })
             ->addColumn('qc', function ($antrian) {
-                if($antrian->dataKerja->qc_id == null){
+                if($antrian->dataKerja->qc_id == null) {
                     return '<span class="text-danger">QC KOSONG</span>';
-                }else{
+                } else {
                     //explode string qc
                     $qc = explode(',', $antrian->dataKerja->qc_id);
                     $namaQc = [];
-                    foreach($qc as $q){
+                    foreach($qc as $q) {
                         $namaQc[] = Employee::where('id', $q)->first()->name;
                     }
                     return implode(', ', $namaQc);
                 }
             })
             ->addColumn('tempat', function ($antrian) {
-                if($antrian->cabang_id == null){
+                if($antrian->cabang_id == null) {
                     return '<span class="text-danger">TEMPAT KOSONG</span>';
-                }else{
+                } else {
                     //explode string cabang
                     $cabang = explode(',', $antrian->cabang_id);
                     $namaCabang = [];
-                    foreach($cabang as $c){
+                    foreach($cabang as $c) {
                         $namaCabang[] = Cabang::where('id', $c)->first()->nama_cabang;
                     }
                     return implode(', ', $namaCabang);
@@ -169,22 +163,19 @@ class AntrianController extends Controller
             ->addColumn('action', function ($antrian) {
                 $btn = '<div class="btn-group">';
                 if(auth()->user()->isAdminWorkshop()) {
-                    if($antrian->dataKerja->tgl_selesai == null){
+                    if($antrian->dataKerja->tgl_selesai == null) {
                         $btn .= '<a href="javascript:void(0)" class="btn btn-success btn-sm disabled"><i class="fas fa-download"></i> e-SPK</a>';
-                    }else{
+                    } else {
                         $btn .= '<a href="'.route('antrian.form-espk', $antrian->ticket_order).'"  class="btn btn-success btn-sm"><i class="fas fa-download"></i> e-SPK</a>';
                     }
                     $btn .= '<a href="' . route('antrian.edit', $antrian->id) . '" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Penugasan</a>';
                     $btn .= '<a href="'.route('antrian.show', $antrian->ticket_order).'" class="btn btn-info btn-sm"><i class="fas fa-eye"></i> Detail</a>';
                     $btn .= '<a href="javascript:void(0)" onclick="deleteAntrian('.$antrian->ticket_order.')" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Hapus</a>';
-                }
-                elseif(auth()->user()->isProduksi()) {
+                } elseif(auth()->user()->isProduksi()) {
                     $btn .= '<a href="' . route('documentation.uploadProduksi', $antrian->ticket_order) . '" class="btn btn-warning btn-sm"><i class="fas fa-camera"></i> Unggah Dokumentasi</a>';
-                }
-                elseif(auth()->user()->isSales()) {
+                } elseif(auth()->user()->isSales()) {
                     $btn .= '<a href="'. route('order.notaOrder', $antrian->ticket_order) .'" class="btn btn-info btn-sm"><i class="fas fa-print"></i>Print Struk</a>';
-                }
-                else{
+                } else {
                     $btn .= '<a href="'.route('antrian.show', $antrian->ticket_order).'" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
                 }
                 $btn .= '</div>';
@@ -263,7 +254,8 @@ class AntrianController extends Controller
         return view('page.antrian-workshop.create', compact('ekspedisi', 'desain', 'infoPelanggan'));
     }
 
-    public function printeSpk($id){
+    public function printeSpk($id)
+    {
         $antrian = DataAntrian::where('ticket_order', $id)->first();
         $dataKerja = DataKerja::where('ticket_order', $id)->first();
         $order = Order::where('ticket_order', $id)->first();
@@ -293,14 +285,6 @@ class AntrianController extends Controller
     //Fungsi untuk menampilkan halaman tambah antrian service
     //--------------------------------------------------------------------------
 
-    public function serviceIndex()
-    {
-        $servisBaru = Anservice::with('payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing')
-        ->get();
-
-        return view('page.antrian-service.index', compact('servisBaru'));
-    }
-
     public function serviceCreate()
     {
         return view('page.antrian-service.create');
@@ -312,7 +296,7 @@ class AntrianController extends Controller
 
     public function estimatorIndex(Request $request)
     {
-        if($request->input('kategori')){
+        if($request->input('kategori')) {
             $jobType = $request->input('kategori');
             $filtered = $jobType;
 
@@ -343,7 +327,7 @@ class AntrianController extends Controller
 
             return view('page.antrian-workshop.estimator-index', compact('fileBaruMasuk', 'progressProduksi', 'selesaiProduksi', 'filtered'));
 
-        }else{
+        } else {
 
             $filtered = null;
 
@@ -382,14 +366,14 @@ class AntrianController extends Controller
         //menyimpan tanggal menjadi array
         $dateRange = [];
         $date = $startDate;
-        while($date->lte($endDate)){
+        while($date->lte($endDate)) {
             $dateRange[] = $date->format('Y-m-d');
             $date->addDay();
         }
 
         //mengambil total omset per hari dari seluru sales
         $omsetPerHari = [];
-        foreach($dateRange as $date){
+        foreach($dateRange as $date) {
             $omset = Antrian::whereDate('created_at', $date)->sum('omset');
             $omsetPerHari[] = $omset;
         }
@@ -397,9 +381,10 @@ class AntrianController extends Controller
         return view('page.admin-sales.omset-global', compact('listSales', 'omsetPerHari', 'dateRange'));
     }
 
-    public function downloadPrintFile($id){
+    public function downloadPrintFile($id)
+    {
         $antrian = Barang::where('id', $id)->first();
-        if($antrian->file_cetak == null){
+        if($antrian->file_cetak == null) {
             return redirect()->back()->with('error', 'File cetak tidak ditemukan !');
         }
         $file = $antrian->barang->file_cetak;
@@ -407,21 +392,24 @@ class AntrianController extends Controller
         return response()->download($path);
     }
 
-    public function downloadPrintFileCreate($id){
+    public function downloadPrintFileCreate($id)
+    {
         $order = Order::where('id', $id)->first();
         $file = $order->file_cetak;
         $path = storage_path('app/public/file-cetak/' . $file);
         return response()->download($path);
     }
 
-    public function downloadProduksiFile($id){
+    public function downloadProduksiFile($id)
+    {
         $antrian = Antrian::where('id', $id)->first();
         $file = $antrian->design->filename;
         $path = storage_path('app/public/file-jadi/' . $file);
         return response()->download($path);
     }
 
-    public function downloadFilePendukung($id){
+    public function downloadFilePendukung($id)
+    {
         $antrian = DataAntrian::where('id', $id)->first();
         $file = $antrian->filePendukung->nama_file;
         $path = storage_path('app/public/file-pendukung/' . $file);
@@ -464,15 +452,6 @@ class AntrianController extends Controller
             'status_pembayaran' => $request->input('statusPembayaran'),
         ]);
 
-        // Periksa apakah pembayaran penuh atau parsial
-        if ($payment->total_harga == $payment->dibayarkan) {
-            $payment->update([
-                'nominal_pelunasan' => $payment->dibayarkan,
-                'file_pelunasan' => $namaBaru,
-                'tanggal_pelunasan' => Carbon::now(),
-                'status_pembayaran' => 2,
-            ]);
-        }
 
         // Simpan bukti pembayaran
         if ($request->hasFile('paymentImage')) {
@@ -484,6 +463,16 @@ class AntrianController extends Controller
             BuktiPembayaran::create([
                 'ticket_order' => $ticketOrder,
                 'gambar' => $namaBaru,
+            ]);
+        }
+
+        // Periksa apakah pembayaran penuh atau parsial
+        if ($payment->total_harga == $payment->dibayarkan) {
+            $payment->update([
+                'nominal_pelunasan' => $payment->dibayarkan,
+                'file_pelunasan' => $namaBaru,
+                'tanggal_pelunasan' => Carbon::now(),
+                'status_pembayaran' => 2,
             ]);
         }
 
@@ -550,7 +539,7 @@ class AntrianController extends Controller
 
         $totalHargaBarang = 0;
         $barangs = Barang::where('ticket_order', $antrian->ticket_order)->get();
-        foreach($barangs as $barang){
+        foreach($barangs as $barang) {
             $totalHargaBarang += $barang->price * $barang->qty;
         }
         $totalHargaBarang = number_format($totalHargaBarang, 0, ',', '.');
@@ -558,13 +547,13 @@ class AntrianController extends Controller
 
         $tempatCabang = Cabang::pluck('nama_cabang', 'id');
 
-        if($antrian->end_job == null){
+        if($antrian->end_job == null) {
             $isEdited = 0;
-        }else{
+        } else {
             $isEdited = 1;
         }
 
-        return view('page.antrian-workshop.edit', compact('barangs' ,'antrian', 'operatorId', 'finishingId', 'qualityId', 'cabangId', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
+        return view('page.antrian-workshop.edit', compact('barangs', 'antrian', 'operatorId', 'finishingId', 'qualityId', 'cabangId', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
     }
 
     public function edit($id)
@@ -578,7 +567,7 @@ class AntrianController extends Controller
 
         $totalHargaBarang = 0;
         $barangs = Barang::where('ticket_order', $antrian->ticket_order)->get();
-        foreach($barangs as $barang){
+        foreach($barangs as $barang) {
             $totalHargaBarang += $barang->price * $barang->qty;
         }
         $totalHargaBarang = number_format($totalHargaBarang, 0, ',', '.');
@@ -586,13 +575,13 @@ class AntrianController extends Controller
 
         $tempatCabang = Cabang::pluck('nama_cabang', 'id');
 
-        if($antrian->end_job == null){
+        if($antrian->end_job == null) {
             $isEdited = 0;
-        }else{
+        } else {
             $isEdited = 1;
         }
 
-        return view('page.antrian-workshop.edit', compact('barangs' ,'antrian', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
+        return view('page.antrian-workshop.edit', compact('barangs', 'antrian', 'operators', 'qualitys', 'machines', 'tempatCabang', 'isEdited', 'totalHargaBarang', 'totalBarang'));
     }
 
     public function updateLama(Request $request, $id)
@@ -618,7 +607,7 @@ class AntrianController extends Controller
         $dataKerja->tgl_selesai = $request->input('end_job');
 
         //Jika input mesin adalah array, lakukan implode lalu simpan ke database
-        if($request->input('jenisMesin')){
+        if($request->input('jenisMesin')) {
             $mesin = implode(',', $request->input('jenisMesin'));
             $dataKerja->machine_id = $mesin;
         }
@@ -639,17 +628,17 @@ class AntrianController extends Controller
 
         $users = [];
 
-        foreach($request->input('operator_id') as $operator){
+        foreach($request->input('operator_id') as $operator) {
             $user = 'user-' . $operator;
             $users[] = $user;
         }
 
-        foreach($request->input('finishing_id') as $finisher){
+        foreach($request->input('finishing_id') as $finisher) {
             $user = 'user-' . $finisher;
             $users[] = $user;
         }
 
-        foreach($request->input('qc_id') as $quality){
+        foreach($request->input('qc_id') as $quality) {
             $user = 'user-' . $quality;
             $users[] = $user;
         }
@@ -705,11 +694,11 @@ class AntrianController extends Controller
         $quality = implode(',', $request->input('qc_id'));
 
         //Jika input mesin adalah array, lakukan implode lalu simpan ke database
-        if($request->input('jenisMesin')){
+        if($request->input('jenisMesin')) {
             $mesin = implode(',', $request->input('jenisMesin'));
         }
 
-        $dataKerja = new DataKerja;
+        $dataKerja = new DataKerja();
         $dataKerja->ticket_order = $antrian->ticket_order;
         $dataKerja->barang_id = $antrian->job_id;
         $dataKerja->operator_id = $operator;
@@ -735,17 +724,17 @@ class AntrianController extends Controller
 
         $users = [];
 
-        foreach($request->input('operator_id') as $operator){
+        foreach($request->input('operator_id') as $operator) {
             $user = 'user-' . $operator;
             $users[] = $user;
         }
 
-        foreach($request->input('finishing_id') as $finisher){
+        foreach($request->input('finishing_id') as $finisher) {
             $user = 'user-' . $finisher;
             $users[] = $user;
         }
 
-        foreach($request->input('qc_id') as $quality){
+        foreach($request->input('qc_id') as $quality) {
             $user = 'user-' . $quality;
             $users[] = $user;
         }
@@ -812,7 +801,7 @@ class AntrianController extends Controller
 
         $total = 0;
 
-        foreach($items as $item){
+        foreach($items as $item) {
             $subtotal = $item->price * $item->qty;
             $total += $subtotal;
         }
@@ -821,7 +810,7 @@ class AntrianController extends Controller
 
         $totalBahan = 0;
 
-        foreach($bahan as $b){
+        foreach($bahan as $b) {
             $totalBahan += $b->harga;
         }
 
@@ -840,7 +829,7 @@ class AntrianController extends Controller
 
         $sisaPembayaran = $total - $pembayaran->dibayarkan;
 
-        return view('page.antrian-workshop.show', compact('antrian', 'total', 'items', 'pembayaran' , 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran', 'desainan'));
+        return view('page.antrian-workshop.show', compact('antrian', 'total', 'items', 'pembayaran', 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran', 'desainan'));
     }
 
     public function updateDeadline(Request $request)
@@ -875,32 +864,25 @@ class AntrianController extends Controller
     }
     //--------------------------------------------------------------------------
 
-    public function design(){
-        //Melarang akses langsung ke halaman ini sebelum login
-        if (!auth()->check()) {
-            return redirect()->route('auth.login')->with('belum-login', 'Silahkan login terlebih dahulu');
-        }
-
-        $list_desain = AntrianDesain::get();
-        return view('antriandesain.index', compact('list_desain'));
-    }
-
-    public function tambahDesain(){
+    public function tambahDesain()
+    {
         $list_antrian = Antrian::get();
         return view('antriandesain.create', compact('list_antrian'));
     }
 
-//fungsi untuk menggunggah & menyimpan file gambar dokumentasi
-    public function showDokumentasi($id){
+    //fungsi untuk menggunggah & menyimpan file gambar dokumentasi
+    public function showDokumentasi($id)
+    {
         $antrian = DataAntrian::where('ticket_order', $id)->first();
-        return view ('page.antrian-workshop.dokumentasi' , compact('antrian'));
+        return view('page.antrian-workshop.dokumentasi', compact('antrian'));
     }
 
-    public function storeDokumentasi(Request $request){
+    public function storeDokumentasi(Request $request)
+    {
         $files = $request->file('files');
         $id = $request->input('idAntrian');
 
-        foreach($files as $file){
+        foreach($files as $file) {
             $filename = time()."_".$file->getClientOriginalName();
             $path = 'dokumentasi/'.$filename;
             Storage::disk('public')->put($path, file_get_contents($file));
@@ -914,21 +896,22 @@ class AntrianController extends Controller
             $dokumentasi->save();
         }
 
-        return response()->json(['success'=>'You have successfully upload file.']);
+        return response()->json(['success' => 'You have successfully upload file.']);
     }
 
-    public function getMachine(Request $request){
+    public function getMachine(Request $request)
+    {
         //Menampilkan data mesin pada tabel Machines
         $search = $request->input('search');
 
-        if($search == ''){
+        if($search == '') {
             $machines = Machine::get();
-        }else{
+        } else {
             $machines = Machine::where('machine_name', 'like', '%'.$search.'%')->get();
         }
 
         $response = array();
-        foreach($machines as $machine){
+        foreach($machines as $machine) {
             $response[] = array(
                 "id" => $machine->id,
                 "text" => $machine->machine_name
@@ -938,31 +921,33 @@ class AntrianController extends Controller
         return response()->json($response);
     }
 
-    public function showProgress($id){
+    public function showProgress($id)
+    {
         $antrian = Antrian::where('id', $id)->with('job', 'sales', 'order')
         ->first();
 
         return view('page.antrian-workshop.progress', compact('antrian'));
     }
 
-    public function storeProgressProduksi(Request $request){
+    public function storeProgressProduksi(Request $request)
+    {
         $antrian = Antrian::where('id', $request->input('idAntrian'))->first();
 
-        if($request->file('fileGambar')){
-        $gambar = $request->file('fileGambar');
-        $namaGambar = time()."_".$gambar->getClientOriginalName();
-        $pathGambar = 'dokum-proses/'.$namaGambar;
-        Storage::disk('public')->put($pathGambar, file_get_contents($gambar));
-        }else{
+        if($request->file('fileGambar')) {
+            $gambar = $request->file('fileGambar');
+            $namaGambar = time()."_".$gambar->getClientOriginalName();
+            $pathGambar = 'dokum-proses/'.$namaGambar;
+            Storage::disk('public')->put($pathGambar, file_get_contents($gambar));
+        } else {
             $namaGambar = null;
         }
 
-        if($request->file('fileVideo')){
-        $video = $request->file('fileVideo');
-        $namaVideo = time()."_".$video->getClientOriginalName();
-        $pathVideo = 'dokum-proses/'.$namaVideo;
-        Storage::disk('public')->put($pathVideo, file_get_contents($video));
-        }else{
+        if($request->file('fileVideo')) {
+            $video = $request->file('fileVideo');
+            $namaVideo = time()."_".$video->getClientOriginalName();
+            $pathVideo = 'dokum-proses/'.$namaVideo;
+            Storage::disk('public')->put($pathVideo, file_get_contents($video));
+        } else {
             $namaVideo = null;
         }
 
@@ -985,18 +970,19 @@ class AntrianController extends Controller
         return redirect()->back()->with('success', 'File berhasil di tandai aman');
     }
 
-    public function markSelesai($id){
+    public function markSelesai($id)
+    {
         //cek apakah documentasi sudah diupload
         $barang = Barang::where('ticket_order', $id)->get();
 
-        foreach($barang as $b){
-            if($b->documentation_id == null){
+        foreach($barang as $b) {
+            if($b->documentation_id == null) {
                 return redirect()->back()->with('error', 'Ada barang yang belum di dokumentasi !');
             }
         }
 
         $datakerja = DataKerja::where('ticket_order', $id)->first();
-        if($datakerja->operator_id == null || $datakerja->finishing_id == null || $datakerja->qc_id == null){
+        if($datakerja->operator_id == null || $datakerja->finishing_id == null || $datakerja->qc_id == null) {
             return redirect()->back()->with('error', 'Data penugasan belum lengkap !');
         }
 
@@ -1006,10 +992,10 @@ class AntrianController extends Controller
         $antrian->status = 2;
         $antrian->save();
 
-         // Menampilkan push notifikasi saat selesai
-         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
-            "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
-            "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
+        // Menampilkan push notifikasi saat selesai
+        $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
+           "instanceId" => "0958376f-0b36-4f59-adae-c1e55ff3b848",
+           "secretKey" => "9F1455F4576C09A1DE06CBD4E9B3804F9184EF91978F3A9A92D7AD4B71656109",
         ));
 
         $publishResponse = $beamsClient->publishToInterests(
@@ -1019,7 +1005,8 @@ class AntrianController extends Controller
                 "body" => "Yuhuu! Pekerjaan dengan tiket " . $antrian->ticket_order . " (" . $antrian->order->title ."), dari sales ". $antrian->sales->sales_name ." udah selesai !",
                 "deep_link" => "https://app.kassabsyariah.com/",
             )),
-        ));
+        )
+        );
 
         return redirect()->route('antrian.index')->with('success', 'Berhasil ditandai selesai !');
     }
@@ -1050,17 +1037,28 @@ class AntrianController extends Controller
         return response()->json(['message' => 'Biaya Produksi berhasil disimpan !'], 200);
     }
 
-    public function getMachineByIdBarang($id){
-        $mesin = DataKerja::where('barang_id', $request->input('id'))->first();
-        implode(',', $mesin->machine_id);
+    public function getMachineByIdBarang($id)
+    {
+        $mesin = DataKerja::where('barang_id', $id)->pluck('machine_id')->first();
+        //jika $mesin tidak kosong, lakukan explode
+        $mesinTerpilih = [];
+        if($mesin) {
+            $mesin = explode(',', $mesin);
 
-        foreach($mesin as $m){
-            $response[] = array(
-                "id" => $m->id,
-                "text" => $m->machine_name
-            );
+            foreach($mesin as $m) {
+                $mesinTerpilih[] = Machine::where('id', $m)->first();
+                $arrayMesin = [];
+                foreach($mesinTerpilih as $m) {
+                    $arrayMesin[] = [
+                        'mid' => $m->id,
+                        'nama' => $m->machine_name
+                    ];
+                }
+            }
+        } else {
+            $arrayMesin = [];
         }
 
-        return response()->json($response);
+        return response()->json($arrayMesin);
     }
 }
