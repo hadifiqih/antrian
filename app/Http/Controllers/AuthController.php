@@ -34,22 +34,33 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
         $remember = $request->has('remember');
-        //cek apakah email dan password benar
+
+        // Cek apakah email dan password benar
         if (Auth::attempt($credentials)) {
+            // Mengambil data pengguna
             $user = Auth::user();
-            //menyimpan data pengguna ke dalam session
-            $request->session()->put('user', $user);
 
-            if(Auth::attempt($credentials, $remember)){
-                $cookie = Cookie::make('user', $user, 1440);
-                return view('page.dashboard')->withCookie($cookie);
+            // Cek apakah akun pengguna aktif
+            if ($user->employee->is_active == 0) {
+                // Logout pengguna yang tidak aktif
+                Auth::logout();
+                return redirect()->route('auth.login')->with('error', 'Akun anda telah di non-aktifkan !');
+            } else if ($user->employee->is_active == 1) {
+                // Menyimpan data pengguna ke dalam session
+                $request->session()->put('user', $user);
+
+                if ($remember) {
+                    $cookie = Cookie::make('user', $user, 1440);
+                    return view('page.dashboard')->withCookie($cookie);
+                }
+
+                // Jika email dan password benar
+                return view('page.dashboard');
             }
-            //jika email dan password benar
-            return view('page.dashboard');
         }
-        //jika email dan password salah
-        return redirect()->route('auth.login')->with('error', 'Email atau password salah !');
 
+        // Jika email dan password salah
+        return redirect()->route('auth.login')->with('error', 'Email atau password salah!');
     }
 
     public function logout(){
@@ -57,12 +68,12 @@ class AuthController extends Controller
         Auth::logout();
 
         //kembalikan ke halaman login
-        return redirect()->route('auth.login')->with('logout', 'Logout berhasil !');
+        return redirect()->route('auth.login')->with('message', 'Logout berhasil !');
     }
 
     public function store(Request $request)
     {
-        //Membuat rules validasi
+        // Membuat rules validasi
         $rules = [
             'nama' => 'required|min:5|max:50',
             'email' => 'required|email|unique:users',
@@ -76,80 +87,62 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), $rules);
 
-
         if ($validator->fails()) {
             return redirect()->route('auth.register')->withErrors($validator)->withInput();
-        }else{
-
-        if($request->roleProduksi){
-            $role = $request->roleProduksi;
-        }else if($request->roleSales){
-            $role = $request->roleSales;
-        }else if($request->roleDesain){
-            $role = $request->roleDesain;
-        }else if($request->roleKeuangan){
-            $role = $request->roleKeuangan;
-        }else if($request->roleLogistik){
-            $role = $request->roleLogistik;
-        }else if($request->roleManajemen){
-            $role = $request->roleManajemen;
-        }else{
-            $role = null;
         }
 
-        //menentukan lokasi kerja
-        $tempatKerja = $request->lokasi;
-        if ($tempatKerja == "Surabaya"){
-            $tempatKerja = "1";
-        }else if ($tempatKerja == "Malang"){
-            $tempatKerja = "2";
-        }else if ($tempatKerja == "Kediri"){
-            $tempatKerja = "3";
-        }else if ($tempatKerja == "Sidoarjo"){
-            $tempatKerja = "4";
+        // Menentukan role
+        $roles = ['roleProduksi', 'roleSales', 'roleDesain', 'roleKeuangan', 'roleLogistik', 'roleManajemen'];
+        $role = null;
+        foreach ($roles as $r) {
+            if ($request->$r) {
+                $role = $request->$r;
+                break;
+            }
         }
-        
-        $indexTempatKerja = $request->lokasi;
 
-        //menentukan divisi
-        $divisi = $request->divisi;
+        // Menentukan lokasi kerja
+        $lokasiMapping = [
+            "Surabaya" => "1",
+            "Malang" => "2",
+            "Kediri" => "3",
+            "Sidoarjo" => "4"
+        ];
+        $tempatKerja = $lokasiMapping[$request->lokasi] ?? null;
 
-        //tahun masuk
-        $tahunMasuk = $request->tahunMasuk;
-        $tahunMasuk = substr($tahunMasuk, -2);
+        // Tahun masuk
+        $tahunMasuk = substr($request->tahunMasuk, -2);
 
-        //membuat user baru
-        $user = new User;
-        $user->name = ucwords(strtolower($request->nama));
-        $user->email = $request->email;
-        $user->phone = $request->telepon;
-        $user->password = bcrypt($request->password);
-        $user->role = $role;
-        $user->divisi = $request->divisi;
-        $user->save();
+        // Membuat user baru
+        $user = User::create([
+            'name' => ucwords(strtolower($request->nama)),
+            'email' => $request->email,
+            'phone' => $request->telepon,
+            'password' => bcrypt($request->password),
+            'role_id' => $role,
+            'divisi' => $request->divisi
+        ]);
 
-        //membuat nip baru dengan mengambil 2 digit terakhir index tempat kerja, 2 digit terakhir tahun masuk, 2 digit terakhir index divisi, dan 2 digit terakhir index user
-        $nip = $tempatKerja.$tahunMasuk.$user->id;
+        // Membuat NIP baru
+        $nip = $tempatKerja . $tahunMasuk . $user->id;
 
-        //membut employee baru
-        $employee = new Employee;
-        $employee->nip = $nip;
-        $employee->name = ucwords(strtolower($request->nama));
-        $employee->email = $request->email;
-        $employee->phone = $request->telepon;
-        $employee->division = ucwords($request->divisi);
-        $employee->office = $request->lokasi;
-        $employee->user_id = $user->id;
-        $employee->save();
+        // Membuat employee baru
+        Employee::create([
+            'nip' => $nip,
+            'name' => ucwords(strtolower($request->nama)),
+            'email' => $request->email,
+            'phone' => $request->telepon,
+            'division' => ucwords($request->divisi),
+            'office' => $request->lokasi,
+            'user_id' => $user->id
+        ]);
 
-        //mengubah user_id pada tabel sales dengan id user yang baru dibuat
-        if($request->roleSales){
-            $sales = Sales::where('id', $request->salesApa)->first();
-            $sales->user_id = $user->id;
-            $sales->save();
+        // Mengubah user_id pada tabel sales jika roleSales ada
+        if ($request->roleSales) {
+            Sales::where('id', $request->salesApa)->update(['user_id' => $user->id]);
         }
-    }
-        //jika user berhasil dibuat
+
+        // Jika user berhasil dibuat
         return redirect()->route('auth.login')->with('success-register', 'Registrasi berhasil, silahkan login');
     }
 

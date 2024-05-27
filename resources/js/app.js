@@ -1,11 +1,9 @@
 import './bootstrap';
 import '../css/app.css';
-import Swal from 'sweetalert2';
 import axios from 'axios';
 import lightGallery from 'lightgallery';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import lgZoom from 'lightgallery/plugins/zoom';
-
 import * as PusherPushNotifications from "@pusher/push-notifications-web";
 
 //init lightgallery
@@ -15,8 +13,8 @@ lightGallery(document.getElementById('lightgallery'), {
     thumbnail: true,
 });
 
-// Setup Axios Interceptor
-axios.interceptors.response.use(
+  // Setup Axios Interceptor
+    axios.interceptors.response.use(
     response => response,
     error => {
         if (error.response.status === 401) {
@@ -35,7 +33,7 @@ function handleAutoLogout() {
     beamsClient.stop()
         .then(() => {
             console.log('Beams client stopped due to session timeout.');
-            // Tambahkan logika logout Anda di sini, misalnya menghapus sesi pengguna dan mengarahkan ke halaman login
+          // Tambahkan logika logout Anda di sini, misalnya menghapus sesi pengguna dan mengarahkan ke halaman login
             localStorage.removeItem('beamsInitialized');
             window.location.href = '/login'; // Arahkan ke halaman login
         })

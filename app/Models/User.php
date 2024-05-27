@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\DesignQueue;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,7 +24,24 @@ class User extends Authenticatable
      * The User model represents a user in the application.
      * It uses the HasApiTokens, HasFactory, Notifiable, and CanResetPassword traits.
      */
-    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword, SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role_id',
+        'can_design',
+        'phone',
+        'status',
+        'email_verified_at',
+        'can_design',
+        'remember_token',
+        'beams_token',
+        'can_design',
+        'design_load',
+        'cabang_id'
+    ];
 
     protected $hidden = [
         'password',

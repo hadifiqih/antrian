@@ -24,6 +24,8 @@
 
   <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 
+  @vite(['resources/js/app.js', 'resources/css/app.css'])
+
   <style>
     .loader {
         border: 3px solid #f3f3f3; /* Light grey */
@@ -305,11 +307,13 @@
           .then(() => {
               console.log('Beams client stopped.');
               // Lanjutkan dengan logika logout Anda, misalnya menghapus sesi pengguna
+              localStorage.removeItem('beamsInitialized');
           })
           .catch(console.error);
-      // Redirect to the logout URL if the user clicks "OK"
-      window.location.href = "{{ route('auth.logout') }}";
+      
     }
+    //jika beamsClient.stop() berhasil, maka akan dilanjutkan dengan logout
+    window.location.href = "{{ route('auth.logout') }}";
   }
 
   function sendReminder() {
@@ -341,7 +345,6 @@
     });
   }
 
-  //set device interests based on user role
   function setDeviceInterests(beamsClient, roleId) {
     let interests = ['hello'];
 
@@ -369,40 +372,84 @@
             break;
     }
 
-    beamsClient.setDeviceInterests(interests);
+    console.log('Setting device interests:', interests);
+    beamsClient.setDeviceInterests(interests)
+        .then(() => console.log('Device interests set successfully:', interests))
+        .catch(error => console.error('Error setting device interests:', error));
   }
 
   $(document).ready(function () {
-    bsCustomFileInput.init();
+      bsCustomFileInput.init();
 
-    if (!localStorage.getItem('beamsInitialized')) {
-        const beamsClient = new PusherPushNotifications.Client({
-            instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
-        });
+      if (!localStorage.getItem('beamsInitialized')) {
+      const beamsClient = new PusherPushNotifications.Client({
+          instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
+      });
 
-        const tokenProvider = new PusherPushNotifications.TokenProvider({
-            url: "{{ route('beams.auth') }}"
-        });
+      const tokenProvider = new PusherPushNotifications.TokenProvider({
+          url: "{{ route('beams.auth') }}"
+      });
 
-        beamsClient.start()
-            .then(() => beamsClient.clearAllState()) // clear state on start
-            .then(() => console.log('Successfully registered and subscribed to Beams!'))
-            .then(() => beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider))
-            .then(() => beamsClient.getUserId())
-            .then(userId => {
-                console.log('Successfully registered and subscribed!', userId);
-
-                // Set device interests based on user role
-                setDeviceInterests(beamsClient, {{ Auth::user()->role_id }});
-                
-                // Mark initialization in localStorage
-                localStorage.setItem('beamsInitialized', 'true');
-            })
-            .then(() => beamsClient.getDeviceInterests())
-            .then(interests => console.log('Successfully registered and subscribed!', interests))
-            .catch(console.error);
-    }
-});
+      beamsClient.start()
+          .then(() => {
+              console.log('Successfully registered with Beams!');
+              return beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider);
+          })
+          .then(() => beamsClient.getUserId())
+          .then(userId => {
+              console.log('User ID set:', userId);
+              const roleId = {{ Auth::user()->role_id }};
+              console.log('User role ID:', roleId);
+              setDeviceInterests(beamsClient, roleId);
+              
+              // Mark initialization in localStorage
+              localStorage.setItem('beamsInitialized', 'true');
+          })
+          .then(() => beamsClient.getDeviceInterests())
+          .then(interests => console.log('Successfully registered and subscribed!', interests))
+          .catch(console.error);
+      }
+  });
 </script>
+{{-- <script>
+  const beamsClient = new PusherPushNotifications.Client({
+    instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
+  });
+
+  const tokenProvider = new PusherPushNotifications.TokenProvider({
+    url: "{{ route('beams.auth') }}"
+  });
+
+  //stop the SDK from automatically connecting to Beams
+  beamsClient.stop();
+
+  beamsClient.start()
+  .then(() => beamsClient.clearAllState()) // clear state on start
+  .then(() => console.log('Successfully registered and subscribed to Beams!'))
+  .then(() => beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider))
+  .then(() => beamsClient.getUserId())
+  .then(userId => console.log('Successfully registered and subscribed!', userId))
+  .then(() =>
+
+  @if(Auth::user()->role_id == 11)
+  beamsClient.setDeviceInterests(['hello' , 'sales'])
+  @elseif(Auth::user()->role_id == 15)
+  beamsClient.setDeviceInterests(['hello' , 'admin'])
+  @elseif(Auth::user()->role_id == 13)
+  beamsClient.setDeviceInterests(['hello' , 'operator'])
+  @elseif(Auth::user()->role_id == 5 || Auth::user()->role_id == 20)
+  beamsClient.setDeviceInterests(['hello' , 'supervisor'])
+  @elseif(Auth::user()->role_id == 10)
+  beamsClient.setDeviceInterests(['hello', 'operator'])
+  @elseif(Auth::user()->role_id == 16)
+  beamsClient.setDeviceInterests(['hello' , 'desain'])
+  @else
+  beamsClient.setDeviceInterests(['hello'])
+  @endif
+  )
+  .then(() => beamsClient.getDeviceInterests())
+  .then(interests => console.log('Successfully registered and subscribed!', interests))
+  .catch(console.error);
+</script> --}}
 </body>
 </html>

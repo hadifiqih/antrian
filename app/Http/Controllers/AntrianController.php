@@ -560,8 +560,8 @@ class AntrianController extends Controller
     {
         $antrian = DataAntrian::where('id', $id)->first();
 
-        $operators = Employee::where('can_stempel', 1)->orWhere('can_adv', 1)->get();
-        $qualitys = Employee::where('can_qc', 1)->get();
+        $operators = Employee::where('can_stempel', 1)->orWhere('can_adv', 1)->where('is_active', 1)->get();
+        $qualitys = Employee::where('can_qc', 1)->where('is_active', 1)->get();
 
         $machines = Machine::get();
 

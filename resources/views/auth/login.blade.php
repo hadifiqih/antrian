@@ -1,7 +1,7 @@
 {{-- Jika sudah ada sesi login, redirect to Dashboard--}}
 @if (auth()->check())
 <script>
-window.location.href = "/dashboard";
+  window.location.href = "/dashboard";
 </script>
 @endif
 
@@ -67,12 +67,17 @@ window.location.href = "/dashboard";
         <div class="authentication-inner">
 
           {{-- Menampilkan alert jika ada error saat mencoba login --}}
-          @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              <strong>Whoops!</strong> {{ session('error') }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
+            @if(session('error'))
+              <div class="alert alert-danger" role="alert">
+                {{ session('error') }}
+              </div>
+            @endif
+
+            @if(session('message'))
+              <div class="alert alert-success" role="alert">
+                {{ session('message') }}
+              </div>
+            @endif
 
           {{-- Menampilkan session apapun yang telah dibuat --}}
           @if (session('success-register'))

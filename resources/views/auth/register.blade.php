@@ -141,7 +141,7 @@
                         <option value="" selected disabled>-- Pilih Divisi --</option>
                         <option value="manajemen">Manajemen</option>
                         <option value="produksi">Produksi</option>
-                        <option value="sales">Pemasaran & Penjualan</option>
+                        <option value="sales">Sales & Marketing</option>
                         <option value="desain">Desain Grafis</option>
                         <option value="keuangan">Keuangan & Administrasi</option>
                         <option value="logistik">Logistik & Pengiriman</option>
@@ -162,10 +162,14 @@
                     <label for="roleManajemen">Jabatan</label>
                     <select class="form-select" name="roleManajemen" id="roleManajemen">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="ceo">CEO</option>
-                        <option value="direktur">Direktur</option>
-                        <option value="manager">Manager</option>
-                        <option value="hrd">HRD</option>
+                        <option value="2">CEO</option>
+                        <option value="1">Direktur</option>
+                        <option value="3">HRD</option>
+                        <option value="10">Manager Produksi</option>
+                        <option value="7">Manager Sales</option>
+                        <option value="8">Manager General Affair</option>
+                        <option value="">Manager Keuangan</option>
+                        <option value="10">Manager Produksi</option>
                     </select>
                 </div>
 
@@ -173,41 +177,40 @@
                     <label for="roleProduksi" class="form-label">Jabatan</label>
                     <select id="roleProduksi" class="form-select" name="roleProduksi">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="estimator">Estimator / Supervisor / Kepala Cabang</option>
-                        <option value="stempel">Staff Stempel</option>
-                        <option value="advertising">Staff Advertising</option>
-                        <option value="admin">Admin Workshop</option>
-                        <option value="dokumentasi">Staff Dokumentasi</option>
+                        <option value="13">Staff Stempel</option>
+                        <option value="13">Staff Advertising</option>
+                        <option value="15">Admin Workshop</option>
+                        <option value="21">Staff Dokumentasi</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleSales" style="display: none">
                     <label for="roleSales" class="form-label">Jabatan</label>
                     <select id="roleSales" class="form-select" name="roleSales">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="sales">Supervisor</option>
-                        <option value="sales">Sales</option>
+                        <option value="11">Sales</option>
+                        <option value="12">Marketing Online</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleDesain" style="display: none">
                     <label for="roleDesain" class="form-label">Jabatan</label>
                     <select id="roleDesain" class="form-select" name="roleDesain">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="desain">Supervisor</option>
-                        <option value="desain">Staff Desain</option>
+                        <option value="5">Supervisor</option>
+                        <option value="16">Staff Desain</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleKeuangan" style="display: none">
                     <label for="roleKeuangan" class="form-label">Jabatan</label>
                     <select id="roleKeuangan" class="form-select" name="roleKeuangan">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="staffAdmin">Staff Admin</option>
+                        <option value="19">Staff Admin</option>
                     </select>
                 </div>
                 <div class="mb-3" id="inputRoleLogistik" style="display: none">
                     <label for="roleLogistik" class="form-label">Jabatan</label>
                     <select id="roleLogistik" class="form-select" name="roleLogistik">
                         <option value="" selected disabled>-- Pilih --</option>
-                        <option value="staffGudang">Staff Gudang / Logistik</option>
+                        <option value="14">Staff Gudang / Logistik</option>
                     </select>
                 </div>
 
@@ -266,96 +269,67 @@
     <!-- Page JS -->
     <script>
       $(document).ready(function() {
-          // Ketika pilihan dalam dropdown berubah
-          $("#divisi").change(function() {
-              var selectedDivisi = $(this).val();
+        // Fungsi untuk menyembunyikan semua input role
+        function hideAllRoles() {
+            $("#inputSales, #inputRoleSales, #inputRoleDesain, #inputRoleKeuangan, #inputRoleLogistik, #inputRoleProduksi, #inputRoleManajemen").hide();
+        }
 
-                //reset semua select ke default
-                $('#roleProduksi').prop('selectedIndex',0);
-                $('#roleSales').prop('selectedIndex',0);
-                $('#roleDesain').prop('selectedIndex',0);
-                $('#roleKeuangan').prop('selectedIndex',0);
-                $('#roleLogistik').prop('selectedIndex',0);
-                $('#roleManajemen').prop('selectedIndex',0);
+        // Fungsi untuk mereset semua select ke default
+        function resetAllSelects() {
+            $('#roleProduksi, #roleSales, #roleDesain, #roleKeuangan, #roleLogistik, #roleManajemen').prop('selectedIndex', 0);
+        }
 
-              // Cek apakah pilihan yang dipilih adalah "Sales"
-              if (selectedDivisi == "sales") {
+        // Ketika pilihan dalam dropdown berubah
+        $("#divisi").change(function() {
+            var selectedDivisi = $(this).val();
+            
+            // Reset semua select ke default
+            resetAllSelects();
 
-                    $("#inputSales").show();
-                    $("#inputRoleSales").show();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
+            // Sembunyikan semua input role
+            hideAllRoles();
 
-              } else if (selectedDivisi == "desain") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
+            // Tampilkan input role sesuai dengan divisi yang dipilih
+            switch (selectedDivisi) {
+                case "sales":
+                    $("#inputSales, #inputRoleSales").show();
+                    break;
+                case "desain":
                     $("#inputRoleDesain").show();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
-              } else if (selectedDivisi == "keuangan") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
+                    break;
+                case "keuangan":
                     $("#inputRoleKeuangan").show();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
-
-              } else if (selectedDivisi == "logistik") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
+                    break;
+                case "logistik":
                     $("#inputRoleLogistik").show();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
-
-              } else if (selectedDivisi == "produksi") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
+                    break;
+                case "produksi":
                     $("#inputRoleProduksi").show();
-                    $("#inputRoleManajemen").hide();
-
-              } else if (selectedDivisi == "manajemen") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
+                    break;
+                case "manajemen":
                     $("#inputRoleManajemen").show();
+                    break;
+            }
+        });
 
-              }
-            });
-
-          $("#password").keyup(function() {
+        // Validasi password
+        $("#password").keyup(function() {
             var password = $(this).val();
             var passwordError = $("#passwordError");
 
             if (password.length < 8) {
-              passwordError.html("Password minimal 8 karakter");
+                passwordError.html("Password minimal 8 karakter");
             } else if (password.includes(" ")) {
-              passwordError.html("Password tidak boleh mengandung spasi");
+                passwordError.html("Password tidak boleh mengandung spasi");
             } else {
-              passwordError.html("");
+                passwordError.html("");
             }
-          });
-          //Jika tombol checkbox dicentang maka tombol submit akan aktif
-            $("#terms-conditions").click(function() {
-                if ($(this).is(":checked")) {
-                $("#btnDaftar").removeAttr("disabled");
-                } else {
-                $("#btnDaftar").attr("disabled", true);
-                }
-            });
+        });
+
+        // Jika tombol checkbox dicentang maka tombol submit akan aktif
+        $("#terms-conditions").click(function() {
+            $("#btnDaftar").prop("disabled", !$(this).is(":checked"));
+        });
       });
   </script>
 
