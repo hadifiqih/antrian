@@ -683,6 +683,12 @@ class AntrianController extends Controller
 
     public function update(Request $request, $id)
     {
+        //cek apakah antrian sudah ada di data kerja
+        $cekDataKerja = DataKerja::where('ticket_order', $request->input('ticket_order'))->where('barang_id', $id)->first();
+        
+        if($cekDataKerja) {
+            return redirect()->back()->with('error', 'Data antrian sudah ada di data kerja!');
+        }
         $antrian = DataAntrian::find($id);
         //Jika input operator adalah array, lakukan implode lalu simpan ke database
         $operator = implode(',', $request->input('operator_id'));

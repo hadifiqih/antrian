@@ -297,6 +297,16 @@
   function confirmLogout(){
     const confirmation = confirm('Apakah Anda yakin ingin keluar?');
     if (confirmation) {
+      const beamsClient = new PusherPushNotifications.Client({
+        instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
+      });
+
+      beamsClient.stop()
+          .then(() => {
+              console.log('Beams client stopped.');
+              // Lanjutkan dengan logika logout Anda, misalnya menghapus sesi pengguna
+          })
+          .catch(console.error);
       // Redirect to the logout URL if the user clicks "OK"
       window.location.href = "{{ route('auth.logout') }}";
     }
@@ -331,62 +341,68 @@
     });
   }
 
+  //set device interests based on user role
+  function setDeviceInterests(beamsClient, roleId) {
+    let interests = ['hello'];
+
+    switch (roleId) {
+        case 11:
+            interests.push('sales');
+            break;
+        case 15:
+            interests.push('admin');
+            break;
+        case 13:
+            interests.push('operator');
+            break;
+        case 5:
+        case 20:
+            interests.push('supervisor');
+            break;
+        case 10:
+            interests.push('operator');
+            break;
+        case 16:
+            interests.push('desain');
+            break;
+        default:
+            break;
+    }
+
+    beamsClient.setDeviceInterests(interests);
+  }
+
   $(document).ready(function () {
     bsCustomFileInput.init();
 
-    var targetWaktu = '16:45'
+    if (!localStorage.getItem('beamsInitialized')) {
+        const beamsClient = new PusherPushNotifications.Client({
+            instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
+        });
 
-    var interval = 60000;
+        const tokenProvider = new PusherPushNotifications.TokenProvider({
+            url: "{{ route('beams.auth') }}"
+        });
 
-    function checkTime(){
-            var waktuSekarang = dayjs().format('HH:mm');
-            if(waktuSekarang == targetWaktu){
-                sendReminder();
-            }
-        }
-    setInterval(checkTime, interval);
-  });
-</script>
+        beamsClient.start()
+            .then(() => beamsClient.clearAllState()) // clear state on start
+            .then(() => console.log('Successfully registered and subscribed to Beams!'))
+            .then(() => beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider))
+            .then(() => beamsClient.getUserId())
+            .then(userId => {
+                console.log('Successfully registered and subscribed!', userId);
 
-<script>
-    const beamsClient = new PusherPushNotifications.Client({
-      instanceId: '0958376f-0b36-4f59-adae-c1e55ff3b848',
-    });
-
-    const tokenProvider = new PusherPushNotifications.TokenProvider({
-      url: "{{ route('beams.auth') }}"
-    });
-
-    //stop the SDK from automatically connecting to Beams
-    beamsClient.stop();
-
-    beamsClient.start()
-    .then(() => beamsClient.clearAllState()) // clear state on start
-    .then(() => console.log('Successfully registered and subscribed to Beams!'))
-    .then(() => beamsClient.setUserId('user-{{ Auth::user()->id }}', tokenProvider))
-    .then(() => beamsClient.getUserId())
-    .then(userId => console.log('Successfully registered and subscribed!', userId))
-    .then(() =>
-
-    @if(Auth::user()->role_id == 11)
-    beamsClient.setDeviceInterests(['hello' , 'sales'])
-    @elseif(Auth::user()->role_id == 15)
-    beamsClient.setDeviceInterests(['hello' , 'admin'])
-    @elseif(Auth::user()->role_id == 13)
-    beamsClient.setDeviceInterests(['hello' , 'operator'])
-    @elseif(Auth::user()->role_id == 5 || Auth::user()->role_id == 20)
-    beamsClient.setDeviceInterests(['hello' , 'supervisor'])
-    @elseif(Auth::user()->role_id == 10)
-    beamsClient.setDeviceInterests(['hello', 'operator'])
-    @elseif(Auth::user()->role_id == 16)
-    beamsClient.setDeviceInterests(['hello' , 'desain'])
-    @else
-    beamsClient.setDeviceInterests(['hello'])
-    @endif
-    )
-    .then(() => beamsClient.getDeviceInterests())
-    .then(interests => console.log('Successfully registered and subscribed!', interests))
-    .catch(console.error);
+                // Set device interests based on user role
+                setDeviceInterests(beamsClient, {{ Auth::user()->role_id }});
+                
+                // Mark initialization in localStorage
+                localStorage.setItem('beamsInitialized', 'true');
+            })
+            .then(() => beamsClient.getDeviceInterests())
+            .then(interests => console.log('Successfully registered and subscribed!', interests))
+            .catch(console.error);
+    }
+});
 </script>
 </body>
 </html>
