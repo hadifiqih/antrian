@@ -50,9 +50,6 @@
                     <p class="text-success"><i class="fas fa-circle"></i> <span class="ml-2">Selesai : <strong>{{ date_format($selesai , 'd F Y - H:i')}}</strong></span></p>
                 @endif
             </div>
-            <div class="row ml-1">
-                <p class="text-danger"><i class="fas fa-circle"></i> <span class="ml-2">Deadline Pengerjaan : <strong>{{ $batas != null ? date_format($batas, 'd F Y - H:i') : '-' }}</strong></span></p>
-            </div>
         </div>
     </div>
 

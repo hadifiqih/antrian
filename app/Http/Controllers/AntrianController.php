@@ -560,7 +560,11 @@ class AntrianController extends Controller
     {
         $antrian = DataAntrian::where('id', $id)->first();
 
-        $operators = Employee::where('can_stempel', 1)->orWhere('can_adv', 1)->where('is_active', 1)->get();
+        $operators = Employee::where(function ($query) {
+                        $query->where('can_stempel', 1)
+                            ->orWhere('can_adv', 1);
+                        })->where('is_active', 1)->get();
+
         $qualitys = Employee::where('can_qc', 1)->where('is_active', 1)->get();
 
         $machines = Machine::get();
@@ -683,13 +687,6 @@ class AntrianController extends Controller
 
     public function update(Request $request, $id)
     {
-        //cek apakah antrian sudah ada di data kerja
-        $cekDataKerja = DataKerja::where('ticket_order', $request->input('ticket_order'))->where('barang_id', $id)->first();
-        
-        if($cekDataKerja) {
-            return redirect()->back()->with('error', 'Data antrian sudah ada di data kerja!');
-        }
-        $antrian = DataAntrian::find($id);
         //Jika input operator adalah array, lakukan implode lalu simpan ke database
         $operator = implode(',', $request->input('operator_id'));
 
@@ -699,28 +696,40 @@ class AntrianController extends Controller
         //Jika input quality adalah array, lakukan implode lalu simpan ke database
         $quality = implode(',', $request->input('qc_id'));
 
+        //Jika input tempat adalah array, lakukan implode lalu simpan ke database
+        $tempat = implode(',', $request->input('cabang_id'));
+
         //Jika input mesin adalah array, lakukan implode lalu simpan ke database
         if($request->input('jenisMesin')) {
             $mesin = implode(',', $request->input('jenisMesin'));
         }
 
-        $dataKerja = new DataKerja();
-        $dataKerja->ticket_order = $antrian->ticket_order;
-        $dataKerja->barang_id = $antrian->job_id;
-        $dataKerja->operator_id = $operator;
-        $dataKerja->finishing_id = $finisher;
-        $dataKerja->qc_id = $quality;
-        $dataKerja->tgl_mulai = $request->input('start_job');
-        $dataKerja->tgl_selesai = $request->input('end_job');
-        $dataKerja->machine_id = $mesin ?? null;
-        $dataKerja->save();
-
-        //Jika input tempat adalah array, lakukan implode lalu simpan ke database
-        $tempat = implode(',', $request->input('cabang_id'));
-        $antrian->cabang_id = $tempat;
-
-        $antrian->admin_note = $request->input('admin_note');
-        $antrian->save();
+        $cekDataKerja = DataKerja::where('barang_id', $id)->where('ticket_order', $request->input('ticketOrder'))->first();
+        if($cekDataKerja) {
+            $cekDataKerja->barang_id = $id;
+            $cekDataKerja->operator_id = $operator;
+            $cekDataKerja->finishing_id = $finisher;
+            $cekDataKerja->qc_id = $quality;
+            $cekDataKerja->tgl_mulai = $request->input('start_job');
+            $cekDataKerja->tgl_selesai = $request->input('end_job');
+            $cekDataKerja->machine_id = $mesin ?? null;
+            $cekDataKerja->cabang_id = $tempat;
+            $cekDataKerja->admin_note = $request->input('admin_note');
+            $cekDataKerja->save();
+        } else {
+            $dataKerja = new DataKerja();
+            $dataKerja->ticket_order = $request->input('ticketOrder');
+            $dataKerja->barang_id = $id;
+            $dataKerja->operator_id = $operator;
+            $dataKerja->finishing_id = $finisher;
+            $dataKerja->qc_id = $quality;
+            $dataKerja->tgl_mulai = $request->input('start_job');
+            $dataKerja->tgl_selesai = $request->input('end_job');
+            $dataKerja->machine_id = $mesin ?? null;
+            $dataKerja->cabang_id = $tempat;
+            $dataKerja->admin_note = $request->input('admin_note');
+            $dataKerja->save();
+        }
 
         // Menampilkan push notifikasi saat selesai
         $beamsClient = new \Pusher\PushNotifications\PushNotifications(array(
@@ -780,7 +789,7 @@ class AntrianController extends Controller
         //     }
         // }
 
-        return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
+        return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil diupdate!');
     }
 
     public function show($id)

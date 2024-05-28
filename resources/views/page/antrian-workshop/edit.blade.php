@@ -77,10 +77,11 @@
                 </div>
             </div>
             <div class="card-body">
-        <form id="formEditAntrian{{ $antrian->id }}" action="{{ route('antrian.update', $antrian->id) }}" method="POST">
+        <form id="formEditAntrian{{ $barang->id }}" action="{{ route('antrian.update', $barang->id) }}" method="POST">
         @csrf
         @method('PUT')
         <input type="hidden" name="job_id" value="{{ $barang->job->id }}">
+        <input type="hidden" name="ticketOrder" value="{{ $antrian->ticket_order }}">
         <div class="row ml-1">
             <h5 class="font-weight-bold">Pilih Operator :</h5>
         </div>
@@ -91,7 +92,7 @@
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $operatorId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('operator_id')->first();
+                            $operatorId = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('operator_id')->first();
                             $implodeOperatorId = explode(',', $operatorId);
                             
                             if($operatorId != null){
@@ -133,7 +134,7 @@
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $finishingId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->get();
+                            $finishingId = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('finishing_id')->first();
                             $finishingId = explode(',', $finishingId);
                             if($finishingId != null){
                                 $isCheckedFinishing = in_array($operator->id, $finishingId) ? 'checked' : '';
@@ -153,7 +154,7 @@
                         @php
                             $isFinRekanan = in_array('r', $finishingId) ? 'checked' : '';
                         @endphp
-                        <input name="finishing_id[]" value="{{ $operator->id }}" class="form-check-input" type="checkbox" {{ $isFinRekanan }}>
+                        <input name="finishing_id[]" value="r" class="form-check-input" type="checkbox" {{ $isFinRekanan }}>
                         <label class="form-check-label"><span>Rekanan</span></label>
                     </div>
                 </div>
@@ -174,7 +175,7 @@
                 <div class="form-group">
                     <div class="form-check">
                         @php
-                            $qualityId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('qc_id')->first();
+                            $qualityId = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('qc_id')->first();
                             $qualityId = explode(',', $qualityId);
                             if($qualityId != null){
                                 $isCheckedQC = is_array($qualityId) && in_array($qc->id, $qualityId);
@@ -205,7 +206,7 @@
                 <div class="col-md-3">
                     <div class="form-check">
                         @php
-                            $cabangId = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('cabang_id')->first();
+                            $cabangId = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('cabang_id')->first();
                             $cabangId = explode(',', $cabangId);
                             if($cabangId != null){
                                 $isCheckedCabang = is_array($cabangId) && in_array($cabang, $cabangId) ? 'checked' : '';
@@ -213,7 +214,7 @@
                                 $isCheckedCabang = false;
                             }
                         @endphp
-                        <input id="cabang{{ $barang->id }}" name="cabang_id" value="{{ $cabang }}" class="form-check-input" type="checkbox" {{ $isCheckedCabang }}>
+                        <input id="cabang{{ $barang->id }}" name="cabang_id[]" value="{{ $cabang }}" class="form-check-input" type="checkbox" {{ $isCheckedCabang }}>
                         <label class="form-check-label" id="ca">{{ $value }}</label>
                     </div>
                 </div>
@@ -225,7 +226,7 @@
         <div class="mb-3">
             <div class="form-group">
                 <label>Jenis Mesin :</label>
-                <select id="cariMesin{{ $barang->id }}" class="custom-select rounded-1 select2" multiple="multiple" name="jenisMesin" style="width: 100%">
+                <select id="cariMesin{{ $barang->id }}" class="custom-select rounded-1 select2" multiple="multiple" name="jenisMesin[]" style="width: 100%">
 
                 </select>
                 @if($antrian->cabang_id != null)
@@ -237,14 +238,14 @@
         <div class="mb-3">
             {{-- Masukkan start job --}}
             @php
-                $mulai = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('tgl_mulai')->first();
+                $mulai = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('tgl_mulai')->first();
             @endphp
             <label for="start_job" class="form-label">Mulai<span class="text-danger">*</span></label>
             <input type="datetime-local" class="form-control" id="start_job" aria-describedby="start_job" name="start_job" value="{{ $mulai }}" required>
         </div>
         <div class="mb-3">
             @php
-                $selesai = \App\Models\DataKerja::where('ticket_order', $antrian->ticket_order)->where('barang_id', $barang->id)->pluck('tgl_selesai')->first();
+                $selesai = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('tgl_selesai')->first();
             @endphp
             {{-- Masukkan Deadline --}}
             <label for="deadline" class="form-label">Deadline<span class="text-danger">*</span></label>
@@ -252,13 +253,16 @@
         </div>
         <div class="mb-3">
             {{-- Masukkan Keterangan --}}
+            @php
+                $note = \App\Models\DataKerja::where('barang_id', $barang->id)->pluck('admin_note')->first();
+            @endphp
             <label for="keterangan" class="form-label">Catatan Admin <span class="text-muted font-italic text-sm">(Opsional)</span></label>
-            <textarea class="form-control" id="keterangan" rows="3" name="admin_note">{{ $antrian->admin_note != null ? $antrian->admin_note : "" }}</textarea>
+            <textarea class="form-control" id="keterangan" rows="3" name="admin_note">{{ $note }}</textarea>
         </div>
 
         <input type="hidden" name="isEdited" value="{{ $isEdited }}">
         <div class="d-flex align-items-center">
-            <input id="submitEdit{{ $barang->id }}" type="submit" class="btn btn-primary" value="Submit"><span id="loader" class="loader m-2" style="display: none"></span>
+            <input id="submitEdit{{ $barang->id }}" type="submit" class="btn btn-primary" value="Submit"><span id="loader{{ $barang->id }}" class="loader m-2" style="display: none"></span>
         </div>
     </form>
                 </div>
@@ -318,11 +322,6 @@
                 ],
             });
 
-        $('#formEditAntrian').on('submit', function() {
-            $(this).find('input[type="submit"]').prop('disabled', true);
-            $('#loader').show();
-        });
-
         $('.select2').select2({
             placeholder: "Pilih Mesin",
             allowClear: true,
@@ -344,6 +343,45 @@
         });
 
         @foreach($barangs as $barang)
+        $('#formEditAntrian{{ $barang->id }}').on('submit', function(e) {
+            e.preventDefault(); // Mencegah form dari submit default
+            $(this).find('input[type="submit"]').prop('disabled', true); // Nonaktifkan tombol submit
+            $('#loader{{ $barang->id }}').show(); // Tampilkan loader
+
+            // Ambil data dari form
+            var formData = $(this).serialize();
+
+            // Kirim data menggunakan AJAX
+            $.ajax({
+                url: $(this).attr('action'), // URL tujuan dari form action
+                type: 'POST', // Metode pengiriman, bisa juga 'GET' tergantung kebutuhan
+                data: formData, // Data yang akan dikirim
+                success: function(response) {
+                    $(document).Toasts('create', {
+                        title: 'Notifikasi',
+                        autohide: true,
+                        delay: 1500,
+                        class: 'bg-success',
+                        body: 'Penugasan {{ $barang->job->job_name }} berhasil diperbarui !'
+                    });
+                },
+                error: function(xhr, status, error) {
+                    $(document).Toasts('create', {
+                        title: 'Notifikasi',
+                        autohide: true,
+                        delay: 1500,
+                        class: 'bg-danger',
+                        body: 'Penugasan {{ $barang->job->job_name }} gagal diperbarui !'
+                    });
+                },
+                complete: function() {
+                    // Fungsi yang akan dijalankan setelah request selesai (baik berhasil maupun gagal)
+                    $('#formEditAntrian{{ $barang->id }}').find('input[type="submit"]').prop('disabled', false); // Aktifkan kembali tombol submit
+                    $('#loader{{ $barang->id }}').hide(); // Sembunyikan loader
+                }
+            });
+        });
+
         $.ajax({
             type: 'GET',
             url: '/design/get-machine-by-idbarang/' + '{{ $barang->id }}',
