@@ -189,6 +189,38 @@
 
     <div class="card">
         <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-truck mr-2"></i> <strong>Informasi Pengiriman</strong></h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md">
+                    <h5><strong>Alamat Pengiriman</strong></h5>
+                    <p>{{ !isset($pengiriman->alamat_pengiriman) ? '-' : $pengiriman->alamat_pengiriman }}</p>
+                </div>
+                <div class="col-md">
+                    <h5><strong>Ekspedisi Pengiriman</strong></h5>
+                    <p>{{ !isset($pengiriman->ekspedisi) ? '-' : $pengiriman->ekspedisi}}</p>
+                </div>
+                <div class="col-md">
+                    <h5><strong>Biaya Pengiriman</strong></h5>
+                    <p>Rp{{ !isset($pengiriman->ongkir) ? '-' : number_format($pengiriman->ongkir, 0, ',', '.') }}</p>
+                </div>
+                <div class="col-md">
+                    <h5><strong>Resi (Airway Bill)</strong></h5>
+                    <p>{{ !isset($pengiriman->no_resi) || $pengiriman->no_resi == null ? '-' : $pengiriman->no_resi }}</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
             <h3 class="card-title"><i class="fas fa-folder-open mr-2"></i> <strong>File Cetak & Pendukung</strong></h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -312,10 +344,11 @@
         </div>
         @endforeach
     </div>
+    
 
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-truck mr-2"></i> <strong>Informasi Pengiriman</strong></h3>
+            <h3 class="card-title"><i class="fas fa-money-check mr-2"></i> <strong>Biaya Produksi</strong></h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                     <i class="fas fa-minus"></i>
@@ -324,30 +357,95 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md">
-                    <h5><strong>Alamat Pengiriman</strong></h5>
-                    <p>{{ !isset($pengiriman->alamat_pengiriman) ? '-' : $pengiriman->alamat_pengiriman }}</p>
-                </div>
-                <div class="col-md">
-                    <h5><strong>Ekspedisi Pengiriman</strong></h5>
-                    <p>{{ !isset($pengiriman->ekspedisi) ? '-' : $pengiriman->ekspedisi}}</p>
-                </div>
-                <div class="col-md">
-                    <h5><strong>Biaya Pengiriman</strong></h5>
-                    <p>Rp{{ !isset($pengiriman->ongkir) ? '-' : number_format($pengiriman->ongkir, 0, ',', '.') }}</p>
-                </div>
-                <div class="col-md">
-                    <h5><strong>Resi (Airway Bill)</strong></h5>
-                    <p>{{ !isset($pengiriman->no_resi) || $pengiriman->no_resi == null ? '-' : $pengiriman->no_resi }}</p>
-                </div>
+                <div class="col-md table-responsive">
+                    <h5><strong>Biaya Bahan</strong></h5>
+                @if($antrian->done_production_at == null && auth()->user()->role_id == 10)
+                    <button class="btn btn-primary btn-sm m-0" onclick="modalBahan()"><i class="fas fa-plus-circle"></i> Tambah</button>
+                @endif
+                <table id="tabelBahan" class="table table-responsive table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Nama Bahan</th>
+                            <th scope="col">Harga</th>
+                            <th scope="col">Note</th>
+                            <th scope="col">Orderan</th>
+                            <th scope="col">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="6" class="text-center">Total Biaya Bahan : <span class="text-danger" id="bahanTotal">{{ $totalBahan }}</span></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <hr>
+                <h5><strong>Biaya Lainnya</strong></h5>
+                <table id="tableBahan" class="table table-responsive table-bordered table-hover mt-3" style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>Biaya Sales (3%)</th>
+                            <th>Biaya Desain (2%)</th>
+                            <th>Biaya Penanggung Jawab (3%)</th>
+                            <th>Biaya Pekerjaan (5%)</th>
+                            <th>BPJS (2,5%)</th>
+                            <th>Biaya Transportasi (1%)</th>
+                            <th>Biaya Overhead / Lainnya (2,5%)</th>
+                            <th>Biaya Alat & Listrik (2%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Rp{{ number_format($biayaSales, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaDesain, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaPenanggungJawab, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaPekerjaan, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaBPJS, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaTransportasi, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaOverhead, 0, ',', '.') }}</th>
+                            <th>Rp{{ number_format($biayaAlatListrik, 0, ',', '.') }}</th>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="8" class="text-center">Total Biaya Lainnya : <span class="text-danger" id="totalBiayaLain">Rp{{ number_format($biayaSales + $biayaDesain + $biayaPenanggungJawab + $biayaPekerjaan + $biayaBPJS + $biayaTransportasi + $biayaOverhead + $biayaAlatListrik, 0, ',', '.') }}</span></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <hr>
+                <div class="row">
+                    <div class="col-sm">
+                        <h5 class="font-weight-bold text-success">Profit Perusahaan : <span class="text-success float-right" id="profit">Rp{{ number_format($profit, 0, ',', '.') }}</span></h5>
+                        <h6>Omset : <span class="text-dark float-right" id="profit">Rp{{ number_format($totalKeseluruhan, 0, ',', '.') }}</span></h6>
+                        <h6 class="text-danger">Total Biaya Produksi : <span class="text-danger float-right" id="totalProduksi">-Rp{{ number_format($totalBiaya, 0, ',', '.')}}</span></h6>
+                        <h6>Diupdate oleh : <span class="text-dark float-right">{{ $antrian->estimator_id == null ? '-' : $antrian->estimator->name }}</span></h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="text-right">
+                            @if(auth()->user()->role_id == 10)
+                                @if($antrian->done_production_at == null)
+                                <button class="btn btn-success btn-sm" onclick="tandaiSelesaiHitungBP()">Tandai Selesai <i class="fas fa-check"></i></button>
+                                @else
+                                <a href="{{ route('report.tampilBP', $antrian->ticket_order) }}" class="btn btn-warning btn-sm">Unduh BP<i class="fas fa-download"></i></a>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
     @includeIf('page.antrian-workshop.modal.modal-ref-acc')
+    @includeIf('page.antrian-workshop.modal.modal-tambah-bahan')
     @includeIf('page.antrian-workshop.modal.modal-bukti-pembayaran')
     @includeIf('page.antrian-workshop.modal.modal-pelunasan')
+</div>
+
 @endsection
 
 @section('script')

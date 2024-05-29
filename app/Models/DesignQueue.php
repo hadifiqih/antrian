@@ -125,14 +125,16 @@ class DesignQueue extends Model
     {
         $nama_file = null;
 
-        if($request->hasFile('fileCetak')){
+        if ($request->hasFile('fileCetak')) {
             $file = $request->file('fileCetak');
-            $nama_file = time()."_".$file->getClientOriginalName();
-            $tujuan_upload = 'storage/file-cetak';
-            $file->move($tujuan_upload,$nama_file);
+            $nama_file = time() . "_" . $file->getClientOriginalName();
+            $filePath = 'file-cetak/' . $nama_file;
+            
+            // Simpan file menggunakan Storage Laravel
+            Storage::disk('public')->putFileAs('file-cetak', $file, $nama_file);
         }
 
-        if($request->input('linkFile')){
+        if ($request->input('linkFile')) {
             $nama_file = $request->input('linkFile');
         }
 

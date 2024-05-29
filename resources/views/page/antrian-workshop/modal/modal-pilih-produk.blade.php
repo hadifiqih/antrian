@@ -1,5 +1,5 @@
 <div class="modal fade" id="modalPilihProduk">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Input Produk</h5>
@@ -110,12 +110,25 @@
 
                 <div class="form-group">
                     <label for="namaFileDesain">Pilih Desain</label>
-                    <select class="form-control select2" id="namaFileDesain" name="namaFileDesain" style="width: 100%">
+                    {{-- <select class="form-control select2" id="namaFileDesain" name="namaFileDesain" style="width: 100%">
                         <option value="" selected disabled>Pilih </option>
                         @foreach($desain as $d)
                             <option value="{{ $d->id }}">{{ $d->judul }}</option>
                         @endforeach
-                    </select>
+                    </select> --}}
+                    <div class="row">
+                        @foreach ($desain as $d)
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="{{ asset('storage/') }}" alt="{{ $d->judul }}">
+                                <div class="card-body">
+                                    <p class="card-text"></p>
+                                    <a href="#" class="btn btn-primary">Pilih</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

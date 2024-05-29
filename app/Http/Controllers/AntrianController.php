@@ -93,73 +93,6 @@ class AntrianController extends Controller
             ->addColumn('customer', function ($antrian) {
                 return $antrian->customer->nama;
             })
-            ->addColumn('endJob', function ($antrian) {
-                if($antrian->dataKerja->tgl_selesai == null) {
-                    return '<span class="text-danger">BELUM DIANTRIKAN</span>';
-                } else {
-                    return '<span class="text-danger">'. $antrian->dataKerja->tgl_selesai .'</span>';
-                }
-            })
-            ->addColumn('operator', function ($antrian) {
-                if($antrian->dataKerja->operator_id == null) {
-                    return '<span class="text-danger">OPERATOR KOSONG</span>';
-                } else {
-                    //explode string operator
-                    $operator = explode(',', $antrian->dataKerja->operator_id);
-                    $namaOperator = [];
-                    foreach($operator as $o) {
-                        if($o == 'r') {
-                            $namaOperator[] = "<span class='text-primary'>Rekanan</span>";
-                        } else {
-                            $namaOperator[] = Employee::where('id', $o)->first()->name;
-                        }
-                    }
-                    return implode(', ', $namaOperator);
-                }
-            })
-            ->addColumn('finishing', function ($antrian) {
-                if($antrian->dataKerja->finishing_id == null) {
-                    return '<span class="text-danger">FINISHING KOSONG</span>';
-                } else {
-                    //explode string finishing
-                    $finishing = explode(',', $antrian->dataKerja->finishing_id);
-                    $namaFinishing = [];
-                    foreach($finishing as $f) {
-                        if($f == 'r') {
-                            $namaFinishing[] = "<span class='text-primary'>Rekanan</span>";
-                        } else {
-                            $namaFinishing[] = Employee::where('id', $f)->first()->name;
-                        }
-                    }
-                    return implode(', ', $namaFinishing);
-                }
-            })
-            ->addColumn('qc', function ($antrian) {
-                if($antrian->dataKerja->qc_id == null) {
-                    return '<span class="text-danger">QC KOSONG</span>';
-                } else {
-                    //explode string qc
-                    $qc = explode(',', $antrian->dataKerja->qc_id);
-                    $namaQc = [];
-                    foreach($qc as $q) {
-                        $namaQc[] = Employee::where('id', $q)->first()->name;
-                    }
-                    return implode(', ', $namaQc);
-                }
-            })
-            ->addColumn('tempat', function ($antrian) {
-                if($antrian->cabang_id == null) {
-                    return '<span class="text-danger">TEMPAT KOSONG</span>';
-                } else {
-                    //explode string cabang
-                    $cabang = explode(',', $antrian->cabang_id);
-                    $namaCabang = [];
-                    foreach($cabang as $c) {
-                        $namaCabang[] = Cabang::where('id', $c)->first()->nama_cabang;
-                    }
-                    return implode(', ', $namaCabang);
-                }
-            })
             ->addColumn('action', function ($antrian) {
                 $btn = '<div class="btn-group">';
                 if(auth()->user()->isAdminWorkshop()) {
@@ -181,7 +114,7 @@ class AntrianController extends Controller
                 $btn .= '</div>';
                 return $btn;
             })
-            ->rawColumns(['ticket_order', 'endJob', 'operator', 'finishing', 'qc', 'tempat', 'action'])
+            ->rawColumns(['ticket_order', 'action'])
             ->make(true);
     }
 
@@ -794,7 +727,9 @@ class AntrianController extends Controller
 
     public function show($id)
     {
-        $antrian = DataAntrian::where('ticket_order', $id)->with('sales', 'customer', 'job', 'barang', 'dataKerja', 'pembayaran', 'estimator')->first();
+        $tiket = $id;
+
+        $antrian = DataAntrian::where('ticket_order', $id)->first();
 
         $items = Barang::where('ticket_order', $id)->get();
 
@@ -803,8 +738,6 @@ class AntrianController extends Controller
         $pengiriman = Pengiriman::where('ticket_order', $id)->first();
 
         $ekspedisi = Ekspedisi::all();
-
-        $desainan = DesignQueue::where('data_antrian_id', $antrian->id)->get();
 
         $omset = $pembayaran->total_harga;
 
@@ -844,7 +777,7 @@ class AntrianController extends Controller
 
         $sisaPembayaran = $total - $pembayaran->dibayarkan;
 
-        return view('page.antrian-workshop.show', compact('antrian', 'total', 'items', 'pembayaran', 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran', 'desainan'));
+        return view('page.antrian-workshop.show', compact('tiket', 'antrian', 'total', 'items', 'pembayaran', 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran'));
     }
 
     public function updateDeadline(Request $request)

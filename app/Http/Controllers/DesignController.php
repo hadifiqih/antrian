@@ -193,6 +193,11 @@ class DesignController extends Controller
 
     public function simpanFile(Request $request, $id)
     {
+        $request->validate([
+            'fileCetak' => 'required|mimes:cdr,pdf,ai,eps,jpg,png|max:2048',
+            'linkFile' => 'nullable|url',
+        ]);
+        
         $design = DesignQueue::find($id);
         $design->simpanFileCetak($request);
         return redirect()->route('design.indexDesain')->with('success', 'File berhasil diupload');

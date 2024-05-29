@@ -84,26 +84,8 @@
             </tr>
 
             <tr>
-              <td>Tanggal</td>
+              <td colspan="2">Tanggal</td>
               <td>: {{ $antrian->created_at }}</td>
-              <td>Lokasi Pengerjaan</td>
-              <td>: 
-                @php
-                    $location = $antrian->cabang_id;
-                    //explode string
-                    $explode = explode(',', $location);
-                    //for each
-                    foreach ($explode as $key => $value) {
-                        $cabang = App\Models\Cabang::where('id', $value)->first();
-                        $tempat = "";
-                        if(end($explode) == $value){
-                            echo $tempat .= $cabang->nama_cabang;
-                        }else{
-                            echo $tempat .= $cabang->nama_cabang.',';
-                        }
-                    }
-                @endphp
-              </td>
             </tr>
             
             <tr>
@@ -138,7 +120,9 @@
             <tr>
               <td class="text-center" colspan="4">
                 @foreach ($barang as $item)
-                    <img src="{{ asset($item->accdesain) }}" alt="" width="200px">
+                  @if($file->designQueue && $file->designQueue->file_cetak)
+                    <img src="{{ asset($file->accdesain) }}" alt="" width="200px">
+                  @endif
                 @endforeach
               </td>
             </tr>

@@ -92,11 +92,6 @@
                                             <th scope="col">Ticket Order</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Nama Customer</th>
-                                            <th scope="col">Deadline</th>
-                                            <th scope="col">Operator</th>
-                                            <th scope="col">Finishing</th>
-                                            <th scope="col">QC</th>
-                                            <th scope="col">Tempat</th>
                                             <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
@@ -115,7 +110,7 @@
                     <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Antrian Stempel</h3>
+                                <h3 class="card-title">Antrian Workshop</h3>
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
@@ -213,11 +208,6 @@
                     {data: 'ticket_order', name: 'ticket_order'},
                     {data: 'sales', name: 'sales'},
                     {data: 'customer', name: 'customer'},
-                    {data: 'endJob', name: 'endJob'},
-                    {data: 'operator', name: 'operator'},
-                    {data: 'finishing', name: 'finishing'},
-                    {data: 'qc', name: 'qc'},
-                    {data: 'tempat', name: 'tempat'},
                     {data: 'action', name: 'action'},
                 ],
             });

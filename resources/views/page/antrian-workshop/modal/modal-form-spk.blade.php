@@ -53,56 +53,39 @@
               </tr>
 
               <tr>
-                <td>Tanggal</td>
-                <td>: {{ $antrian->created_at }}</td>
-                <td>Lokasi Pengerjaan</td>
-                <td>:
-                  @php
-                      $location = $antrian->cabang_id;
-                      //explode string
-                      $explode = explode(',', $location);
-                      //for each
-                      foreach ($explode as $key => $value) {
-                          $cabang = App\Models\Cabang::where('id', $value)->first();
-                          $tempat = "";
-                          if(end($explode) == $value){
-                              echo $tempat .= $cabang->nama_cabang;
-                          }else{
-                              echo $tempat .= $cabang->nama_cabang.',';
-                          }
-                      }
-                  @endphp
-                </td>
-              </tr>
-
-              <tr>
                 <td>Mulai</td>
-                <td>: {{ $dataKerja->tgl_mulai }}</td>
+                <td><strong>{{ $dataKerja->tgl_mulai }}</strong></td>
                 <td>Selesai</td>
-                <td>: {{ $dataKerja->tgl_selesai }}</td>
+                <td><strong>{{ $dataKerja->tgl_selesai }}</strong></td>
               </tr>
 
-              <tr class="bg-dark">
+              <tr class="bg-danger">
                 <td class="text-center text-white" colspan="4">Pelanggan</td>
               </tr>
 
               <tr>
                 <td>Customer</td>
-                <td>: {{ $customer->nama }}</td>
+                <td colspan="3"><strong>{{ $customer->nama }}</strong></td>
+              </tr>
+
+              <tr>
                 <td>Alamat</td>
-                <td>: {{ $customer->alamat }}</td>
+                <td colspan="3"><strong>{{ $customer->alamat }}</strong></td>
               </tr>
 
               <tr>
                 <td>Instansi</td>
-                <td>: {{ $customer->instansi }}</td>
+                <td colspan="3"><strong>{{ $customer->instansi }}</strong></td>
+              </tr>
+
+              <tr>
                 <td>Telepon</td>
-                <td>: {{ $customer->telepon }}</td>
+                <td colspan="3"><strong>{{ $customer->telepon }}</strong></td>
               </tr>
 
               <tr>
                 <td>Sumber Pelanggan</td>
-                <td colspan="3">: {{ $customer->frekuensi_order > 1 ? 'Repeat Order' : $customer->infoPelanggan }}</td>
+                <td colspan="3"><strong>{{ $customer->frekuensi_order > 1 ? 'Repeat Order' : $customer->infoPelanggan }}</strong></td>
               </tr>
 
               <tr class="bg-dark">
@@ -111,9 +94,19 @@
 
               <tr>
                 <td class="text-center" colspan="4">
+                  <div class="row justify-content-center">
                   @foreach ($barang as $item)
-                      <img src="{{ asset($item->accdesain) }}" alt="" width="200px">
+                  <div class="col-md-3">
+                    @if($item->designQueue && $item->designQueue->file_cetak)
+                      <img src="{{ asset('storage/acc_desain/'. $item->acc_desain) }}" alt="Gambar ACC {{ $item->id }}" width="200px">
+                      <p class="text-center">{{ $item->job->job_name }}</p>
+                    @else
+                      <img class="text-center" alt="Gambar ACC {{ $item->id }}" width="200px">
+                      <p class="text-center">{{ $item->job->job_name }}</p>
+                    @endif
+                  </div>
                   @endforeach
+                </div>
                 </td>
               </tr>
 
@@ -122,10 +115,10 @@
               </tr>
 
               <tr>
-                <td class="text-center">Nama Pekerjaan</td>
-                <td class="text-center">Jumlah</td>
-                <td class="text-center">Keterangan</td>
-                <td class="text-center">Desainer</td>
+                <td class="text-center"><strong>Nama Pekerjaan</strong></td>
+                <td class="text-center"><strong>Jumlah</strong></td>
+                <td class="text-center"><strong>Keterangan</strong></td>
+                <td class="text-center"><strong>Desainer</strong></td>
               </tr>
 
               @foreach ($barang as $item)
@@ -137,91 +130,94 @@
               </tr>
               @endforeach
 
-              <tr class="bg-dark text-white">
-                <td colspan="4" class="text-center text-white">Penugasan</td>
+              @foreach ($barang as $item)
+              <tr class="bg-success text-white">
+                <td colspan="4" class="text-center text-white">Penugasan - {{ $item->job->job_name }}</td>
               </tr>
 
               <tr>
-                <td>Operator</td>
-                <td colspan="2">Finishing</td>
-                <td>Quality Control</td>
-
+                <td><strong>Operator</strong></td>
+                <td colspan="2"><strong>Finishing</strong></td>
+                <td><strong>Quality Control</strong></td>
               </tr>
 
               <tr>
                 <td>
                   @php
-                      $operator = $dataKerja->operator_id;
-                      //explode string
-                      $explode = explode(',', $operator);
-                      //for each
-                      foreach ($explode as $value) {
-                        $employee = App\Models\Employee::where('id', $value)->first();
-                        $operator = "";
-                        if($value == 'r'){
-                          if(end($explode) == $value){
-                            echo $operator .= '- Rekanan';
-                          }else{
-                            echo $operator .= '- Rekanan, <br>';
-                          }
-                        }else{
-                          if(end($explode) == $value){
-                              echo $operator .= '- ' . $employee->name;
-                          }else{
-                              echo $operator .= '- ' . $employee->name.', <br>';
-                          }
+                    $operator = \App\Models\DataKerja::where('ticket_order', $item->ticket_order)->where('barang_id', $item->id)->pluck('operator_id')->first();
+                    // explode string
+                    $explode = explode(',', $operator);
+                    $operatorNames = [];
+                    // for each
+                    foreach ($explode as $value) {
+                        if ($value == 'r') {
+                            $operatorNames[] = 'Rekanan';
+                        } else {
+                            $employee = App\Models\Employee::find($value);
+                            if ($employee) {
+                                $operatorNames[] = $employee->name;
+                            } else {
+                                $operatorNames[] = 'Tidak Ditemukan';
+                            }
                         }
-                      }
-                  @endphp
+                    }
+                    // implode with ', <br>'
+                    echo '- ' . implode(', <br>- ', $operatorNames);
+                @endphp
                 </td>
+
                 <td colspan="2">
                   @php
-                      $finishing = $dataKerja->finishing_id;
-                      //explode string
-                      $explode = explode(',', $finishing);
-                      //for each
-                      foreach ($explode as $value) {
-                        $employee = App\Models\Employee::where('id', $value)->first();
-                        $finishing = "";
-                        if($value == 'r'){
-                          if(end($explode) == $value){
-                            echo $finishing .= '- Rekanan';
-                          }else{
-                            echo $finishing .= '- Rekanan, <br>';
-                          }
-                        }else{
-                          if(end($explode) == $value){
-                              echo $finishing .= '- ' . $employee->name;
-                          }else{
-                              echo $finishing .= '- ' . $employee->name.', <br>';
-                          }
+                    $finishing = \App\Models\DataKerja::where('ticket_order', $item->ticket_order)->where('barang_id', $item->id)->pluck('finishing_id')->first();
+                    // explode string
+                    $explode = explode(',', $finishing);
+                    $finishingNames = [];
+                    // for each
+                    foreach ($explode as $value) {
+                        if ($value == 'r') {
+                            $finishingNames[] = 'Rekanan';
+                        } else {
+                            $employee = \App\Models\Employee::find($value);
+                            if ($employee) {
+                                $finishingNames[] = $employee->name;
+                            } else {
+                                $finishingNames[] = 'Tidak Ditemukan';
+                            }
                         }
-                      }
-                  @endphp
+                    }
+                    // implode with ', <br>'
+                    echo '- ' . implode(', <br>- ', $finishingNames);
+                @endphp
                 </td>
                 <td>
                   @php
-                      $qc = $dataKerja->qc_id;
-                      //explode string
-                      $explode = explode(',', $qc);
-                      //for each
-                      foreach ($explode as $value) {
-                          $employee = App\Models\Employee::where('id', $value)->first();
-                          $qc = "";
-                          if(end($explode) == $value){
-                              echo $qc .= '- ' . $employee->name;
-                          }else{
-                              echo $qc .= '- ' . $employee->name.', <br>';
-                          }
-                      }
-                  @endphp
+                    $qc = \App\Models\DataKerja::where('ticket_order', $item->ticket_order)->where('barang_id', $item->id)->pluck('qc_id')->first();
+                    // explode string
+                    $explode = explode(',', $qc);
+                    $qcNames = [];
+                    // for each
+                    foreach ($explode as $value) {
+                        $employee = \App\Models\Employee::find($value);
+                        if ($employee) {
+                            $qcNames[] = $employee->name;
+                        } else {
+                            $qcNames[] = 'Tidak Ditemukan';
+                        }
+                    }
+                    // implode with ', <br>'
+                    echo '- ' . implode(', <br>- ', $qcNames);
+                @endphp
                 </td>
               </tr>
 
               <tr>
+                @php
+                  $catatan = \App\Models\DataKerja::where('ticket_order', $item->ticket_order)->where('barang_id', $item->id)->pluck('admin_note')->first();
+                @endphp
                 <td class="text-center">Catatan</td>
-                <td colspan="3">: {{ $antrian->admin_note }}</td>
+                <td colspan="3">{{ $catatan ?? '-' }}</td>
               </tr>
+              @endforeach
 
             </table>
           </div>
