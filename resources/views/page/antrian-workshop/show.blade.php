@@ -221,22 +221,6 @@
 
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-clipboard mr-2"></i> <strong>Catatan Admin Workshop</strong></h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row ml-1">
-                <p class="text-dark keterangan">{{ $antrian->admin_note == null ? '-' : $antrian->admin_note }}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
             <h3 class="card-title"><i class="fas fa-folder-open mr-2"></i> <strong>File Cetak & Pendukung</strong></h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
