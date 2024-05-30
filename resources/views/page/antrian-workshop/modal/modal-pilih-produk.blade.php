@@ -1,5 +1,5 @@
 <div class="modal fade" id="modalPilihProduk">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Input Produk</h5>
@@ -8,8 +8,9 @@
                 </button>
             </div>
         <div class="modal-body">
-            <form id="formTambahProduk" action="" enctype="multipart/form-data">
+            <form id="formTambahProduk" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="idPelanggan" id="idPelanggan" value="">
                 <div class="form-group">
                     <h6 class="font-weight-bold">Kategori Produk</h6>
                     <select name="kategoriProduk" id="kategoriProduk" class="form-control" data-allow-search="true" style="width: 100%" required>
@@ -110,20 +111,14 @@
 
                 <div class="form-group">
                     <label for="namaFileDesain">Pilih Desain</label>
-                    {{-- <select class="form-control select2" id="namaFileDesain" name="namaFileDesain" style="width: 100%">
-                        <option value="" selected disabled>Pilih </option>
-                        @foreach($desain as $d)
-                            <option value="{{ $d->id }}">{{ $d->judul }}</option>
-                        @endforeach
-                    </select> --}}
                     <div class="row">
                         @foreach ($desain as $d)
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                            <div class="card" style="width: 18rem;">
-                                <img class="card-img-top" src="{{ asset('storage/') }}" alt="{{ $d->judul }}">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <img class="card-img-top" src="{{ asset('storage/ref-desain/' . $d->ref_desain) }}" alt="{{ $d->judul }}">
                                 <div class="card-body">
-                                    <p class="card-text"></p>
-                                    <a href="#" class="btn btn-primary">Pilih</a>
+                                    <p class="card-text">{{ $d->judul }}</p>
+                                    <button type="button" onclick="pilihDesain(this, {{ $d->id }})" class="btn btn-primary btn-block btnDesainan">Pilih</button>
                                 </div>
                             </div>
                         </div>
@@ -132,12 +127,13 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <input type="hidden" name="queueId" id="queueId" value="">
                 <input id="submitProduk" type="submit" class="btn btn-primary btnTambah" value="Tambah">
             </div>
         </form>
-      </div>
-      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-content -->
     </div>
     <!-- /.modal-dialog -->
-  </div>
-  <!-- /.modal -->
+</div>
+<!-- /.modal -->

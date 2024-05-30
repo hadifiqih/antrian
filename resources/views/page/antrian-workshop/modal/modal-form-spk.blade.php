@@ -96,15 +96,15 @@
                 <td class="text-center" colspan="4">
                   <div class="row justify-content-center">
                   @foreach ($barang as $item)
-                  <div class="col-md-3">
-                    @if($item->designQueue && $item->designQueue->file_cetak)
-                      <img src="{{ asset('storage/acc_desain/'. $item->acc_desain) }}" alt="Gambar ACC {{ $item->id }}" width="200px">
-                      <p class="text-center">{{ $item->job->job_name }}</p>
-                    @else
-                      <img class="text-center" alt="Gambar ACC {{ $item->id }}" width="200px">
-                      <p class="text-center">{{ $item->job->job_name }}</p>
-                    @endif
-                  </div>
+                    <div class="col-md-3">
+                      @if($item->designQueue && $item->designQueue->file_cetak)
+                        <img src="{{ asset('storage/acc_desain/'. $item->designQueue->acc_desain) }}" alt="Gambar ACC {{ $item->id }}" width="200px">
+                        <p class="text-center">{{ $item->job->job_name }}</p>
+                      @else
+                        <img class="text-center" alt="Gambar ACC {{ $item->id }}" width="200px">
+                        <p class="text-center">{{ $item->job->job_name }}</p>
+                      @endif
+                    </div>
                   @endforeach
                 </div>
                 </td>

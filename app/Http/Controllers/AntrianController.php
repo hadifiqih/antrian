@@ -181,7 +181,7 @@ class AntrianController extends Controller
     public function buatAntrianWorkshop()
     {
         $ekspedisi = Ekspedisi::all();
-        $desain = DesignQueue::where('sales_id', auth()->user()->sales->id)->where('status', 2)->where('data_antrian_id', 0)->get();
+        $desain = DesignQueue::where('sales_id', auth()->user()->sales->id)->where('status', 2)->where('barang_id', 0)->get();
         $infoPelanggan = SumberPelanggan::all();
 
         return view('page.antrian-workshop.create', compact('ekspedisi', 'desain', 'infoPelanggan'));

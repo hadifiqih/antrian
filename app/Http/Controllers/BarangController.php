@@ -22,72 +22,89 @@ class BarangController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    private function handleFileUpload($file)
     {
-        //
+        if (empty($file)) {
+            return null;
+        }
+
+        $fileName = time().'_'.$file->getClientOriginalName();
+        $pathGambar = 'acc-desain/'.$fileName;
+        Storage::disk('public')->put($pathGambar, file_get_contents($file));
+
+        return $fileName;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        // Validasi input
+        $request->validate([
+            'idPelanggan' => 'required|string',
+            'kategoriProduk' => 'required|string',
+            'namaProduk' => 'required|string',
+            'harga' => 'required|string',
+            'qty' => 'required|string',
+            'keterangan' => 'nullable|string',
+            'fileAccDesain' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'tahunIklan' => 'nullable|string',
+            'bulanIklan' => 'nullable|string',
+            'queueId' => 'required|string',
+        ]);
+
+        // Remove currency format
         $harga = CustomHelper::removeCurrencyFormat($request->harga);
 
-        //rename file acc_desain
-        if($request->file('acc_desain') == null ){
-            $fileName = null;
+        // Handle file upload
+        $fileName = $this->handleFileUpload($request->file('fileAccDesain'));
+
+        DB::beginTransaction();
+        try {
+
+            // Update DesignQueue
+            $desainan = DesignQueue::find($request->queueId);
+            $desainan->acc_desain = $fileName;
+            $desainan->save();
+
+            // Create Barang
+            $barang = new Barang();
+            $barang->customer_id = $request->idPelanggan;
+            $barang->kategori_id = $request->kategoriProduk;
+            $barang->job_id = $request->namaProduk;
+            $barang->user_id = auth()->user()->id;
+            $barang->price = $harga;
+            $barang->qty = $request->qty;
+            $barang->note = $request->keterangan;
+            $barang->accdesain = $fileName;
+            $barang->design_queue_id = $request->queueId;
+            $barang->save();
+
+            // Save BarangIklan if applicable
+            if (!empty($request->tahunIklan)) {
+                $iklan = new BarangIklan();
+                $iklan->tahun_iklan = $request->tahunIklan;
+                $iklan->bulan_iklan = $request->bulanIklan;
+                $iklan->sales_id = $barang->user->sales->id;
+                $iklan->job_id = $barang->job_id;
+                $iklan->barang_id = $barang->id;
+                $iklan->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang berhasil ditambahkan!',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menambahkan barang!',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        else{
-            $file = $request->file('acc_desain');
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $pathGambar = 'acc_desain/'.$fileName;
-            Storage::disk('public')->put($pathGambar, file_get_contents($file));
-        }
-
-        //cek apakah user memiliki relasi dengan tabel sales
-        $barang = new Barang();
-        $barang->customer_id = $request->customer_id;
-        $barang->kategori_id = $request->kategoriProduk;
-        $barang->job_id = $request->namaProduk;
-        $barang->user_id = auth()->user()->id;
-        $barang->price = $harga;
-        $barang->qty = $request->qty;
-        $barang->note = $request->keterangan;
-        $barang->accdesain = $fileName;
-        $barang->design_queue_id = $request->namaFileDesain;
-        $barang->save();
-
-        $desainan = DesignQueue::find($request->namaFileDesain);
-        $desainan->acc_desain = $fileName;
-        $desainan->save();
-
-        //saveiklan
-        if($request->tahunIklan != null || $request->tahunIklan != ''){
-            $iklan = new BarangIklan();
-            $iklan->tahun_iklan = $request->tahunIklan;
-            $iklan->bulan_iklan = $request->bulanIklan;
-            $iklan->sales_id = $barang->user->sales->id;
-            $iklan->job_id = $barang->job_id;
-            $iklan->barang_id = $barang->id;
-            $iklan->save();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Barang berhasil ditambahkan !',
-        ]);
     }
 
     public function getTotalHarga($id)
@@ -100,9 +117,6 @@ class BarangController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $items = Barang::where('ticket_order', $id)->get();
@@ -160,7 +174,7 @@ class BarangController extends Controller
             if($row->accdesain == null){
                 return '<span class="text-danger">Tidak ada file</span>';
             }else{
-                return '<a href="'. asset($row->accdesain).'" target="_blank" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>';
+                return '<a href="'. asset('storage/acc-desain/'.$row->accdesain).'" target="_blank" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>';
             }
         })
         ->addColumn('namaFile', function($row){
@@ -191,9 +205,6 @@ class BarangController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function editCreate(string $id)
     {
         $barang = Barang::with('job')->where('id', $id)->first();
@@ -204,9 +215,6 @@ class BarangController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function updateCreate(Request $request)
     {
         $harga = CustomHelper::removeCurrencyFormat($request->harga);
@@ -262,9 +270,6 @@ class BarangController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $barang = Barang::findOrFail($id);

@@ -373,14 +373,9 @@
     function formatPhoneNumber(phoneNumber){
         // Menghapus semua karakter non-digit dari nomor telepon
         const digits = phoneNumber.replace(/\D/g, '');
-
         // Membagi nomor menjadi array yang berisi substring 4 digit
         const substrings = digits.match(/.{1,4}/g);
-
-        // Menggabungkan substring dengan tanda (-)
-        const formattedPhoneNumber = substrings ? substrings.join('-') : '';
-
-        return formattedPhoneNumber;
+        return substrings ? substrings.join('-') : '';
     }
 
     function resetFormValues() {
@@ -411,7 +406,64 @@
 
     function removeRequiredAttributes() {
         $('#alamatKirim, #ongkir, #ekspedisi').removeAttr('required');
-        console.log('removeRequiredAttributes');
+    }
+
+    // Fungsi perhitungan total
+    function calculateTotal() {
+            var packing = parseInt($('#packing').val().replace(/[^0-9]/g, '')) || 0;
+            var ongkir = parseInt($('#ongkir').val().replace(/[^0-9]/g, '')) || 0;
+            var pasang = parseInt($('#pasang').val().replace(/[^0-9]/g, '')) || 0;
+            var diskon = parseInt($('#diskon').val().replace(/[^0-9]/g, '')) || 0;
+            var ppn = $('#ppn').val();
+            var pph = $('#pph').val();
+
+            //input ppn dan pph dikosongkan
+
+
+            var totalAll = parseInt($('#subtotal').text().replace(/[^0-9]/g, '')) || 0;
+
+            var pajak = 0;
+            if(ppn != '' || ppn != null || ppn != 0){
+                pajak += parseInt(ppn.replace(/[^0-9]/g, '')) || 0;
+            }
+            if(pph != '' || pph != null || pph != 0){
+                pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
+            }
+
+            if($('divPajak').is(':visible')) {
+                if($('input[name=termasukPajak]:checked').val() == 0){
+                    totalAll += packing + ongkir + pasang - diskon - pajak;
+                }else{
+                    totalAll += packing + ongkir + pasang - diskon + pajak;
+                }
+            }else{
+                totalAll += packing + ongkir + pasang - diskon;
+            }
+            
+            var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia
+            $('#totalAll').html('Rp ' + formattedTotal);
+            $('#totalAllInput').val(totalAll);
+
+            if (totalAll == 0) {
+                $('#jumlahPembayaran').val(totalAll);
+                $('#jumlahPembayaran').prop('readonly', true);
+                $('#sisaPembayaran').html('Rp 0');
+                $('#statusPembayaran').val('');
+            } else {
+                $('#jumlahPembayaran').val('');
+                $('#jumlahPembayaran').prop('readonly', false);
+                $('#sisaPembayaran').html('Rp ' + formattedTotal + ' (Belum Lunas)');
+                $('#statusPembayaran').val('');
+            }
+        }
+
+    function pilihDesain(button, id){
+        // Mengembalikan semua tombol ke keadaan semula
+        $('.btnDesainan').html('Pilih').removeClass('btn-dark');
+        $('#queueId').val(id);
+
+        // Mengubah tombol yang dipilih
+        $(button).html('<i class="fas fa-check"></i>').addClass('btn-dark');
     }
 
     $(document).ready(function() {
@@ -421,12 +473,7 @@
 
         //find atribut name termasukPajak
         $('input[name=termasukPajak]').on('change', function(){
-            var termasukPajak = $('input[name=termasukPajak]:checked').val();
-            if(termasukPajak == 0){
-                calculateTotal();
-            }else{
-                calculateTotal();
-            }
+            calculateTotal();
         });
         
         $('#modalTelepon').on('keyup', function(){
@@ -435,27 +482,18 @@
         });
 
         $('#usePajak').on('change', function(){
-            if($(this).is(':checked')){
-                $('#divPajak').show();
-            }else{
-                $('#divPajak').hide();
-            }
+            $('#divPajak').toggle(this.checked);
+            $('#ppn, #pph').val('').prop('disabled', true);
+            $('#usePPN, #usePPh').prop('checked', false);
+            $('#radio1, #radio2').prop('checked', false);
         });
 
         $('#usePPN').on('change', function(){
-            if($(this).is(':checked')){
-                $('#ppn').attr('disabled', false);
-            }else{
-                $('#ppn').attr('disabled', true);
-            }
+            $('#ppn').attr('disabled', !this.checked);
         });
 
         $('#usePPh').on('change', function(){
-            if($(this).is(':checked')){
-                $('#pph').attr('disabled', false);
-            }else{
-                $('#pph').attr('disabled', true);
-            }
+            $('#pph').attr('disabled', !this.checked);
         });
 
         // ketika isOngkir dicentang maka divAlamatKirim, divOngkir, divEkspedisi akan muncul
@@ -465,9 +503,7 @@
                 $('.pengiriman').show();
                 addRequiredAttributes();
             } else {
-                if($('#ongkir').val() != ''){
-                    updateTotalWithoutShipping();
-                }
+                updateTotalWithoutShipping();
                 resetFormValues();
                 $('.pengiriman').hide();
                 removeRequiredAttributes();
@@ -481,9 +517,7 @@
             success: function(data){
                 //foreach provinsi
                 $.each(data, function(key, value){
-                    $('#provinsi').append(`
-                        <option value="${key}">${value}</option>
-                    `);
+                    $('#provinsi').append(`<option value="${key}">${value}</option>`);
                 });
             }
         });
@@ -492,21 +526,15 @@
         $('#provinsi').on('change', function(){
             var provinsi = $(this).val();
             $('#groupKota').show();
-            $('#kota').empty();
-            $('#kota').append(`<option value="" selected disabled>Pilih Kota</option>`);
+            $('#kota').empty().append(`<option value="" selected disabled>Pilih Kota</option>`);
             $.ajax({
                 url: "{{ route('getKota') }}",
                 method: "GET",
-                delay: 250,
-                data: {
-                    provinsi: provinsi
-                },
+                data: { provinsi: provinsi },
                 success: function(data){
                     //foreach kota
                     $.each(data, function(key, value){
-                        $('#kota').append(`
-                            <option value="${key}">${value}</option>
-                        `);
+                        $('#kota').append(`<option value="${key}">${value}</option>`);
                     });
                 }
             });
@@ -546,13 +574,14 @@
         //fungsi untuk menyembunyikan file acc desain saat kosoongAcc dicentang
         $('#kosongAcc').on('change', function(){
             if($(this).is(':checked')){
-                //remove required
-                $('#fileAccDesain').removeAttr('required');
-                $('#fileAccDesain').attr('disabled', true);
-            }else{
-                //add required
-                $('#fileAccDesain').attr('required', true);
-                $('#fileAccDesain').attr('disabled', false);
+                // Disable and remove the file input if 'kosongAcc' is checked
+                $('#fileAccDesain').prop('required', false).attr('disabled', true).val('');
+                // Remove the selected file name from the label
+                $('.custom-file-label').text('Pilih File');
+                // Remove the file from input file
+            } else {
+                // Enable the file input if 'kosongAcc' is unchecked
+                $('#fileAccDesain').prop('required', true).attr('disabled', false);
             }
         });
 
@@ -566,10 +595,7 @@
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.id
-                            }
+                            return { text: item.nama, id: item.id };
                         })
                     };
                 },
@@ -578,12 +604,10 @@
         });
 
         $('#customer_id').on('change', function(){
-            var pelanggan = $(this).val();
-
-            //DataTables Produk
-            $('#tableProduk').DataTable().ajax.url("/barang/show-create/" + pelanggan).load();
-
+            $('#tableProduk').DataTable().ajax.url("/barang/show-create/" + $(this).val()).load();
             updateTotalBarang();
+            //idPelanggan get from customer_id
+            $('#modalPilihProduk #idPelanggan').val($(this).val());
         });
 
         //function untuk membuat alamat pengiriman sama dengan alamat pada data pelanggan customer
@@ -606,9 +630,7 @@
         //nama produk select2
         $('#modalPilihProduk #kategoriProduk').on('change', function(){
 
-        $('#modalPilihProduk #namaProduk').val(null).trigger('change');
-        $('#modalPilihProduk #namaProduk').empty();
-        $('#modalPilihProduk #namaProduk').append(`<option value="" selected disabled>Pilih Produk</option>`);
+        $('#modalPilihProduk #namaProduk').val(null).trigger('change').empty().append(`<option value="" selected disabled>Pilih Produk</option>`);
 
         $('#modalPilihProduk #namaProduk').select2({
             placeholder: 'Pilih Produk',
@@ -623,48 +645,23 @@
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
-                            return {
-                                id: item.id,
-                                text: item.job_name
-                            };
+                            return { id: item.id, text: item.job_name };
                         })
                     };
                 },
                 cache: true
             }
         });
+    });
+
+        $('#not_iklan').on('change', function(){
+            var isChecked = $(this).is(':checked');
+            $('#namaProdukIklan, #tahunIklan, #bulanIklan').val('').prop('disabled', isChecked);
+            $('#bulanIklan, .divNamaProduk').toggle(!isChecked);
         });
 
         $('#not_iklan').on('change', function(){
-            if($(this).is(':checked')){
-                $('#namaProdukIklan').val(null).trigger('change');
-                $('#tahunIklan').val('');
-                $('#bulanIklan').val('');
-                $('#tahunIklan').prop('disabled', true);
-                $('#bulanIklan').prop('disabled', true);
-                $('#namaProdukIklan').prop('disabled', true);
-                $('#bulanIklan').hide();
-                $('.divNamaProduk').hide();
-            }else{
-                $('#namaProdukIklan').val(null).trigger('change');
-                $('#tahunIklan').val('');
-                $('#bulanIklan').val('');
-                $('#tahunIklan').prop('disabled', false);
-                $('#bulanIklan').prop('disabled', false);
-                $('#namaProdukIklan').prop('disabled', false);
-                $('#bulanIklan').show();
-                $('.divNamaProduk').show();
-            }
-        });
-
-        $('#not_iklan').on('change', function(){
-            if($(this).is(':checked')){
-                $('#periode_iklan').val(null).trigger('change');
-
-                $('#periode_iklan').prop('disabled', true);
-            }else{
-                $('#periode_iklan').prop('disabled', false);
-            }
+            $('#periode_iklan').val(null).trigger('change').prop('disabled', $(this).is(':checked'));
         });
 
         $('#tahunIklan').on('change', function(){
@@ -683,10 +680,7 @@
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
-                            return {
-                                id: item.id,
-                                text: item.job_name
-                            };
+                            return { id: item.id, text: item.job_name };
                         })
                     };
                 },
@@ -697,31 +691,27 @@
         $('#formTambahProduk').on('submit', function(e){
             e.preventDefault();
 
-            var kosongAcc = ($('#kosongAcc').is(':checked')) ? 1 : 0;
+            // Check if "Kosong ACC" is checked
+            if ($('#kosongAcc').is(':checked')) {
+                $('#fileAccDesain').prop('required', false);
+            } else {
+                $('#fileAccDesain').prop('required', true);
+            }
 
-            // Inisialisasi File acc_desain
-            var acc_desain = ($('#fileAccDesain')[0].files.length > 0) ? $('#fileAccDesain')[0].files[0] : "";
+            // Check if "Tidak Ada Gambar ACC" is checked
+            var fileAccDesain = $('#fileAccDesain')[0].files[0];
+            if (!fileAccDesain && !$('#kosongAcc').is(':checked')) {
+                alert("Silakan upload file ACC atau centang 'Tidak Ada Gambar ACC'.");
+                return;
+            }
 
-            var dataInput = new FormData();
-            dataInput.append('acc_desain', acc_desain);
-            dataInput.append('_token', "{{ csrf_token() }}");
-            dataInput.append('customer_id', $('#customer_id').val());
-            dataInput.append('ticket_order', $('#ticket_order').val());
-            dataInput.append('namaProduk', $('#namaProduk').val());
-            dataInput.append('kategoriProduk', $('#kategoriProduk').val());
-            dataInput.append('qty', $('#qty').val());
-            dataInput.append('harga', $('#harga').val());
-            dataInput.append('keterangan', $('#keterangan').val());
-            dataInput.append('tahunIklan', $('#tahunIklan').val());
-            dataInput.append('bulanIklan', $('#bulanIklan').val());
-            dataInput.append('namaProdukIklan', $('#namaProdukIklan').val());
-            dataInput.append('namaFileDesain', $('#namaFileDesain').val());
+            var formData = new FormData(this);
 
             $.ajax({
                 url: "{{ route('barang.store') }}",
                 method: "POST",
                 //data is form dataInput, acc_desain, _token
-                data: dataInput,
+                data: formData,
                 contentType: false,
                 processData: false,
                 cache: false,
@@ -750,60 +740,10 @@
         });
 
         // Event handler untuk perubahan pada input packing, ongkir, pasang, dan diskon
-        $('#packing, #ongkir, #pasang, #diskon').on('keyup', function() {
-            calculateTotal(); // Panggil fungsi perhitungan saat terjadi perubahan pada input packing, ongkir, pasang, atau diskon
-        });
+        $('#packing, #ongkir, #pasang, #diskon').on('keyup', calculateTotal);
 
         // Event handler untuk perubahan pada checkbox PPN dan PPH
-        $('#ppn, #pph').on('change', function() {
-            calculateTotal(); // Panggil fungsi perhitungan saat terjadi perubahan pada checkbox PPN atau PPH
-        });
-
-        // Fungsi perhitungan total
-        function calculateTotal() {
-            var packing = parseInt($('#packing').val().replace(/[^0-9]/g, '')) || 0;
-            var ongkir = parseInt($('#ongkir').val().replace(/[^0-9]/g, '')) || 0;
-            var pasang = parseInt($('#pasang').val().replace(/[^0-9]/g, '')) || 0;
-            var diskon = parseInt($('#diskon').val().replace(/[^0-9]/g, '')) || 0;
-            var ppn = $('#ppn').val();
-            var pph = $('#pph').val();
-
-            var totalAll = parseInt($('#subtotal').text().replace(/[^0-9]/g, '')) || 0;
-
-            var pajak = 0;
-            if(ppn != '' || ppn != null || ppn != 0){
-                pajak += parseInt(ppn.replace(/[^0-9]/g, '')) || 0;
-            }
-            if(pph != '' || pph != null || pph != 0){
-                pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
-            }
-
-            if($('divPajak').is(':visible')) {
-                if($('input[name=termasukPajak]:checked').val() == 0){
-                    totalAll += packing + ongkir + pasang - diskon - pajak;
-                }else{
-                    totalAll += packing + ongkir + pasang - diskon + pajak;
-                }
-            }else{
-                totalAll += packing + ongkir + pasang - diskon;
-            }
-            
-            var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia
-            $('#totalAll').html('Rp ' + formattedTotal);
-            $('#totalAllInput').val(totalAll);
-
-            if (totalAll == 0) {
-                $('#jumlahPembayaran').val(totalAll);
-                $('#jumlahPembayaran').prop('readonly', true);
-                $('#sisaPembayaran').html('Rp 0');
-                $('#statusPembayaran').val('');
-            } else {
-                $('#jumlahPembayaran').val('');
-                $('#jumlahPembayaran').prop('readonly', false);
-                $('#sisaPembayaran').html('Rp ' + formattedTotal + ' (Belum Lunas)');
-                $('#statusPembayaran').val('');
-            }
-        }
+        $('#ppn, #pph').on('change', calculateTotal);
 
         $('#statusPembayaran').on('change', function(){
             var statusPembayaran = $('#statusPembayaran').val();
@@ -878,17 +818,10 @@
                             processResults: function (data) {
                                 return {
                                     results:  $.map(data, function (item) {
-                                        if(item.instansi == null){
-                                            return {
-                                                text: item.nama + ' - ' + item.telepon,
-                                                id: item.id,
-                                            }
-                                        }else{
-                                            return {
-                                                text: item.nama + ' - ' + item.telepon,
-                                                id: item.id,
-                                            }
-                                        }
+                                        return {
+                                            text: item.nama + ' - ' + item.telepon,
+                                            id: item.id,
+                                        };
                                     })
                                 };
                             },
