@@ -174,7 +174,7 @@ class DesignController extends Controller
                 }
                 return $btn;
             })
-            ->rawColumns(['action', 'ref_desain', 'status', 'prioritas'])
+            ->rawColumns(['ref_desain', 'status', 'prioritas'])
             ->make(true);
     }
 
@@ -309,12 +309,6 @@ class DesignController extends Controller
             })
             ->addColumn('diselesaikan', function($design){
                 return $design->end_design;
-            })
-            ->addColumn('action', function($design){
-                $btn = '<div class="btn-group">';
-                $btn .= '<a href="'.route('design.showPenugasan', $design->id).'" class="btn btn-sm btn-success">Selesai</a>';
-                $btn .= '</div>';
-                return $btn;
             })
             ->rawColumns(['action', 'status', 'prioritas', 'ref_desain'])
             ->make(true);

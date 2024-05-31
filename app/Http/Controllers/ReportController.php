@@ -525,7 +525,7 @@ class ReportController extends Controller
         ->get();
 
         foreach ($antriansToday as $antrian) {
-            $totalOmsetToday += $antriansToday->price * $antriansToday->qty;
+            $totalOmsetToday += $antrian->price * $antrian->qty;
         }
 
         return view('page.antrian-workshop.ringkasan-sales', compact('antrians', 'totalOmset', 'totalOmsetToday', 'bulan'));

@@ -68,7 +68,6 @@
                                     <th>Status</th>
                                     <th>Prioritas</th>
                                     <th>Desainer</th>
-                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -159,8 +158,7 @@
                 { data: 'note', name: 'note' },
                 { data: 'status', name: 'status' },
                 { data: 'prioritas', name: 'prioritas' },
-                { data: 'desainer', name: 'desainer'},
-                { data: 'action', name: 'action' }
+                { data: 'desainer', name: 'desainer'}
             ]
         });
     });

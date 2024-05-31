@@ -46,7 +46,6 @@ class BarangController extends Controller
             'harga' => 'required|string',
             'qty' => 'required|string',
             'keterangan' => 'nullable|string',
-            'fileAccDesain' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
             'tahunIklan' => 'nullable|string',
             'bulanIklan' => 'nullable|string',
             'queueId' => 'required|string',
