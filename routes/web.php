@@ -152,10 +152,13 @@ Route::controller(AuthController::class)->group(function(){
 })->middleware('guest');
 
 Route::controller(EstimatorController::class)->group(function(){
-    Route::get('/estimator/laporan-penugasan', 'laporanPenugasan')->middleware(['auth'])->name('estimator.laporanPenugasan');
-    Route::get('/estimator/laporan-penugasan-json', 'laporanPenugasanJson')->middleware(['auth'])->name('estimator.laporanPenugasanJson');
-    Route::get('/estimator/laporan-workshop-excel', 'laporanWorkshopExcel')->middleware(['auth'])->name('estimator.laporanWorkshopExcel');
-})->middleware(['auth', 'checkrole:estimator']);
+    Route::get('/estimator/laporan-penugasan', 'laporanPenugasan')->name('estimator.laporanPenugasan');
+    Route::get('/estimator/laporan-penugasan-json', 'laporanPenugasanJson')->name('estimator.laporanPenugasanJson');
+    Route::get('/estimator/laporan-workshop-excel', 'laporanWorkshopExcel')->name('estimator.laporanWorkshopExcel');
+    Route::get('/estimator/unduh-bp-excel/{id}', 'unduhBPExcel')->name('estimator.unduhBPExcel');
+    Route::get('/estimator/biaya-produksi/{id}', 'biayaProduksi')->name('biaya.produksi');
+    Route::post('/estimator/tambah-bahan-produksi', 'tambahBahanProduksi')->name('tambahBahanProduksi');
+})->middleware('auth');
 
 Route::controller(IklanController::class)->group(function(){
     Route::get('/iklan/json', 'iklanJson')->name('iklan.indexJson');

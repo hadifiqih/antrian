@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bahan;
+
 use App\Models\Barang;
 
 use App\Models\Employee;
-
+use App\Exports\BPExport;
+use App\Models\BiayaLain;
 use App\Models\DataKerja;
 use App\Models\DataAntrian;
 use App\Exports\UsersExport;
@@ -128,7 +131,44 @@ class EstimatorController extends Controller
                     return '<span class="font-weight-bold text-success">SELESAI</span>';
                 }
             })
-            ->rawColumns(['ticket_order','operator', 'finishing', 'qc', 'desainer', 'status', 'tgl_mulai', 'tgl_selesai', 'omset'])
+            ->addColumn('action', function ($antrian) {
+                return '<a href="'.route('biaya.produksi', $antrian->id).'" class="btn btn-sm btn-primary">Lihat BP</a>';
+            })
+            ->rawColumns(['ticket_order','operator', 'finishing', 'qc', 'desainer', 'status', 'tgl_mulai', 'tgl_selesai', 'omset', 'action'])
             ->make();
+    }
+
+    public function unduhBPExcel($id)
+    {
+        return Excel::download(new BPExport($id), 'biaya-produksi.xlsx');
+    }
+
+    public function biayaProduksi($id)
+    {
+        $barang = Barang::find($id);
+
+        $bahan = Bahan::where('barang_id', $id)->get();
+        $totalProduksi = 0;
+        foreach($bahan as $b){
+            $totalProduksi += $b->harga * $b->qty;
+        }
+
+        $biayaLainnya = BiayaLain::all();
+
+        return view('page.estimator.biaya-produksi', compact('barang', 'bahan', 'totalProduksi', 'biayaLainnya'));
+    }
+
+    public function tambahBahanProduksi(Request $request)
+    {
+        $bahan = Bahan::create([
+            'ticket_order' => $request->ticket_order,
+            'nama_bahan' => $request->nama_bahan,
+            'barang_id' => $request->barang_id,
+            'qty' => $request->qty,
+            'harga' => $request->harga,
+            'note' => $request->note ?? null
+        ]);
+
+        return redirect()->back()->with('success', 'Bahan berhasil ditambahkan!');
     }
 }

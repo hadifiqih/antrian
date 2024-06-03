@@ -29,7 +29,6 @@
                     <option value="11">November</option>
                     <option value="12">Desember</option>
                 </select>
-            <button onclick="filter()" class="btn btn-sm btn-primary mt-2">Filter</button>
         </div>
     </div>
 
@@ -59,6 +58,7 @@
                                     <th>Finishing</th>
                                     <th>QC</th>
                                     <th>Omset</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -90,6 +90,11 @@
             }
         });
     }
+
+    $('#periode').on('change', function(){
+        filter();
+    });
+
     //DATA TABLE
     $(document).ready(function() {
         $('#table').DataTable({
@@ -110,6 +115,7 @@
                 {data: 'finishing', name: 'finishing'},
                 {data: 'qc', name: 'qc'},
                 {data: 'omset', name: 'omset'},
+                {data: 'action', name: 'action', orderable: false, searchable: false}
             ],
         });
     });
