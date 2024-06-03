@@ -158,16 +158,16 @@
             ajax: "{{ route('design.indexPenugasanSelesaiDatatables') }}",
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex' },
-                { data: 'sales', name: 'sales'},
+                { data: 'sales', name: 'sales' },
                 { data: 'judul', name: 'judul' },
                 { data: 'job', name: 'job' },
-                { data: 'ref_desain', name: 'ref_desain'},
+                { data: 'ref_desain', name: 'ref_desain' },
                 { data: 'note', name: 'note' },
                 { data: 'prioritas', name: 'prioritas' },
                 { data: 'desainer', name: 'desainer' },
                 { data: 'mulai_penugasan', name: 'mulai_penugasan' },
                 { data: 'diselesaikan', name: 'diselesaikan' },
-                { data: 'action', name: 'action' }
+                { data: 'action', name: 'action', orderable: false, searchable: false }
             ]
         });
     });

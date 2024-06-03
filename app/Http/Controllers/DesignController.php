@@ -160,21 +160,23 @@ class DesignController extends Controller
                         $btn .= '<a href="'.route('design.editDesain', $design->id).'" class="btn btn-sm btn-warning">Edit</a>';
                         $btn .= '<button onclick="deleteData('. $design->id .')" class="btn btn-sm btn-danger">Hapus</button>';
                         $btn .= '</div>';
-                    }else if($design->status == 2){
+                    }elseif($design->status == 2){
                         $btn = '<a href="'.route('design.editDesain', $design->id).'" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Selesai</a>';
                     }
-                }else if(auth()->user()->isDesigner()){
+                }elseif(auth()->user()->isDesigner()){
                     if($design->status == 1){
                         $btn = '<a href="'.route('design.uploadDesain', $design->id).'" class="btn btn-sm btn-warning">Upload File Cetak</a>';
-                    }else if($design->status == 2){
+                    }elseif($design->status == 2){
                         $btn = '<a href="'.route('design.editDesain', $design->id).'" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Selesai</a>';
+                    }else{
+                        $btn = '<button class="btn btn-sm btn-secondary">Tidak Ditugaskan</button>';
                     }
                 }else{
-                    $btn = '<button class="btn btn-sm btn-secondary">-</button>';
+                    $btn = '<button class="btn btn-sm btn-secondary">Bukan Desainer</button>';
                 }
                 return $btn;
             })
-            ->rawColumns(['ref_desain', 'status', 'prioritas'])
+            ->rawColumns(['ref_desain', 'status', 'prioritas', 'action'])
             ->make(true);
     }
 
@@ -309,6 +311,9 @@ class DesignController extends Controller
             })
             ->addColumn('diselesaikan', function($design){
                 return $design->end_design;
+            })
+            ->addColumn('action', function($design){
+                return '<button class="btn btn-sm btn-success">Desain Selesai</button>';
             })
             ->rawColumns(['action', 'status', 'prioritas', 'ref_desain'])
             ->make(true);

@@ -120,11 +120,16 @@ class StokController extends Controller
             ->make(true);
     }
 
-    public function mutasiStokJson()
+    public function mutasiStokJson(Request $request)
     {
-        //mutasi stok bulan ini
-        $cabang = auth()->user()->cabang_id;
-        $mutasi = MutasiStok::where('cabang_id', $cabang)->whereMonth('created_at', date('m'))->get();
+        if($request->has('periode')){
+            $periode = $request->periode;
+            $cabang = auth()->user()->cabang_id;
+            $mutasi = MutasiStok::where('cabang_id', $cabang)->whereMonth('created_at', $periode)->get();
+        }else{
+            $cabang = auth()->user()->cabang_id;
+            $mutasi = MutasiStok::where('cabang_id', $cabang)->whereMonth('created_at', date('m'))->get();
+        }
 
         //yajra datatable
         return Datatables::of($mutasi)

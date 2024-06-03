@@ -75,12 +75,12 @@ class User extends Authenticatable
 
     public function isDesigner()
     {
-        return $this->can_design == 1;
+        return $this->can_design == 1 || $this->role_id == 16 || $this->role_id == 17;
     }
 
     public function isSpvDesain()
     {
-        return $this->role_id == 17;
+        return $this->role_id == 5;
     }
 
     public function isCustomer()

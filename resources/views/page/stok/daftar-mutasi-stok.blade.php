@@ -19,6 +19,26 @@
 @endif
 
 <div class="container">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="periode">Periode Bulan</label>
+                <select id="periode" class="form-control select2" name="periode" id="periode">
+                    <option value="">Semua</option>
+                    <option value="01" {{ date('m') == '01' ? 'selected' : '' }}>Januari</option>
+                    <option value="02" {{ date('m') == '02' ? 'selected' : '' }}>Februari</option>
+                    <option value="03" {{ date('m') == '03' ? 'selected' : '' }}>Maret</option>
+                    <option value="04" {{ date('m') == '04' ? 'selected' : '' }}>April</option>
+                    <option value="05" {{ date('m') == '05' ? 'selected' : '' }}>Mei</option>
+                    <option value="06" {{ date('m') == '06' ? 'selected' : '' }}>Juni</option>
+                    <option value="07" {{ date('m') == '07' ? 'selected' : '' }}>Juli</option>
+                    <option value="08" {{ date('m') == '08' ? 'selected' : '' }}>Agustus</option>
+                    <option value="09" {{ date('m') == '09' ? 'selected' : '' }}>September</option>
+                    <option value="10" {{ date('m') == '10' ? 'selected' : '' }}>Oktober</option>
+                    <option value="11" {{ date('m') == '11' ? 'selected' : '' }}>November</option>
+                    <option value="12" {{ date('m') == '12' ? 'selected' : '' }}>Desember</option>
+                </select>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <div class="card card-primary card-outline">
@@ -67,6 +87,11 @@
                 { data: 'jumlah', name: 'jumlah' },
                 { data: 'keterangan', name: 'keterangan' }
             ]
+        });
+
+        $('#periode').change(function() {
+            var periode = $('#periode').val();
+            $('#tableMutasi').DataTable().ajax.url("{{ route('mutasiStokJson') }}?periode=" + periode).load();
         });
     });
 </script>
