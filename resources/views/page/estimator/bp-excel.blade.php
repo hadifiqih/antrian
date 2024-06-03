@@ -4,69 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 100%;
-            margin: 0px auto;
-            padding: 0px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-    </style>
+    <title>Biaya Produksi</title>
 </head>
+<body>
 <table>
     <tbody>
+        <tr></tr>
         <tr>
-            <td colspan="2">Nama Produk</td>
-            <td>:</td>
-            <td>{{ $barang->job->job_name }}</td>
+            <td></td>
+            <td colspan="2" style="text-align: center;">Sales</td>
+            <td colspan="3" style="text-align: center; font-weight: bold;">{{ $barang->user->sales->sales_name }}</td>
         </tr>
         <tr>
-            <td colspan="2">Harga Jual</td>
-            <td>:</td>
-            <td>Rp{{ number_format($barang->price,0,',','.') }}</td>
+            <td></td>
+            <td colspan="2" style="text-align: center;">Nama Produk</td>
+            <td colspan="3" style="text-align: center; font-weight: bold;">{{ $barang->job->job_name }}</td>
         </tr>
         <tr>
-            <td colspan="2">Qty</td>
-            <td>:</td>
-            <td>{{ $barang->qty }}</td>
+            <td></td>
+            <td colspan="2" style="text-align: center;">Harga Jual</td>
+            <td style="text-align: center; font-weight: bold;">{{ $barang->price }}</td>
         </tr>
         <tr>
-            <td colspan="2">Total Omset</td>
-            <td>:</td>
-            <td>Rp{{ number_format($barang->price * $barang->qty,0,',','.') }}</td>
+            <td></td>
+            <td colspan="2" style="text-align: center;">Qty</td>
+            <td colspan="3" style="text-align: center; font-weight: bold;">{{ $barang->qty }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2" style="text-align: center;">Total Omset</td>
+            <td colspan="3" style="text-align: center; font-weight: bold;">{{ $barang->price * $barang->qty }}</td>
         </tr>
     </tbody>
 </table>
@@ -74,78 +41,93 @@
 <table>
     <thead>
         <tr>
-            <th>No</th>
-            <th>Nama Bahan</th>
-            <th>Qty</th>
-            <th>Harga</th>
-            <th>Subtotal</th>
+            <td></td>
+            <th style="font-weight: bold; text-align:center;">No</th>
+            <th style="font-weight: bold; text-align:center;">Nama Bahan</th>
+            <th style="font-weight: bold; text-align:center;">Qty</th>
+            <th style="font-weight: bold; text-align:center;">Harga</th>
+            <th style="font-weight: bold; text-align:center;">Subtotal</th>
         </tr>
     </thead>
     <tbody>
         @foreach($bahan as $key => $b)
         <tr>
-            <td>{{ $key + 1 }}</td>
+            <td style="text-align: center;"></td>
+            <td style="text-align: center;">{{ $key + 1 }}</td>
             <td>{{ $b->nama_bahan }}</td>
-            <td>{{ $b->qty }}</td>
-            <td>{{ $b->harga }}</td>
-            <td>{{ $b->qty * $b->harga }}</td>
+            <td style="text-align: center;">{{ $b->qty }}</td>
+            <td style="text-align: center;">{{ $b->harga }}</td>
+            <td style="text-align: center;">{{ $b->qty * $b->harga }}</td>
         </tr>
         @endforeach
     </tbody>
     <tfoot>
         <tr>
-            <th colspan="4">Total</th>
+            <th></th>
+            <th colspan="4" style="text-align: center;">Total</th>
             @php
             $totalProduksi = 0;
             foreach($bahan as $b){
                 $totalProduksi += $b->qty * $b->harga;
             }
             @endphp
-            <th>Rp{{ number_format($totalProduksi,0,',','.') }}</th>
+            <th style="text-align: center;">{{ $totalProduksi }}</th>
         </tr>
     </tfoot>
 </table>
 
-<p>Biaya Tambahan Lainnya</p>
 <table>
     <thead>
         <tr>
-            <th>No</th>
-            <th>Nama Biaya</th>
-            <th>Persentase</th>
-            <th>Nominal</th>
+            <th></th>
+            <th colspan="5" style="text-align: center;">Biaya Tambahan Lainnya</th>
         </tr>
     </thead>
     <tbody>
+        <tr>
+            <td></td>
+            <td style="font-weight: bold; text-align:center;">No</td>
+            <td style="font-weight: bold; text-align:center;">Nama Biaya</td>
+            <td style="font-weight: bold; text-align:center;">Persentase</td>
+            <td colspan="2" style="font-weight: bold; text-align:center;">Nominal</td>
+        </tr>
         @if($barang->kategori_id == 3)
         @foreach($biayaLainnya as $key => $b)
         <tr>
-            <td>{{ $key + 1 }}</td>
-            <td>{{ $b->nama_biaya }}</td>
-            <td>{{ $b->persentase }}</td>
-            <td>{{ $b->nominal }}</td>
+            <td></td>
+            <td style="text-align: center;">{{ $key + 1 }}</td>
+            <td >{{ $b->nama_biaya }}</td>
+            <td style="text-align: center;">{{ $b->persentase }}</td>
+            <td colspan="2" style="text-align: center;">{{ ($b->persentase / 100) * $barang->price }}</td>
         </tr>
         @endforeach
         @else
+        @foreach($biayaLainnya as $key => $b)
         <tr>
-            <td colspan="4">Tidak ada biaya tambahan lainnya</td>
+            <td></td>
+            <td style="text-align: center;">{{ $key + 1 }}</td>
+            <td >{{ $b->nama_biaya }}</td>
+            <td style="text-align: center;">{{ $b->persentase }}</td>
+            <td colspan="2" style="text-align: center;">0</td>
         </tr>
+        @endforeach
         @endif
     </tbody>
     <tfoot>
         <tr>
-            <th colspan="3">Total</th>
+            <th></th>
+            <th colspan="3" style="text-align: center;">Total Biaya Lainnya</th>
             @php
             $totalBiaya = 0;
             if($barang->kategori_id == 3){
-                foreach($biaya as $b){
-                    $totalBiaya += $b->nominal;
+                foreach($biayaLainnya as $b){
+                    $totalBiaya += ($b->persentase / 100) * $barang->price;
                 }
             }else{
                 $totalBiaya = 0;
             }
             @endphp
-            <th>Rp{{ number_format($totalBiaya,0,',','.') }}</th>
+            <th colspan="2" style="text-align: center;">{{ $totalBiaya }}</th>
         </tr>
     </tfoot>
 </table>
@@ -154,16 +136,14 @@
 @php
 $total = $totalProduksi + $totalBiaya;
 @endphp
-<p>Total Biaya Produksi</p>
 <table>
     <thead>
         <tr>
-            <th>Total Biaya Produksi</th>
+            <th></th>
+            <th colspan="3" style="text-align: center;">Total Biaya Produksi</th>
+            <th colspan="2" style="text-align: center;">{{ $total }}</th>
         </tr>
     </thead>
-    <tbody>
-        <tr>
-            <td>Rp{{ number_format($total,0,',','.') }}</td>
-        </tr>
-    </tbody>
 </table>
+</body>
+</html>
