@@ -18,7 +18,7 @@
                 </div>
                 <div class="form-group">
                     <label for="harga">Harga</label>
-                    <input type="number" name="harga" id="harga" class="form-control">
+                    <input type="text" name="harga" id="harga" class="form-control maskRupiah">
                 </div>
                 <div class="form-group">
                     <label for="qty">Qty</label>
@@ -28,13 +28,12 @@
                     <label for="note">Keterangan</label>
                     <textarea name="note" id="note" class="form-control"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
-            </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="button" class="btn btn-primary">Simpan</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
         </div>
+      </form>
       </div>
     </div>
   </div>

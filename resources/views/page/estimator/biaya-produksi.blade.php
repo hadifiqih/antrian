@@ -9,6 +9,11 @@
 @section('breadcrumb', 'Laporan Penugasan')
 
 @section('content')
+@if(session('message'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session('message') }}
+</div>
+@endif
 
 <div class="container">
     {{-- Tabel Bahan --}}
@@ -68,7 +73,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Biaya Tambahan Lainnya</h3>
+                    <h3 class="card-title">Biaya Tambahan Lainnya (Berlaku untuk Advertising)</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -87,7 +92,11 @@
                                     <td>{{ $key + 1 }}</td>
                                     <td>{{ $b->nama_biaya }}</td>
                                     <td>{{ $b->persentase }}%</td>
+                                    @if($barang->kategori_id == 3)
                                     <td>Rp{{ number_format(($b->persentase / 100) * $barang->price,0,',','.') }}</td>
+                                    @else
+                                    <td>Rp0</td>
+                                    @endif
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -96,8 +105,12 @@
                                     <th colspan="3">Total</th>
                                     @php
                                     $totalBiayaLainnya = 0;
-                                    foreach($biayaLainnya as $b){
-                                        $totalBiayaLainnya += ($b->persentase / 100) * $barang->price;
+                                    if($barang->kategori_id == 3){
+                                        foreach($biayaLainnya as $b){
+                                            $totalBiayaLainnya += ($b->persentase / 100) * $barang->price;
+                                        }
+                                    }else{
+                                        $totalBiayaLainnya = 0;
                                     }
                                     @endphp
                                     <th class="font-weight-bold">Rp{{ number_format($totalBiayaLainnya,0,',','.') }}</th>
@@ -126,6 +139,7 @@
 @endsection
 
 @section('script')
+<script src="{{ asset('adminlte/dist/js/maskMoney.min.js') }}"></script>
 <script>
     function modalTambahBahan(){
         $('#modalTambahBahan').modal('show');
@@ -133,7 +147,7 @@
 
     $(document).ready(function(){
         //maskmoney
-        $('#modalTambahBahan #harga').maskMoney({thousands:'.', decimal:',', precision:0});
+        $('#modalTambahBahan .maskRupiah').maskMoney({prefix:'Rp ', thousands:'.', decimal:',', precision:0});
 
         $('#formTambahBahan').submit(function(e){
             e.preventDefault();

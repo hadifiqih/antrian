@@ -13,6 +13,7 @@ use App\Models\DataKerja;
 use App\Models\DataAntrian;
 use App\Exports\UsersExport;
 use Illuminate\Http\Request;
+use App\Helpers\CustomHelper;
 use App\Exports\AntrianExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -140,7 +141,9 @@ class EstimatorController extends Controller
 
     public function unduhBPExcel($id)
     {
-        return Excel::download(new BPExport($id), 'biaya-produksi.xlsx');
+        $barang = Barang::find($id);
+        $filename = 'BP'. '_' . $barang->ticket_order . '_' . $barang->job->job_name . '.xlsx';
+        return Excel::download(new BPExport($id), $filename);
     }
 
     public function biayaProduksi($id)
@@ -161,14 +164,14 @@ class EstimatorController extends Controller
     public function tambahBahanProduksi(Request $request)
     {
         $bahan = Bahan::create([
-            'ticket_order' => $request->ticket_order,
+            'ticket_order' => $request->ticketOrder,
             'nama_bahan' => $request->nama_bahan,
-            'barang_id' => $request->barang_id,
+            'barang_id' => $request->idBarang,
             'qty' => $request->qty,
-            'harga' => $request->harga,
+            'harga' => CustomHelper::removeCurrencyFormat($request->harga),
             'note' => $request->note ?? null
         ]);
 
-        return redirect()->back()->with('success', 'Bahan berhasil ditambahkan!');
+        return redirect()->route('biaya.produksi', $request->idBarang)->with('message', 'Bahan berhasil ditambahkan!');
     }
 }

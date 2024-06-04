@@ -41,11 +41,7 @@ class BPExport implements FromView, WithColumnWidths, WithEvents
             $totalProduksi += $b->harga * $b->qty;
         }
 
-        if($barang->kategori_id == 3){
-            $biayaLainnya = BiayaLain::all();
-        }else{
-            $biayaLainnya = [];
-        }
+        $biayaLainnya = BiayaLain::all();
 
         return view('page.estimator.bp-excel', [
             'barang' => $barang,
@@ -65,20 +61,28 @@ class BPExport implements FromView, WithColumnWidths, WithEvents
                 $dataBiayaLain = BiayaLain::all();
 
                 $startRowBahan = 9;
-                $totalRowBahan = count($dataBahan) + $startRowBahan;//11
+                $akhirRowBahan = count($dataBahan) + $startRowBahan;//11
 
-                $startHeaderBiayaLain = $totalRowBahan + 2;//13
-                $totalHeaderBiayaLain = $startHeaderBiayaLain + 1;//14
+                $startHeaderBiayaLain = $akhirRowBahan + 2;//13
+                $akhirHeaderBiayaLain = $akhirRowBahan + 3;//14
 
-                $startRowBiayaLain = $totalRowBahan + 4;//15
-                $akhirRowBiayaLain = $startRowBiayaLain + 8;//23
+                $startRowBiayaLain = $akhirRowBahan + 4;//15
+                $akhirRowBiayaLain = $akhirRowBahan + 12;//22
 
-                $totalRowBiayaLain = $akhirRowBiayaLain + 1;//24
+                $startTotalProduksi = $akhirRowBahan + 14;//25
 
                 $localeCurrencyMask = '[$Rp-421]#,##0';
 
                 $sheet->mergeCells('D4:F4');
                 $sheet->mergeCells('D6:F6');
+
+                // Set border
+                $sheet->getStyle('B2:F6')->getBorders()->getAllBorders()->setBorderStyle('thin');
+                $sheet->getStyle('B8:F10')->getBorders()->getAllBorders()->setBorderStyle('thin');
+                $sheet->getStyle('B'.$akhirRowBahan.':F'.$akhirRowBahan)->getBorders()->getAllBorders()->setBorderStyle('thin');
+                $sheet->getStyle('B'.$startHeaderBiayaLain.':F'.$akhirHeaderBiayaLain)->getBorders()->getAllBorders()->setBorderStyle('thin');
+                $sheet->getStyle('B'.$startRowBiayaLain.':F'.$akhirRowBiayaLain)->getBorders()->getAllBorders()->setBorderStyle('thin');
+                $sheet->getStyle('B'.$startTotalProduksi.':F'.$startTotalProduksi)->getBorders()->getAllBorders()->setBorderStyle('thin');
 
                 //SET CURRENCY
                 $sheet->getStyle('D4')->getNumberFormat()->setFormatCode($localeCurrencyMask);
@@ -86,24 +90,16 @@ class BPExport implements FromView, WithColumnWidths, WithEvents
                 foreach($dataBahan as $key => $bahan){
                     $sheet->getStyle('E'.$startRowBahan)->getNumberFormat()->setFormatCode($localeCurrencyMask);
                     $sheet->getStyle('F'.$startRowBahan)->getNumberFormat()->setFormatCode($localeCurrencyMask);
-                    $startRowBahan++;
+                    $startRowBahan++;//10
                 }
+                
                 foreach($dataBiayaLain as $key => $biayaLain){
                     $sheet->getStyle('E'.$startRowBiayaLain)->getNumberFormat()->setFormatCode($localeCurrencyMask);
-                    $sheet->getStyle('F'.$startRowBiayaLain)->getNumberFormat()->setFormatCode($localeCurrencyMask);
-                    $startRowBiayaLain++;
+                    $startRowBiayaLain++;//16
                 }
-                
-                $sheet->getStyle('F'.$totalRowBahan)->getNumberFormat()->setFormatCode($localeCurrencyMask);
-                
-
-                // Set border
-                $sheet->getStyle('B2:F6')->getBorders()->getAllBorders()->setBorderStyle('thin');
-                $sheet->getStyle('B8:F10')->getBorders()->getAllBorders()->setBorderStyle('thin');
-                $sheet->getStyle('B'.$totalRowBahan.':F'.$totalRowBahan)->getBorders()->getAllBorders()->setBorderStyle('thin');
-                $sheet->getStyle('B'.$startHeaderBiayaLain.':F'.$totalHeaderBiayaLain)->getBorders()->getAllBorders()->setBorderStyle('thin');
-                $sheet->getStyle('B'.$startRowBiayaLain.':F'.$akhirRowBiayaLain)->getBorders()->getAllBorders()->setBorderStyle('thin');
-                
+                $sheet->getStyle('F'.$startRowBahan)->getNumberFormat()->setFormatCode($localeCurrencyMask);
+                $sheet->getStyle('E'.$startRowBiayaLain)->getNumberFormat()->setFormatCode($localeCurrencyMask);
+                $sheet->getStyle('E'.$startTotalProduksi)->getNumberFormat()->setFormatCode($localeCurrencyMask);
             },
         ];
     }

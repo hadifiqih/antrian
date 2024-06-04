@@ -91,27 +91,19 @@
             <td style="font-weight: bold; text-align:center;">Persentase</td>
             <td colspan="2" style="font-weight: bold; text-align:center;">Nominal</td>
         </tr>
-        @if($barang->kategori_id == 3)
         @foreach($biayaLainnya as $key => $b)
         <tr>
             <td></td>
             <td style="text-align: center;">{{ $key + 1 }}</td>
             <td >{{ $b->nama_biaya }}</td>
-            <td style="text-align: center;">{{ $b->persentase }}</td>
+            <td style="text-align: center;">{{ $b->persentase }}%</td>
+            @if($barang->kategori_id == 3)
             <td colspan="2" style="text-align: center;">{{ ($b->persentase / 100) * $barang->price }}</td>
-        </tr>
-        @endforeach
-        @else
-        @foreach($biayaLainnya as $key => $b)
-        <tr>
-            <td></td>
-            <td style="text-align: center;">{{ $key + 1 }}</td>
-            <td >{{ $b->nama_biaya }}</td>
-            <td style="text-align: center;">{{ $b->persentase }}</td>
+            @else
             <td colspan="2" style="text-align: center;">0</td>
+            @endif
         </tr>
         @endforeach
-        @endif
     </tbody>
     <tfoot>
         <tr>

@@ -23,7 +23,6 @@
         <div class="col-md-4">
             <label for="periode">Periode Bulan</label>
                 <select id="periode" class="form-control select2" name="periode" id="periode">
-                    <option value="">Semua</option>
                     <option value="01" {{ date('m') == '01' ? 'selected' : '' }}>Januari</option>
                     <option value="02" {{ date('m') == '02' ? 'selected' : '' }}>Februari</option>
                     <option value="03" {{ date('m') == '03' ? 'selected' : '' }}>Maret</option>
