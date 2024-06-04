@@ -92,6 +92,7 @@
                                             <th scope="col">Ticket Order</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Nama Customer</th>
+                                            <th scope="col">Produk</th>
                                             <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
@@ -208,6 +209,7 @@
                     {data: 'ticket_order', name: 'ticket_order'},
                     {data: 'sales', name: 'sales'},
                     {data: 'customer', name: 'customer'},
+                    {data: 'produk', name: 'produk'},
                     {data: 'action', name: 'action'},
                 ],
             });

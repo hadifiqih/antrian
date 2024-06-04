@@ -19,6 +19,7 @@ use App\Http\Controllers\IklanController;
 use App\Http\Controllers\OrderController;
 
 use Illuminate\Auth\Events\PasswordReset;
+use Orhanerday\OpenAi\OpenAi;
 
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DesignController;

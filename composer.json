@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
         "mike42/escpos-php": "^2.2",
+        "orhanerday/open-ai": "^5.2",
         "phpoffice/phpspreadsheet": "^1.29",
         "pusher/pusher-php-server": "^7.2",
         "pusher/pusher-push-notifications": "^2.0",

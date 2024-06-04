@@ -93,6 +93,14 @@ class AntrianController extends Controller
             ->addColumn('customer', function ($antrian) {
                 return $antrian->customer->nama;
             })
+            ->addColumn('produk', function ($antrian) {
+                $barang = Barang::where('ticket_order', $antrian->ticket_order)->get();
+                $produk = '';
+                foreach ($barang as $item) {
+                    $produk .= '- '. $item->job->job_name . '<br>';
+                }
+                return rtrim($produk, '<br>');
+            })
             ->addColumn('action', function ($antrian) {
                 $btn = '<div class="btn-group">';
                 if(auth()->user()->isAdminWorkshop()) {
@@ -114,7 +122,7 @@ class AntrianController extends Controller
                 $btn .= '</div>';
                 return $btn;
             })
-            ->rawColumns(['ticket_order', 'action'])
+            ->rawColumns(['ticket_order', 'action', 'produk', 'operator'])
             ->make(true);
     }
 
