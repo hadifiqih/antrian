@@ -3,10 +3,12 @@
 use App\Models\User;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Orhanerday\OpenAi\OpenAi;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Events\SendGlobalNotification;
 use App\Notifications\AntrianWorkshop;
+use App\Http\Controllers\BotController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\AuthController;
@@ -15,12 +17,11 @@ use App\Http\Controllers\UserController;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\BahanController;
+
 use App\Http\Controllers\IklanController;
 use App\Http\Controllers\OrderController;
 
 use Illuminate\Auth\Events\PasswordReset;
-use Orhanerday\OpenAi\OpenAi;
-
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\ReportController;
@@ -340,6 +341,12 @@ Route::controller(StokController::class)->group(function(){
     
     Route::get('/stok/daftar-mutasi', 'daftarMutasi')->name('daftarMutasi');
     Route::post('/stok/simpan-mutasi', 'simpanMutasi')->name('simpanMutasi');
+})->middleware('auth');
+
+Route::controller(BotController::class)->group(function(){
+    Route::get('/bot', 'index')->name('bot.index');
+    Route::get('/bot/get-response', 'getResponse')->name('bot.getResponse');
+    Route::post('/bot/send-message', 'sendMessage')->name('bot.sendMessage');
 })->middleware('auth');
 
 Route::controller(AntrianController::class)->group(function(){
