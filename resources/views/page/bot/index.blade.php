@@ -9,131 +9,135 @@
 @section('breadcrumb', 'ChatBot')
 
 @section('content')
-<section style="background-color: #eee;">
-  <div class="container py-5">
+    <style>
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .message.user {
+            text-align: right;
+        }
+        .message.bot {
+            text-align: left;
+        }
+        .message .msg-content {
+            display: inline-block;
+            padding: 10px;
+            border-radius: 20px;
+        }
+        .message.user .msg-content {
+            background-color: #007bff;
+            color: white;
+        }
+        .message.bot .msg-content {
+            background-color: #e9ecef;
+            color: black;
+        }
+        /* HTML: <div class="loader"></div> */
+        .loader {
+        height: 15px;
+        aspect-ratio: 5;
+        display: grid;
+        --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
+        }
+        .loader:before,
+        .loader:after {
+        content: "";
+        grid-area: 1/1;
+        background:
+            var(--_g) left,
+            var(--_g) right;
+        background-size: 20% 100%;
+        animation: l32 1s infinite; 
+        }
+        .loader:after { 
+        background:
+            var(--_g) calc(1*100%/3),
+            var(--_g) calc(2*100%/3);
+        background-size: 20% 100%;
+        animation-direction: reverse;
+        }
+        @keyframes l32 {
+        80%,100% {transform:rotate(.5turn)}
+        }
+    </style>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">Chatbot</div>
+                    <div class="card-body chat-box" id="chat-box">
+                        <!-- Messages will appear here -->
+                        <!-- Loading animation -->
+                    </div>
+                    <div class="message bot" id="loading" style="display: none;">
+                        <span class="msg-content">
+                            <div  class="loader" ></div>
+                        </span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group">
+                            <textarea type="text" id="message-input" class="form-control" placeholder="Masukkan perintah disini.."></textarea>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="send-button">Kirim</button>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="row d-flex justify-content-center">
-      <div class="col-md-10 col-lg-8 col-xl-6">
-
-        <div class="card" id="chat2">
-          <div class="card-header d-flex justify-content-between align-items-center p-3">
-            <h5 class="mb-0">Chat</h5>
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-sm" data-mdb-ripple-color="dark">Let's Chat
-              App</button>
-          </div>
-          <div class="card-body" data-mdb-perfect-scrollbar-init style="position: relative; height: 400px">
-
-            <div class="d-flex flex-row justify-content-start">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">Hi</p>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">How are you ...???
-                </p>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">What are you doing
-                  tomorrow? Can we come up a bar?</p>
-                <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p>
-              </div>
+                </div>
             </div>
-
-            <div class="divider d-flex align-items-center mb-4">
-              <p class="text-center mx-3 mb-0" style="color: #a2aab7;">Today</p>
-            </div>
-
-            <div class="d-flex flex-row justify-content-end mb-4 pt-1">
-              <div>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Hiii, I'm good.</p>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">How are you doing?</p>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Long time no see! Tomorrow
-                  office. will
-                  be free on sunday.</p>
-                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:06</p>
-              </div>
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-            </div>
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">Okay</p>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">We will go on
-                  Sunday?</p>
-                <p class="small ms-3 mb-3 rounded-3 text-muted">00:07</p>
-              </div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-end mb-4">
-              <div>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">That's awesome!</p>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">I will meet you Sandon Square
-                  sharp at
-                  10 AM</p>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Is that okay?</p>
-                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:09</p>
-              </div>
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-            </div>
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">Okay i will meet
-                  you on
-                  Sandon Square</p>
-                <p class="small ms-3 mb-3 rounded-3 text-muted">00:11</p>
-              </div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-end mb-4">
-              <div>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Do you have pictures of Matley
-                  Marriage?</p>
-                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:11</p>
-              </div>
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-            </div>
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div>
-                <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">Sorry I don't
-                  have. i
-                  changed my phone.</p>
-                <p class="small ms-3 mb-3 rounded-3 text-muted">00:13</p>
-              </div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-end">
-              <div>
-                <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Okay then see you on sunday!!
-                </p>
-                <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:15</p>
-              </div>
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-            </div>
-
-          </div>
-          <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-              alt="avatar 3" style="width: 40px; height: 100%;">
-            <input type="text" class="form-control form-control-lg" id="exampleFormControlInput1"
-              placeholder="Type message">
-            <a class="ms-1 text-muted" href="#!"><i class="fas fa-paperclip"></i></a>
-            <a class="ms-3 text-muted" href="#!"><i class="fas fa-smile"></i></a>
-            <a class="ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
-          </div>
         </div>
-
-      </div>
     </div>
+@endsection
 
-  </div>
-</section>
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chatBox = document.getElementById('chat-box');
+    const sendButton = document.getElementById('send-button');
+    const messageInput = document.getElementById('message-input');
+    const csrfToken = '{{ csrf_token() }}';
+    const loading = document.getElementById('loading');
+
+    function addMessage(sender, message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        messageElement.innerHTML = `<span class="msg-content">${message}</span>`;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const message = messageInput.value;
+        if (message) {
+            addMessage('user', message);
+            messageInput.value = '';
+            loading.style.display = 'block'; // Show loading animation
+
+            try {
+                const response = await fetch('/bot/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                addMessage('bot', response.data.messages[0].content);
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('bot', 'Maaf terjadi kesalahan..');
+            } finally {
+                loading.style.display = 'none'; // Hide loading animation
+            }
+        }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+});
+</script>
 @endsection
