@@ -389,7 +389,7 @@ class DesignController extends Controller
                     return response()->json([
                         'status' => 200,
                         'message' => 'Desainer ditemukan!',
-                        'desainer_id' => $selectedDesigner,
+                        'id' => $selectedDesigner,
                         'name' => User::find($selectedDesigner)->name
                     ]);
                 } else {

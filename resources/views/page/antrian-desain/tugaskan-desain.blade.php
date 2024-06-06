@@ -86,7 +86,7 @@
         let csrf_token = $('meta[name="csrf-token"]').attr('content');
         let queueId = {{ $design->id }};
 
-        //Swal.fire confirm
+        // Swal.fire confirm
         Swal.fire({
             title: 'Apakah Anda Yakin?',
             text: "Desainer yang dipilih akan menerima antrian desain ini!",
@@ -98,10 +98,13 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "/design/pilih-desainer" + "/" + userId + "/" + queueId,
+                    url: "/design/pilih-desainer/" + userId + "/" + queueId,
                     type: "GET",
+                    headers: {
+                        'X-CSRF-TOKEN': csrf_token
+                    },
                     success: function(response) {
-                        if (response.status == 'success') {
+                        if (response.status === 'success') {
                             Swal.fire({
                                 title: 'Berhasil!',
                                 text: response.message,
@@ -122,13 +125,22 @@
                                 timer: 1500
                             });
                         }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat menghubungi server.',
+                            icon: 'error',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                     }
                 });
             }
         });
     }
 
-    function penugasanOtomatis(queueId){
+    async function penugasanOtomatis(queueId){
         Swal.fire({
             title: 'Loading...',
             text: 'Sedang memilih rekomendasi desainer...',
@@ -138,36 +150,43 @@
             }
         });
 
-        //Ajax request
-        $.ajax({
-            url: "/rekomendasi-desainer-otomatis/" + queueId,
-            type: "GET",
-            success: function(response) {
-                if (response.status == '200') {
-                    Swal.fire({
-                        title: "Tetapkan sebagai desainer?",
-                        text: response.name + " akan ditetapkan sebagai desainer untuk antrian ini!",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Ya, Tetapkan!"
-                        }).then((result) => {
-                        if (result.isConfirmed) {
-                            pilihDesainer(response.id);
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: response.message,
-                        icon: 'error',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                }
-            }
+    try {
+        const response = await $.ajax({
+            url: `/rekomendasi-desainer-otomatis/${queueId}`,
+            type: "GET"
         });
+            if (response.status === 200) {
+                const result = await Swal.fire({
+                    title: "Tetapkan sebagai desainer?",
+                    text: `${response.name} akan ditetapkan sebagai desainer untuk antrian ini!`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Tetapkan!"
+                });
+
+                if (result.isConfirmed) {
+                    pilihDesainer(response.id);
+                }
+            } else {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: response.message,
+                    icon: 'error',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat menghubungi server.',
+                icon: 'error',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
     }
 
     $(document).ready(function() {
