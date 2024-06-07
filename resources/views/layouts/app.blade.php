@@ -77,7 +77,7 @@
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
           <i class="far fa-bell"></i>
-            @if(auth()->user()->unreadNotifications->count() > 0)
+            @if(auth()->check() && auth()->user()->unreadNotifications->count() > 0)
                 <span class="badge badge-danger navbar-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
             @endif
         </a>
