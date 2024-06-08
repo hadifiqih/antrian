@@ -14,6 +14,7 @@ use App\Models\DesignerSkill;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\File;
 
 class DesignController extends Controller
 {
@@ -195,14 +196,18 @@ class DesignController extends Controller
 
     public function simpanFile(Request $request, $id)
     {
-        $request->validate([
-            'fileCetak' => 'required|mimes:cdr,pdf,ai,eps,jpg,png|max:2048',
-            'linkFile' => 'nullable|url',
+        $validated = $request->validate([
+            'fileCetak' => 'nullable|file|max:200|mimes:jpeg,jpg,pdf,cdr',
+            'linkFile' => 'nullable|url:https,http',
         ]);
+
+        if($validated->fails()){
+            return redirect()->back()->withErrors($validated)->withInput();
+        }
         
         $design = DesignQueue::find($id);
         $design->simpanFileCetak($request);
-        return redirect()->route('design.indexDesain')->with('success', 'File berhasil diupload');
+        return redirect()->route('design.indexDesain')->with('success', 'File berhasil diupload!');
     }
 
     public function daftarPenugasan()

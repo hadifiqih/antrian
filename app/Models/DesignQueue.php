@@ -6,6 +6,7 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\Sales;
 use App\Models\Barang;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +24,7 @@ class DesignQueue extends Model
         'job_id',
         'designer_id',
         'file_cetak',
+        'file_url',
         'ref_desain',
         'note',
         'prioritas',
@@ -113,7 +115,7 @@ class DesignQueue extends Model
         $this->save();
     }
     
-    public function simpanDesainer($request)
+    public function simpanDesainer(Request $request)
     {
         $this->designer_id = $request->designer_id;
         $this->start_design = now();
@@ -121,24 +123,17 @@ class DesignQueue extends Model
         $this->save();
     }
 
-    public function simpanFileCetak($request)
+    public function simpanFileCetak(Request $request)
     {
-        $nama_file = null;
-
-        if ($request->hasFile('fileCetak')) {
+        if ($request->hasFile('fileCetak')){
             $file = $request->file('fileCetak');
             $nama_file = time() . "_" . $file->getClientOriginalName();
-            $filePath = 'file-cetak/' . $nama_file;
-            
-            // Simpan file menggunakan Storage Laravel
             Storage::disk('public')->putFileAs('file-cetak', $file, $nama_file);
         }
 
-        if ($request->input('linkFile')) {
-            $nama_file = $request->input('linkFile');
-        }
-
-        $this->file_cetak = $nama_file;
+        // Simpan nama file cetak ke database
+        $this->file_cetak = $nama_file ?? null;
+        $this->file_url = $request->linkFile;
         $this->end_design = now();
         $this->status = 2;
         $this->save();

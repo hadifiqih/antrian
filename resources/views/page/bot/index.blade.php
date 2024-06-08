@@ -48,19 +48,31 @@
         }
 
         /* HTML: <div class="loader"></div> */
-        .loader {
-        width: 30px;
-        height: 30px;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        border: 0px;
-        background: #f03355;
-        clip-path: polygon(0 0,100% 0,100% 100%,0 100%);
-        animation: l1 2s infinite cubic-bezier(0.3,1,0,1);
+        .loaderbot {
+        height: 8px;
+        aspect-ratio: 5;
+        display: grid;
+        --_g: no-repeat radial-gradient(farthest-side,#000 94%,#0000);
         }
-        @keyframes l1 {
-        33% {border-radius: 0;background: #514b82 ;clip-path: polygon(0 0,100% 0,100% 100%,0 100%)}
-        66% {border-radius: 0;background: #ffa516 ;clip-path: polygon(50% 0,50% 0,100% 100%,0 100%)}
+        .loaderbot:before,
+        .loaderbot:after {
+        content: "";
+        grid-area: 1/1;
+        background:
+            var(--_g) left,
+            var(--_g) right;
+        background-size: 20% 100%;
+        animation: l32 1s infinite; 
+        }
+        .loaderbot:after { 
+        background:
+            var(--_g) calc(1*100%/3),
+            var(--_g) calc(2*100%/3);
+        background-size: 20% 100%;
+        animation-direction: reverse;
+        }
+        @keyframes l32 {
+        80%,100% {transform:rotate(.5turn)}
         }
     </style>
     <div class="container">
@@ -77,7 +89,7 @@
                     </div>
                     <div class="message bot" id="loading" style="display: none; margin-left:20px;">
                         <span class="msg-content">
-                            <div class="loader"></div>
+                            <div class="loaderbot"></div>
                         </span>
                     </div>
                     <div class="card-footer">

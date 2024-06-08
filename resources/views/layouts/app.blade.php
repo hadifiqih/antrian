@@ -7,8 +7,10 @@
 
   <link rel="icon" href="{{ asset('adminlte') }}/dist/img/antree-logo.png" type="image/png" sizes="16x16">
   <title>Software Antree | Kassab Syariah</title>
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/fontawesome-free/css/all.min.css">
   <!-- IonIcons -->
@@ -39,6 +41,10 @@
         @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+
+    body {
+        font-family: 'Source Sans 3', sans-serif;
     }
   </style>
 

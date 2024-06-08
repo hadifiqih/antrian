@@ -14,6 +14,16 @@
 @endsection
 
 @section('content')
+
+@if(session('message'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session('message')}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+@endif
+
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -22,7 +32,7 @@
                     <h5>Upload File Cetak</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('design.simpanFile', $design->id) }}" method="post" enctype="multipart/form-data" id="simpanFile">
+                    <form action="{{ route('design.simpanFile', $design->id) }}" method="POST" enctype="multipart/form-data" id="simpanFile">
                         @csrf
                         @method('PUT')
                         <div class="form-group">
@@ -34,17 +44,23 @@
 
                         <div class="form-group" style="display: none">
                             <label for="note">Link File</label>
-                            <input type="text" class="form-control" id="linkFile" name="linkFile" value="" required>
+                            <input type="text" class="form-control" id="linkFile" name="linkFile" value="">
+                            @if($errors->has('linkFile'))
+                            <small class="text-danger">{{ $errors->first('linkFile') }}</small>
+                            @endif
                         </div>
 
                         <div id="inputFileForm" class="form-group">
                             <label for="fileCetak">File Cetak</label>
                             <div class="input-group">
                                 <div class="custom-file">
-                                    <input type="file" name="fileCetak" class="custom-file-input" id="fileCetak" accept="image/jpg, image/jpeg, image/png, application/pdf, .cdr" required>
+                                    <input type="file" name="fileCetak" class="custom-file-input {{ $errors->has('fileCetak') ? 'is-invalid' : '' }}" id="fileCetak" accept="image/jpg, image/jpeg, image/png, application/pdf, .cdr, .ai">
                                     <label class="custom-file-label" for="fileCetak">Pilih file</label>
                                 </div>
                             </div>
+                            @if($errors->has('fileCetak'))
+                            <small class="text-danger">{{ $errors->first('fileCetak') }}</small>
+                            @endif
                         </div>
                         <button id="submitUnggahCetak" type="submit" class="btn btn-sm btn-outline-primary">Unggah</button>
                     </form>
@@ -52,13 +68,13 @@
                         <div class="card-body">
                             <h6><strong><i class="fas fa-info-circle"></i> Informasi</strong></h6>
                             <ul>
-                                <li>File cetak yang diunggah harus berformat .pdf, atau .cdr</li>
-                                <li>Untuk file cetak .jpg, .png, minimal resolusi : 300DPI.</li>
-                                <li>Minimal resolusi untuk banner : 150DPI.</li>
-                                <li>Ukuran file maksimal 50 MB.</li>
-                                <li>Jika ukuran file > 50MB, silahkan upload di Google Drive, lalu bagikan, dan tempel link file pada form diatas.</li>
-                                <li>Pastikan font sudah di <strong class="text-danger">Convert To Curves</strong> untuk menghindari missing font.</li>
-                                <li>Jika ada kesalahan cetak yang berasal dari file cetak, biaya kesalahan cetak akan dibebankan kepada desainer.</li>
+                                <li>File cetak yang diunggah harus berformat .pdf, .cdr, .ai, atau .jpg</li>
+                                <li>Resolusi gambar minimal 300 dpi</li>
+                                <li>Mode warna yang digunakan harus CMYK (Untuk Cetak Rekanan)</li>
+                                <li>Ukuran file maksimal 50 MB</li>
+                                <li>Jika ukuran file > 50MB, silahkan upload di Google Drive, lalu bagikan, dan tempel link file pada form diatas</li>
+                                <li>Pastikan font sudah di <strong class="text-danger">Convert To Curves</strong> untuk menghindari missing font</li>
+                                <li>Jika ada kesalahan cetak yang berasal dari file cetak, biaya kerugian cetak akan ditangguhkan kepada pihak yang terlibat</li>
                             </ul>
                         </div>
                     </div>
