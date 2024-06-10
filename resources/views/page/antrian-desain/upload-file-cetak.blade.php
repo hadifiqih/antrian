@@ -15,6 +15,20 @@
 
 @section('content')
 
+@if($errors->any())
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Whoops!</strong> Terdapat kesalahan dalam input data:
+    <ul>
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+@endif
+
 @if(session('message'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
     {{ session('message')}}
@@ -32,7 +46,7 @@
                     <h5>Upload File Cetak</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('design.simpanFile', $design->id) }}" method="POST" enctype="multipart/form-data" id="simpanFile">
+                    <form id="simpanFile" action="{{ route('design.simpanFile', $design->id) }}" method="POST" enctype="multipart/form-data" id="simpanFile">
                         @csrf
                         @method('PUT')
                         <div class="form-group">
@@ -54,7 +68,7 @@
                             <label for="fileCetak">File Cetak</label>
                             <div class="input-group">
                                 <div class="custom-file">
-                                    <input type="file" name="fileCetak" class="custom-file-input {{ $errors->has('fileCetak') ? 'is-invalid' : '' }}" id="fileCetak" accept="image/jpg, image/jpeg, image/png, application/pdf, .cdr, .ai">
+                                    <input type="file" name="fileCetak" class="custom-file-input {{ $errors->has('fileCetak') ? 'is-invalid' : '' }}" id="fileCetak" accept="image/jpg, image/jpeg, image/png, application/pdf, .cdr, .ai" required>
                                     <label class="custom-file-label" for="fileCetak">Pilih file</label>
                                 </div>
                             </div>
@@ -88,44 +102,57 @@
 @section('script')
 <script>
     $(document).ready(function() {
+        const $aktifLink = $('#aktifLink');
+        const $linkFile = $('#linkFile');
+        const $fileCetak = $('#fileCetak');
+        const $inputFileForm = $('#inputFileForm');
+        const $submitUnggahCetak = $('#submitUnggahCetak');
+        const $customFileLabel = $('.custom-file-label');
+        const $simpanFile = $('#simpanFile');
+
+        //fungsi untuk menampilkan dan menyembunyikan form
+        function toggleForms() {
+            const isChecked = $aktifLink.is(':checked');
+            $linkFile.attr('required', isChecked);
+            $fileCetak.attr('required', !isChecked);
+            $fileCetak.parent().parent().toggle(!isChecked);
+            $linkFile.parent().toggle(isChecked);
+            $inputFileForm.toggle(!isChecked);
+            $linkFile.val('');
+            $fileCetak.val('');
+            $customFileLabel.text('Pilih file');
+        }
+
+        //initial setup
+        toggleForms();
+
         //jika aktif link maka tampilkan form link file dan sembunyikan upload file dan sebaliknya
-        $('#aktifLink').on('click', function() {
-            if ($('#aktifLink').is(':checked')) {
-                $('#linkFile').attr('required', true);
-                $('#fileCetak').removeAttr('required');
-                $('#fileCetak').parent().parent().hide();
-                $('#linkFile').parent().show();
-                $('#inputFileForm').hide();
-                $('#linkFile').val('');
-                $('#fileCetak').val('');
-                $('.custom-file-label').text('Pilih file');
-            } else {
-                $('#linkFile').removeAttr('required');
-                $('#fileCetak').attr('required', true);
-                $('#fileCetak').parent().parent().show();
-                $('#linkFile').parent().hide();
-                $('#inputFileForm').show();
-                $('#linkFile').val('');
-                $('#fileCetak').val('');
-                $('.custom-file-label').text('Pilih file');
-            }
-        });
+        $aktifLink.on('click', toggleForms);
 
-        //jika file kosong saat menekan button submit maka munculkan alert
-        $('#submitUnggahCetak').on('click', function(e) {
-            if ($('#fileCetak').val() == '') {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'File cetak tidak boleh kosong !'
-                });
-            }
-        });
-
-        //sweet alert konfirmasi upload file cetak
-        $('#submitUnggahCetak').on('click', function(e) {
+        //event handler untuk submit button
+        $submitUnggahCetak.on('click', function(e) {
             e.preventDefault();
+
+            if (!$aktifLink.is(':checked')) {
+                if ($fileCetak.val() === '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'File cetak tidak boleh kosong !'
+                    });
+                    return;
+                }
+            }else{
+                if ($linkFile.val() === '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Link file tidak boleh kosong !'
+                    });
+                    return;
+                }
+            }
+
             Swal.fire({
                 title: 'Apakah anda yakin?',
                 text: "File cetak yang diupload sudah benar ?",
@@ -137,7 +164,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     //proses submit form
-                    $('#simpanFile').submit();  
+                    $simpanFile.submit();  
                 }
             });
         });

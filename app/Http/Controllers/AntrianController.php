@@ -428,6 +428,10 @@ class AntrianController extends Controller
                     $query->increment('frekuensi_order');
                 });
 
+        DesignQueue::where('customer_id', $request->input('customer_id'))
+            ->whereNull('ticket_order')
+            ->update(['ticket_order' => $ticketOrder]);
+
         return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
     }
 

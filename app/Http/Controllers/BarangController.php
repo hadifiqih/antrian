@@ -60,11 +60,6 @@ class BarangController extends Controller
         DB::beginTransaction();
         try {
 
-            // Update DesignQueue
-            $desainan = DesignQueue::find($request->queueId);
-            $desainan->acc_desain = $fileName;
-            $desainan->save();
-
             // Create Barang
             $barang = new Barang();
             $barang->customer_id = $request->idPelanggan;
@@ -77,6 +72,12 @@ class BarangController extends Controller
             $barang->accdesain = $fileName;
             $barang->design_queue_id = $request->queueId;
             $barang->save();
+
+            // Update DesignQueue
+            $desainan = DesignQueue::find($request->queueId);
+            $desainan->acc_desain = $fileName;
+            $desainan->barang_id = $barang->id;
+            $desainan->save();
 
             // Save BarangIklan if applicable
             if (!empty($request->tahunIklan)) {

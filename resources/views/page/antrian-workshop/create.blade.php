@@ -719,6 +719,14 @@
                     $('#modalPilihProduk').modal('hide');
                     $('#tableProduk').DataTable().ajax.url("/barang/show-create/" + $('#customer_id').val()).load();
                     $('#formTambahProduk')[0].reset();
+                    $('#kosongAcc').prop('checked', false);
+                    $('#fileAccDesain').prop('required', true).attr('disabled', false);
+                    $('#fileAccDesain').next('.custom-file-label').text('Pilih File');
+                    $('#tahunIklan, #bulanIklan, #namaProdukIklan').val('').prop('disabled', false);
+                    $('#not_iklan').prop('checked', false);
+                    //mengembalikan tombol pilih desain ke semula
+                    $('.btnDesainan').html('Pilih').removeClass('btn-dark').addClass('btn-primary');
+                    $('#queueId').val('');
 
                     // function updateTotalBarang
                     updateTotalBarang();

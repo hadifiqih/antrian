@@ -196,9 +196,9 @@ class DesignController extends Controller
 
     public function simpanFile(Request $request, $id)
     {
-        $validated = $request->validate([
-            'fileCetak' => 'nullable|file|max:200|mimes:jpeg,jpg,pdf,cdr',
-            'linkFile' => 'nullable|url:https,http',
+        $validated = Validator::make($request->all(), [
+            'fileCetak' => 'nullable|max:51200',
+            'linkFile' => 'nullable',
         ]);
 
         if($validated->fails()){

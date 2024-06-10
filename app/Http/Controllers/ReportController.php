@@ -138,9 +138,9 @@ class ReportController extends Controller
         function buatBaris3Kolom($kolom1, $kolom2, $kolom3)
         {
             // Mengatur lebar setiap kolom (dalam satuan karakter)
-            $lebar_kolom_1 = 9;
-            $lebar_kolom_2 = 15;
-            $lebar_kolom_3 = 19;
+            $lebar_kolom_1 = 15;
+            $lebar_kolom_2 = 11;
+            $lebar_kolom_3 = 17;
 
             // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
@@ -164,7 +164,7 @@ class ReportController extends Controller
                 // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
                 $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
                 // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
-                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_RIGHT);
+                $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_BOTH);
 
                 $hasilKolom3 = str_pad((isset($kolom3Array[$i]) ? $kolom3Array[$i] : ""), $lebar_kolom_3, " ", STR_PAD_LEFT);
 
@@ -259,26 +259,26 @@ class ReportController extends Controller
         $printer->text("==============================================\n");
         foreach ($items as $item) {
             $printer->text(buatBaris1Kolom($item->job->job_name));
-            $printer->text(buatBaris3Kolom($item->qty . "x", '@' . number_format($item->price, 0, ',', '.') ,'Rp '. number_format($item->price * $item->qty, 0, ',', '.')));
+            $printer->text(buatBaris3Kolom($item->qty . "x", '@' . number_format($item->price, 0, ',', '.') , number_format($item->price * $item->qty, 0, ',', '.')));
         }
         $printer->text("==============================================\n");
-        $printer->text(buatBaris2Kolom("Total Harga : " , 'Rp '. number_format($totalHarga, 0, ',', '.')));
-        $printer->text(buatBaris2Kolom("Biaya Packing : " , 'Rp '. number_format($totalPacking, 0, ',', '.')));
-        $printer->text(buatBaris2Kolom("Biaya Ongkir : " , 'Rp '. number_format($totalOngkir, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Total Harga" , 'Rp.', number_format($totalHarga, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Biaya Packing" , 'Rp.', number_format($totalPacking, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Biaya Ongkir" , 'Rp.', number_format($totalOngkir, 0, ',', '.')));
 
         if ($totalPasang != 0) {
-            $printer->text(buatBaris2Kolom("Biaya Pasang : " , 'Rp '. number_format($totalPasang, 0, ',', '.') . "\n"));
+            $printer->text(buatBaris3Kolom("Biaya Pasang" , 'Rp.', number_format($totalPasang, 0, ',', '.')));
         }
 
         if ($diskon != 0) {
-            $printer->text(buatBaris2Kolom("Diskon : " ,'Rp '.  number_format($diskon, 0, ',', '.') . "\n"));
+            $printer->text(buatBaris3Kolom("Diskon" ,'Rp.', number_format($diskon, 0, ',', '.')));
         }
 
         $printer->text("==============================================\n");
-        $printer->text(buatBaris2Kolom("Grand Total" ,'Rp '. number_format($grandTotal, 0, ',', '.')));
-        $printer->text(buatBaris2Kolom("Dibayarkan" ,'Rp '. number_format($infoBayar->dibayarkan, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Grand Total" ,'Rp.', number_format($grandTotal, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Dibayarkan" ,'Rp.', number_format($infoBayar->dibayarkan, 0, ',', '.')));
         $printer->text("==============================================\n");
-        $printer->text(buatBaris2Kolom("Sisa Tagihan" ,'Rp '. number_format($sisaTagihan, 0, ',', '.')));
+        $printer->text(buatBaris3Kolom("Sisa Tagihan" ,'Rp.', number_format($sisaTagihan, 0, ',', '.')));
         $printer->text("==============================================\n");
         $printer->text("-- Terima Kasih --\nSelamat Datang Kembali\n");
         $printer->text("----------------------------------------------\n");
