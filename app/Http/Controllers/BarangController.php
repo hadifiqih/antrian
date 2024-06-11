@@ -274,6 +274,11 @@ class BarangController extends Controller
     {
         $barang = Barang::findOrFail($id);
 
+        $desainan = DesignQueue::where('barang_id', $barang->id)->first();
+        $desainan->barang_id = 0;
+        $desainan->acc_desain = null;
+        $desainan->save();
+
         //hapus file acc_desain
         if($barang->accdesain != null){
             Storage::disk('public')->delete($barang->accdesain);
