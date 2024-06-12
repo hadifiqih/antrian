@@ -54,8 +54,13 @@ class BarangController extends Controller
         // Remove currency format
         $harga = CustomHelper::removeCurrencyFormat($request->harga);
 
-        // Handle file upload
-        $fileName = $this->handleFileUpload($request->file('fileAccDesain'));
+        $fileName = null;
+        //Handle file upload
+        if ($request->hasFile('fileAccDesain')) {
+            $fileName = $this->handleFileUpload($request->file('fileAccDesain'));
+        } else {
+            $fileName = null;
+        }
 
         DB::beginTransaction();
         try {
@@ -73,11 +78,13 @@ class BarangController extends Controller
             $barang->design_queue_id = $request->queueId;
             $barang->save();
 
-            // Update DesignQueue
-            $desainan = DesignQueue::find($request->queueId);
-            $desainan->acc_desain = $fileName;
-            $desainan->barang_id = $barang->id;
-            $desainan->save();
+            if(empty($request->kosongDesain)){
+                // Update DesignQueue
+                $desainan = DesignQueue::find($request->queueId);
+                $desainan->acc_desain = $fileName;
+                $desainan->barang_id = $barang->id;
+                $desainan->save();
+            }
 
             // Save BarangIklan if applicable
             if (!empty($request->tahunIklan)) {

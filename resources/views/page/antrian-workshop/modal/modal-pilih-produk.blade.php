@@ -109,9 +109,10 @@
 
                 <hr>
 
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="namaFileDesain">Pilih Desain</label>
                     <div class="row">
+                        @if($desain->count() > 0)
                         @foreach ($desain as $d)
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="card">
@@ -123,7 +124,16 @@
                             </div>
                         </div>
                         @endforeach
+                        @else
+                        <div class="col-12">
+                            <p class="text-center">Tidak ada desain yang tersedia</p>
+                        </div>
+                        @endif
                     </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="kosongDesain" name="kosongDesain">
+                    <label for="kosongAcc">Tidak menggunakan desain</label>
                 </div>
             </div>
             <div class="modal-footer">

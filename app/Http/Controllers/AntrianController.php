@@ -359,81 +359,82 @@ class AntrianController extends Controller
 
     public function simpanAntrian(Request $request)
     {
-        // Dapatkan ID terakhir
-        $lastId = DataAntrian::latest()->value('id');
-        $lastId = $lastId ? $lastId + 1 : 1;
-        $ticketOrder = Carbon::now()->format('Ymd') . $lastId;
-        $customer = Customer::where('id', $request->input('customer_id'))->first();
+        dd($request->all());
+        DB::transaction(function () use ($request) {
+            // Dapatkan ID terakhir
+            $lastId = DataAntrian::latest()->value('id');
+            $lastId = $lastId ? $lastId + 1 : 1;
+            $ticketOrder = Carbon::now()->format('Ymd') . $lastId;
 
-        // Simpan antrian
-        $antrian = DataAntrian::create([
-            'ticket_order' => $ticketOrder,
-            'sales_id' => auth()->user()->sales->id,
-            'customer_id' => $request->input('customer_id'),
-            'termasuk_pajak' => $request->input('termasukPajak'),
-            'ppn' => $request->input('ppn') != '' ? CustomHelper::removeCurrencyFormat($request->input('ppn')) : 0,
-            'pph' => $request->input('pph') != '' ? CustomHelper::removeCurrencyFormat($request->input('pph')) : 0,
-            'status' => 1,
-        ]);
+            $customer = Customer::find($request->input('customer_id'));
 
-        // Simpan data barang
-        Barang::where('customer_id', $request->input('customer_id'))
-            ->whereNull('ticket_order')
-            ->update(['ticket_order' => $ticketOrder]);
-
-        // Simpan pembayaran
-        $payment = Pembayaran::create([
-            'ticket_order' => $ticketOrder,
-            'metode_pembayaran' => $request->input('metodePembayaran'),
-            'biaya_packing' => $request->input('biayaPacking') ? CustomHelper::removeCurrencyFormat($request->input('biayaPacking')) : 0,
-            'biaya_pasang' => $request->input('biayaPasang') ? CustomHelper::removeCurrencyFormat($request->input('biayaPasang')) : 0,
-            'diskon' => $request->input('diskon') ? CustomHelper::removeCurrencyFormat($request->input('diskon')) : 0,
-            'total_harga' => CustomHelper::removeCurrencyFormat($request->input('totalAllInput')),
-            'dibayarkan' => CustomHelper::removeCurrencyFormat($request->input('jumlahPembayaran')),
-            'status_pembayaran' => $request->input('statusPembayaran'),
-        ]);
-
-
-        // Simpan bukti pembayaran
-        if ($request->hasFile('paymentImage')) {
-            $buktiPembayaran = $request->file('paymentImage');
-            $namaBaru = time() . '_' . $buktiPembayaran->getClientOriginalName();
-            $path = 'bukti-pembayaran/' . $namaBaru;
-            Storage::disk('public')->put($path, file_get_contents($buktiPembayaran));
-
-            BuktiPembayaran::create([
+            // Simpan antrian
+            $antrian = DataAntrian::create([
                 'ticket_order' => $ticketOrder,
-                'gambar' => $namaBaru,
+                'sales_id' => auth()->user()->sales->id,
+                'customer_id' => $request->input('customer_id'),
+                'termasuk_pajak' => $request->input('termasukPajak'),
+                'ppn' => $request->input('ppn') ? CustomHelper::removeCurrencyFormat($request->input('ppn')) : 0,
+                'pph' => $request->input('pph') ? CustomHelper::removeCurrencyFormat($request->input('pph')) : 0,
+                'status' => 1,
             ]);
-        }
 
-        // Periksa apakah pembayaran penuh atau parsial
-        if ($payment->total_harga == $payment->dibayarkan) {
-            $payment->update([
-                'nominal_pelunasan' => $payment->dibayarkan,
-                'file_pelunasan' => $namaBaru,
-                'tanggal_pelunasan' => Carbon::now(),
-                'status_pembayaran' => 2,
+            // Simpan data barang
+            Barang::where('customer_id', $request->input('customer_id'))
+                ->whereNull('ticket_order')
+                ->update(['ticket_order' => $ticketOrder]);
+
+            // Simpan pembayaran
+            $paymentData = [
+                'ticket_order' => $ticketOrder,
+                'metode_pembayaran' => $request->input('metodePembayaran'),
+                'biaya_packing' => $request->input('biayaPacking') ? CustomHelper::removeCurrencyFormat($request->input('biayaPacking')) : 0,
+                'biaya_pasang' => $request->input('biayaPasang') ? CustomHelper::removeCurrencyFormat($request->input('biayaPasang')) : 0,
+                'diskon' => $request->input('diskon') ? CustomHelper::removeCurrencyFormat($request->input('diskon')) : 0,
+                'total_harga' => CustomHelper::removeCurrencyFormat($request->input('totalAllInput')),
+                'dibayarkan' => CustomHelper::removeCurrencyFormat($request->input('jumlahPembayaran')),
+                'status_pembayaran' => $request->input('statusPembayaran'),
+            ];
+
+            if ($request->hasFile('paymentImage')) {
+                $buktiPembayaran = $request->file('paymentImage');
+                $namaBaru = time() . '_' . $buktiPembayaran->getClientOriginalName();
+                $path = 'bukti-pembayaran/' . $namaBaru;
+                Storage::disk('public')->put($path, file_get_contents($buktiPembayaran));
+
+                BuktiPembayaran::create([
+                    'ticket_order' => $ticketOrder,
+                    'gambar' => $namaBaru,
+                ]);
+
+                if ($paymentData['total_harga'] == $paymentData['dibayarkan']) {
+                    $paymentData['nominal_pelunasan'] = $paymentData['dibayarkan'];
+                    $paymentData['file_pelunasan'] = $namaBaru;
+                    $paymentData['tanggal_pelunasan'] = Carbon::now();
+                    $paymentData['status_pembayaran'] = 2;
+                }
+            }
+
+            Pembayaran::create($paymentData);
+
+            // Simpan data kerja
+            DataKerja::create([
+                'ticket_order' => $ticketOrder,
             ]);
-        }
 
-        // Simpan data kerja
-        DataKerja::create([
-            'ticket_order' => $ticketOrder,
-        ]);
+            // Perbarui frekuensi order pelanggan
+            if ($antrian->customer_id != $customer->id || $antrian->created_at->format('Y-m-d') != Carbon::now()->format('Y-m-d')) {
+                $customer->increment('frekuensi_order');
+            }
 
-        // Perbarui frekuensi order pelanggan
-        Customer::where('id', $request->input('customer_id'))
-                ->when($antrian->customer_id != $customer->id || $antrian->created_at->format('Y-m-d') != Carbon::now()->format('Y-m-d'), function ($query) {
-                    $query->increment('frekuensi_order');
-                });
-
-        DesignQueue::where('customer_id', $request->input('customer_id'))
-            ->whereNull('ticket_order')
-            ->update(['ticket_order' => $ticketOrder]);
+            DesignQueue::where('customer_id', $request->input('customer_id'))
+                ->whereNull('ticket_order')
+                ->update(['ticket_order' => $ticketOrder]);
+        });
 
         return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
     }
+
 
     public function penugasanOtomatis(Request $request)
     {

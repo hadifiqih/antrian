@@ -282,16 +282,8 @@
 
 @section('script')
 <script src="{{ asset('adminlte/dist/js/maskMoney.min.js') }}"></script>
-<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 
 <script>
-    Dropzone.options.myDropzone = {
-        url: "{{ route('simpanAcc') }}",
-        paramName: "gambarAcc",
-        maxFilesize: 20,
-        autoProcessQueue: false,
-    };
-
     $(function () {
         bsCustomFileInput.init();
     });
@@ -585,6 +577,16 @@
             }
         });
 
+        $('#kosongDesain').on('change', function(){
+            if($(this).is(':checked')){
+                $('#queueId').val(0);
+                $('.btnDesainan').html('Pilih').removeClass('btn-dark').addClass('btn-primary').prop('disabled', true);
+            } else {
+                $('#queueId').val('');
+                $('.btnDesainan').prop('disabled', false);
+            }
+        });
+
         // Select2 Pelanggan
         $('#customer_id').select2({
             placeholder: 'Pilih Pelanggan',
@@ -691,6 +693,8 @@
         $('#formTambahProduk').on('submit', function(e){
             e.preventDefault();
 
+            $('#formTambahProduk #submitTambahProduk').html('Menyimpan...').prop('disabled', true);
+
             // Check if "Kosong ACC" is checked
             if ($('#kosongAcc').is(':checked')) {
                 $('#fileAccDesain').prop('required', false);
@@ -740,9 +744,17 @@
                         timer: 1500
                     });
                 },
-                error: function(xhr, status, error){
-                    var err = eval("(" + xhr.responseText + ")");
-                    alert(err.Message);
+                error: function(response){
+                    var errors = response.responseJSON.errors;
+                    var errorMessage = '';
+                    $.each(errors, function(key, value){
+                        if(key == 'queueId'){
+                            errorMessage += 'Desain belum dipilih!';
+                        }else{
+                            errorMessage += value + '\n';
+                        }
+                    });
+                    alert(errorMessage);
                 }
             });
         });
@@ -799,6 +811,8 @@
         $('#pelanggan-form').on('submit', function(e){
             e.preventDefault();
 
+            $('#modalTambahPelanggan #subPelanggan').html('Menyimpan...').prop('disabled', true);
+
             $.ajax({
                 url: "{{ route('pelanggan.store') }}",
                 method: "POST",
@@ -815,6 +829,8 @@
                 },
                 success: function(data){
                     $('#modalTambahPelanggan').modal('hide');
+                    $('#modalTambahPelanggan #subPelanggan').html('Simpan').prop('disabled', false);
+                    $('#pelanggan-form')[0].reset();
                     $('#namaPelanggan').append(`<option value="${data.id}" selected>${data.nama}</option>`);
                     $('#namaPelanggan').val(data.id).trigger('change');
                     $('#namaPelanggan').select2({
