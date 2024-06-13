@@ -267,7 +267,7 @@
                     <div class="card-body text-right">
                         {{-- Tombol Submit --}}
                         <div class="d-flex align-items-center">
-                            <button id="submitToAntrian" type="submit" class="btn btn-primary">Submit<div id="loader" class="loader" style="display: none;">
+                            <button id="submitToAntrian" type="submit" class="btn btn-primary">Submit<div id="loader" class="loader" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -288,7 +288,20 @@
         bsCustomFileInput.init();
     });
 
-    // Tambah Produk
+    function removeCurrencyAndParse(value) {
+        return parseInt(value.replace(/[^0-9]/g, '')) || 0;
+    }
+
+    function currencyFormat(value) {
+        const formatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(value);
+
+        return formatter;
+    }
+
     function tambahProduk() {
         if($('#customer_id').val() == null || $('#customer_id').val() == ""){
             Swal.fire({
@@ -306,15 +319,23 @@
             url: "/barang/getTotalBarang/" + $('#customer_id').val(),
             method: "GET",
             success: function(data){
-                $('#subtotal').html(data.totalBarang);
-                $('#totalAll').html(data.totalBarang);
-                $('#totalAllInput').val(data.totalBarang);
-                $('#sisaPembayaran').html(data.totalBarang);
-                $('#sisaPembayaranInput').val(data.totalBarang);
+                // Asumsikan data.totalBarang sudah dalam format rupiah dari server
+                var total = data.totalBarang; 
+
+                $('#subtotal').html(total);
+                $('#totalAll').html(total);
+                $('#totalAllInput').val(total);
+                $('#sisaPembayaran').html(total);
+                $('#sisaPembayaranInput').val(total);
             },
             error: function(xhr, status, error){
-                var err = eval("(" + xhr.responseText + ")");
-                alert(err.Message);
+                // Tampilkan pesan error yang lebih informatif
+                console.error(error); // Log error ke console
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Terjadi kesalahan saat mengambil data total barang.',
+                });
             }
         });
     }
@@ -391,7 +412,7 @@
         var diskon = parseInt($('#diskon').val().replace(/\D/g, '') || 0);
 
         var totalTanpaOngkir = totalBarang + bPacking + bPasang - diskon;
-        $('#totalAll').html('Rp ' + totalTanpaOngkir.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+        $('#totalAll').html(currencyFormat(totalTanpaOngkir));
         $('#totalAllInput').val(totalTanpaOngkir);
         $('#sisaPembayaran').html('Rp ' + $('#totalAllInput').val());
     }
@@ -402,52 +423,46 @@
 
     // Fungsi perhitungan total
     function calculateTotal() {
-            var packing = parseInt($('#packing').val().replace(/[^0-9]/g, '')) || 0;
-            var ongkir = parseInt($('#ongkir').val().replace(/[^0-9]/g, '')) || 0;
-            var pasang = parseInt($('#pasang').val().replace(/[^0-9]/g, '')) || 0;
-            var diskon = parseInt($('#diskon').val().replace(/[^0-9]/g, '')) || 0;
-            var ppn = $('#ppn').val();
-            var pph = $('#pph').val();
+        var packing = removeCurrencyAndParse($('#packing').val());
+        var ongkir = removeCurrencyAndParse($('#ongkir').val());
+        var pasang = removeCurrencyAndParse($('#pasang').val());
+        var diskon = removeCurrencyAndParse($('#diskon').val());
+        var ppn = $('#ppn').val();
+        var pph = $('#pph').val();
 
-            //input ppn dan pph dikosongkan
-
-
-            var totalAll = parseInt($('#subtotal').text().replace(/[^0-9]/g, '')) || 0;
-
-            var pajak = 0;
-            if(ppn != '' || ppn != null || ppn != 0){
-                pajak += parseInt(ppn.replace(/[^0-9]/g, '')) || 0;
-            }
-            if(pph != '' || pph != null || pph != 0){
-                pajak += parseInt(pph.replace(/[^0-9]/g, '')) || 0;
-            }
-
-            if($('divPajak').is(':visible')) {
-                if($('input[name=termasukPajak]:checked').val() == 0){
-                    totalAll += packing + ongkir + pasang - diskon - pajak;
-                }else{
-                    totalAll += packing + ongkir + pasang - diskon + pajak;
-                }
-            }else{
-                totalAll += packing + ongkir + pasang - diskon;
-            }
-            
-            var formattedTotal = totalAll.toLocaleString('id-ID'); // Mengubah ke format mata uang Indonesia
-            $('#totalAll').html('Rp ' + formattedTotal);
-            $('#totalAllInput').val(totalAll);
-
-            if (totalAll == 0) {
-                $('#jumlahPembayaran').val(totalAll);
-                $('#jumlahPembayaran').prop('readonly', true);
-                $('#sisaPembayaran').html('Rp 0');
-                $('#statusPembayaran').val('');
-            } else {
-                $('#jumlahPembayaran').val('');
-                $('#jumlahPembayaran').prop('readonly', false);
-                $('#sisaPembayaran').html('Rp ' + formattedTotal + ' (Belum Lunas)');
-                $('#statusPembayaran').val('');
-            }
+        var totalAll = removeCurrencyAndParse($('#subtotal').text());
+        var pajak = 0;
+        if(ppn != '' || ppn != null || ppn != 0){
+            pajak += removeCurrencyAndParse(ppn);
         }
+        if(pph != '' || pph != null || pph != 0){
+            pajak += removeCurrencyAndParse(pph);
+        }
+        if($('divPajak').is(':visible')) {
+            if($('input[name=termasukPajak]:checked').val() == 0){
+                totalAll += packing + ongkir + pasang - diskon - pajak;
+            }else{
+                totalAll += packing + ongkir + pasang - diskon + pajak;
+            }
+        }else{
+            totalAll += packing + ongkir + pasang - diskon;
+        }
+        
+        var formattedTotal = currencyFormat(totalAll); // Mengubah ke format mata uang Indonesia
+        $('#totalAll').html(formattedTotal);
+        $('#totalAllInput').val(totalAll);
+        if (totalAll == 0) {
+            $('#jumlahPembayaran').val(totalAll);
+            $('#jumlahPembayaran').prop('readonly', true);
+            $('#sisaPembayaran').html('Rp 0');
+            $('#statusPembayaran').val('');
+        } else {
+            $('#jumlahPembayaran').val('');
+            $('#jumlahPembayaran').prop('readonly', false);
+            $('#sisaPembayaran').html('Rp ' + formattedTotal + ' (Belum Lunas)');
+            $('#statusPembayaran').val('');
+        }
+    }
 
     function pilihDesain(button, id){
         // Mengembalikan semua tombol ke keadaan semula
@@ -591,13 +606,13 @@
         $('#customer_id').select2({
             placeholder: 'Pilih Pelanggan',
             ajax: {
-                url: '{{ route('pelanggan.search') }}',
+                url: "{{ route('getAllCustomers') }}",
                 dataType: 'json',
                 delay: 250,
                 processResults: function (data) {
                     return {
                         results: $.map(data, function (item) {
-                            return { text: item.nama, id: item.id };
+                            return { text: item.nama + ' - ' + item.telepon, id: item.id };
                         })
                     };
                 },
@@ -693,7 +708,7 @@
         $('#formTambahProduk').on('submit', function(e){
             e.preventDefault();
 
-            $('#formTambahProduk #submitTambahProduk').html('Menyimpan...').prop('disabled', true);
+            $('#formTambahProduk #submitProduk').val('Menyimpan...').prop('disabled', true);
 
             // Check if "Kosong ACC" is checked
             if ($('#kosongAcc').is(':checked')) {
@@ -775,7 +790,11 @@
             }else if(statusPembayaran == 1){
                 $('#jumlahPembayaran').val('');
                 $('#jumlahPembayaran').attr('readonly', false);
-                $('#sisaPembayaran').html('Rp ' + totalAll.toLocaleString('id-ID') + ' (Belum Lunas)');
+                if(isNaN(totalAll) || totalAll == 0){
+                    $('#sisaPembayaran').html('Rp 0');
+                }else{
+                    $('#sisaPembayaran').html(currencyFormat(totalAll) + ' (Belum Lunas)');
+                }
             }
         });
 
@@ -836,7 +855,7 @@
                     $('#namaPelanggan').select2({
                         placeholder: 'Pilih Pelanggan',
                         ajax: {
-                            url: "/pelanggan-all/{{ auth()->user()->sales->id }}",
+                            url: "/pelanggan-all/",
                             dataType: 'json',
                             delay: 250,
                             processResults: function (data) {

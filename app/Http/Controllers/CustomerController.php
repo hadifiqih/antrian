@@ -139,9 +139,17 @@ class CustomerController extends Controller
         return response()->json(['success' => 'true', 'message' => 'Data berhasil dihapus !']);
     }
 
-    public function getAllCustomers(Request $request, $id)
+    public function getAllCustomers(Request $request)
     {
-        $customers = Customer::where('nama', 'LIKE', "%".request('q')."%")->where('sales_id', $id)->get();
+        $searchTerm = $request->q;
+        $sales =  auth()->user()->sales->id;
+
+        if($searchTerm == ''){
+            $customers = Customer::where('sales_id', $sales)->orderBy('nama', 'asc')->select('id', 'nama', 'telepon')->limit(10)->get();
+        }else{
+            $customers = Customer::where('sales_id', $sales)->orderBy('nama', 'asc')->select('id', 'nama', 'telepon')->where('nama', 'LIKE', "%".$searchTerm."%")->orWhere('telepon', 'LIKE', "%".$searchTerm."%")->limit(10)->get();
+        }
+
         return response()->json($customers);
     }
 

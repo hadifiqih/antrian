@@ -29,10 +29,11 @@ use App\Models\BiayaProduksi;
 use App\Models\Documentation;
 use App\Models\BuktiPembayaran;
 use App\Models\SumberPelanggan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Notifications\AntrianWorkshop;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\AntrianDiantrikan;
-use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Notification;
 
@@ -359,7 +360,6 @@ class AntrianController extends Controller
 
     public function simpanAntrian(Request $request)
     {
-        dd($request->all());
         DB::transaction(function () use ($request) {
             // Dapatkan ID terakhir
             $lastId = DataAntrian::latest()->value('id');
@@ -426,10 +426,6 @@ class AntrianController extends Controller
             if ($antrian->customer_id != $customer->id || $antrian->created_at->format('Y-m-d') != Carbon::now()->format('Y-m-d')) {
                 $customer->increment('frekuensi_order');
             }
-
-            DesignQueue::where('customer_id', $request->input('customer_id'))
-                ->whereNull('ticket_order')
-                ->update(['ticket_order' => $ticketOrder]);
         });
 
         return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil ditambahkan!');
