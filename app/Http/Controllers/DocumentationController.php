@@ -163,6 +163,12 @@ class DocumentationController extends Controller
     {
         $barang = Barang::where('ticket_order', $id)->get();
         $ticket = $id;
-        return view('page.dokumentasi.upload-dokumentasi-produksi', compact('barang', 'ticket'));
+        $belumDokumentasi = Barang::where('ticket_order', $id)->where('documentation_id', null)->count();
+        if($belumDokumentasi > 0){
+            $selesai = false;
+        }else{
+            $selesai = true;
+        }
+        return view('page.dokumentasi.upload-dokumentasi-produksi', compact('barang', 'ticket', 'selesai'));
     }
 }

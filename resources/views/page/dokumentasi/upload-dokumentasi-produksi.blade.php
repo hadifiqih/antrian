@@ -32,7 +32,7 @@
                                     <h4 class="card-title">{{ $b->job->job_name }}</h4>
                                 </div>
                                 <div class="card-body">
-                                    <img src="{{ asset($b->accdesain) }}" class="img-fluid" alt="Produk" style="width: 100%; height: 100%;">
+                                    <img src="{{ asset('storage/acc-desain/'.$b->accdesain) }}" class="img-fluid" alt="Produk" style="width: 100%; height: 100%;">
                                 </div>
                                 <div class="card-footer">
                                     @if($b->documentation_id == null)
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ route('antrian.markSelesai', $b->ticket_order) }}" class="btn btn-danger float-right">Tandai Selesai</a>
+                    <a href="{{ route('antrian.markSelesai', $b->ticket_order) }}" class="btn btn-danger float-right {{ $selesai == false ? 'disabled' : '' }}">Tandai Selesai</a>
                 </div>
             </div>
         </div>

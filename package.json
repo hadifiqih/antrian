@@ -14,6 +14,7 @@
         "@google/generative-ai": "^0.12.0",
         "@pusher/push-notifications-web": "^1.1.0",
         "cropperjs": "^1.5.13",
+        "dropzone": "^6.0.0-beta.2",
         "firebase": "^10.2.0",
         "html2canvas": "^1.4.1",
         "laravel-echo": "^1.15.2",
