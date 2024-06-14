@@ -7,6 +7,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use App\Models\Documentation;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\DataAntrian; // Import the DataAntrian model
@@ -42,7 +43,7 @@ class DocumentationController extends Controller
                 })
                 ->addColumn('accdesain', function ($barang) {
                     if (isset($barang->accdesain)) {
-                        return '<a class=""><img width="150" src="'. asset($barang->accdesain) .'" class="img-thumbnail"></a>';
+                        return '<a class=""><img width="150" src="'. asset('storage/acc-desain/' . $barang->accdesain) .'" class="img-thumbnail"></a>';
                     } else {
                         return 'Tidak ada data';
                     }
@@ -138,9 +139,9 @@ class DocumentationController extends Controller
 
         //cek apakah file sudah tersimpan dalam folder
         if(Storage::disk('public')->exists($path)){
-            return response()->json(['status' => 200]);
+            return response()->json(['message' => 'Berhasil diunggah!'], 200);
         }else{
-            return response()->json(['status' => 500]);
+            return response()->json(['message' => 'Gagal diunggah!'], 500);
         }
     }
 
@@ -149,13 +150,13 @@ class DocumentationController extends Controller
         if($request != null && $request->get('produk') != null){
             $jenisProduk = Job::all();
             $selectedProduk = $request->get('produk');
-            $barang = Barang::orderBy('updated_at', 'desc')->where('job_id',$request->get('produk'))->paginate(6);
+            $barang = Barang::with('job', 'user.sales', 'documentation')->orderBy('updated_at', 'desc')->where('job_id', $selectedProduk)->where('documentation_id', '!=', null)->paginate(32);
             return view('page.dokumentasi.gallery', compact('barang', 'jenisProduk', 'selectedProduk'));
         }
 
         $jenisProduk = Job::all();
         $selectedProduk = '';
-        $barang = Barang::orderBy('updated_at', 'desc')->paginate(6);
+        $barang = Barang::with('job', 'user.sales', 'documentation')->orderBy('updated_at', 'desc')->where('documentation_id', '!=', null)->paginate(32);
         return view('page.dokumentasi.gallery', compact('barang', 'jenisProduk', 'selectedProduk'));
     }
 
@@ -170,5 +171,24 @@ class DocumentationController extends Controller
             $selesai = true;
         }
         return view('page.dokumentasi.upload-dokumentasi-produksi', compact('barang', 'ticket', 'selesai'));
+    }
+
+    public function hapusFileSampah()
+    {
+        // 1. Ambil daftar file dari direktori hosting
+        $files = Storage::disk('dokumentasi')->files(); // Ganti 'your-disk' dengan disk yang Anda gunakan
+
+        // 2. Ambil daftar nama file dari database
+        $dbFiles = DB::table('documentations')->pluck('filename')->toArray(); // Ganti 'your_table' dan 'file_name' 
+
+        // 3. Looping file dari direktori hosting
+        foreach ($files as $file) {
+            // 4. Jika file tidak ada di database, hapus file
+            if (!in_array(basename($file), $dbFiles)) {
+                Storage::disk('dokumentasi')->delete($file); // Ganti 'your-disk' dengan disk yang Anda gunakan
+            }
+        }
+
+        return response()->json(['message' => 'Berhasil menghapus file sampah!']);
     }
 }

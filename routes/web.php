@@ -425,6 +425,7 @@ Route::controller(DocumentationController::class)->middleware('auth')->group(fun
     Route::get('/documentation/gallery', 'galleryDokumentasi')->name('documentation.gallery');
     Route::post('/documentation/upload-gambar', 'uploadGambar')->name('documentation.upload');
     Route::get('/documentation/upload-gambar-produksi/{id}', 'uploadGambarProduksi')->name('documentation.uploadProduksi');
+    Route::get('/documentation/hapus-file-sampah', 'hapusFileSampah')->name('hapusFileSampah');
 });
 
 Route::controller(UserController::class)->middleware('auth')->group(function(){

@@ -19,7 +19,7 @@
                 }
             </style>
             <!-- Image here -->
-          <img id="gambarDokum" src="" class="img-fluid" height="300">
+          <img id="gambarDokum" src="" class="img-fluid" width="200px">
             <div class="row mt-3">
                 <div class="col-md-6">
                 <h5 class="text-secondary">Spesifikasi</h5>

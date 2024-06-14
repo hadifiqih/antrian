@@ -738,9 +738,9 @@ class AntrianController extends Controller
     {
         $tiket = $id;
 
-        $antrian = DataAntrian::where('ticket_order', $id)->first();
+        $antrian = DataAntrian::with('dataKerja', 'customer', 'sales', 'pembayaran', 'buktiBayar')->where('ticket_order', $id)->first();
 
-        $items = Barang::where('ticket_order', $id)->get();
+        $items = Barang::with('job', 'designQueue')->where('ticket_order', $id)->get();
 
         $pembayaran = Pembayaran::where('ticket_order', $id)->first();
 

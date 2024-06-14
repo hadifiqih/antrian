@@ -16,40 +16,20 @@
 </div>
 @endif
 
-{{-- Alert success-update --}}
-@if(session('success-update'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('success-update') }}
-</div>
-@endif
-
-{{-- Alert successToAntrian --}}
-@if(session('successToAntrian'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('successToAntrian') }}
-</div>
-@endif
-
-{{-- Alert success-dokumentasi --}}
-@if(session('success-dokumentasi'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('success-dokumentasi') }}
-</div>
-@endif
-
-@if(session('success-progress'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('success-progress') }}
-</div>
-@endif
-
-@if(session('error'))
+{{-- Jika ada error apapun --}}
+@if($errors->any())
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ session('error') }}
+    <strong>Whoops!</strong> Terdapat kesalahan dalam input data:
+    <ul>
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
 </div>
 @endif
-
-{{-- Alert error --}}
 
 {{-- Content Table --}}
     <div class="container-fluid">
@@ -121,7 +101,6 @@
                 </div>
             </div>
         </div>
-    </div>
     <!-- /.row -->
     @include('page.dokumentasi.modal.show-dokumentasi')
 @endsection

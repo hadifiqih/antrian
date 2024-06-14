@@ -16,10 +16,6 @@
 @endif
 
 <style>
-    .spesifikasi {
-        white-space: pre-line;
-    }
-
     @media (max-width: 767px) {
         .col-sm h5, .col-sm h6 {
             font-size: 14px;

@@ -28,26 +28,6 @@
 
   @vite(['resources/js/app.js', 'resources/css/app.css'])
 
-  <style>
-    .loader {
-        border: 3px solid #f3f3f3; /* Light grey */
-        border-top: 3px solid #3498db; /* Blue */
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 0.3s linear infinite;
-        }
-
-        @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    body {
-        font-family: 'Source Sans 3', sans-serif;
-    }
-  </style>
-
   @yield('style')
   {{-- Pusher --}}
   <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>

@@ -18,18 +18,17 @@
                 </div>
                 <div class="card-body">
                         <!-- Formulir Dropzone untuk unggah file -->
-                        <form action="{{ route('documentation.upload') }}" class="dropzone" id="my-dropzone-dokumentasi">
+                        <form action="{{ route('documentation.upload') }}" class="dropzone" id="myDropzoneDokumentasi">
                             @csrf
                             <input type="hidden" name="job_id" value="{{ $barang->job_id }}">
                             <input type="hidden" name="barang_id" value="{{ $barang->id }}">
                         </form>
                 </div>
                 <div class="card-footer">
-                    <button id="submitUpload" type="submit" class="btn btn-primary">Simpan</button>
+                    <button id="submitUploadDokumentasi" type="button" class="btn btn-primary">Unggah</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 @endsection

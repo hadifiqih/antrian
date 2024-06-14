@@ -14,7 +14,7 @@
             <li class="nav-item">
                 <a href="{{ route('documentation.index') }}" class="nav-link {{ request()->routeIs('documentation.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Unggah Dokumentasi</p>
+                <p>Antrian Dokumentasi</p>
                 </a>
             </li>
         </ul>

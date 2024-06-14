@@ -11,59 +11,59 @@
 @section('content')
 
 <div class="container">
-    <style>
-        .select2-selection {
-            height: 38px !important;
-        }
-    </style>
     {{-- Filter berdasarkan jenis produk --}}
     <div class="row mb-3">
         <div class="col-md-4">
             <h5 class="text-secondary">Jenis Produk</h5>
             <form action="{{ route('documentation.gallery') }}" method="GET">
                 <select class="form-control select2" {{ $selectedProduk == '' ? '' : 'disabled' }} id="filterJenisProduk" name="produk" style="width=100%">
-                    <option value="0">Semua</option>
-                    @foreach($jenisProduk as $jp)
-                    <option value="{{ $jp->id }}" {{ $jp->id == $selectedProduk ? 'disabled selected' : '' }}>{{ $jp->job_name }}</option>
-                    @endforeach
-                </select>
-                @if($selectedProduk == '')
-                <button type="submit" class="btn btn-sm btn-primary mt-2">Filter</button>
-                @else
-                <a href="{{ route('documentation.gallery') }}" class="btn btn-sm btn-danger mt-2">Reset</a>
+                    <option value="0">Semua</option> @foreach($jenisProduk as $jp) <option value="{{ $jp->id }}" {{ $jp->id == $selectedProduk ? 'disabled selected' : '' }}>{{ $jp->job_name }}</option> @endforeach
+                </select> 
+                @if($selectedProduk == '') 
+                    <button type="submit" class="btn btn-sm btn-primary mt-2">Filter</button> 
+                @else 
+                    <a href="{{ route('documentation.gallery') }}" class="btn btn-sm btn-danger mt-2">Reset</a> 
                 @endif
             </form>
         </div>
     </div>
-  <div class="row">
-    <!-- Card 1 -->
-    @if(count($barang) == 0)
-    <div class="col-md-12">
-        <div class="alert alert-warning" role="alert">
-            Dokumentasi tidak ditemukan.
+    <!-- Card 1 --> 
+    @if(count($barang) == 0) 
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-warning" role="alert"> Dokumentasi tidak ditemukan. </div>
         </div>
     </div>
     @else
+    <div class="row">
     @foreach($barang as $b)
-    <div class="col-md-4">
-      <div class="card">
-        <img width="300" height="300" src="{{ !isset($b->documentation->filename) ? asset($b->accdesain) : asset('storage/dokumentasi/'. $b->documentation->filename) }}" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">{{ $b->job->job_name }}</h5>
-          <p class="card-text text-secondary text-sm">{{ $b->user->sales->sales_name }}</p>
-        </div>
-        <div class="card-footer">
-          <button onclick="modalSpesifikasi({{ $b->id }})" type="button" class="btn btn-sm btn-primary">Lihat Detail</button>
-        </div>
-      </div>
-    </div>
-    <!-- ... other cards ... -->
-    @endforeach
-    @endif
-
-    <!-- Modal 1 -->
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card">
+            <img 
+                data-sizes="auto" 
+                data-srcset="
+                {{ isset($b->documentation->filename) ? asset('storage/dokumentasi/'. $b->documentation->filename.'?w=300') : asset('adminlte/dist/img/placeholder.svg') }} 300w,
+                {{ isset($b->documentation->filename) ? asset('storage/dokumentasi/'. $b->documentation->filename.'?w=600') : asset('adminlte/dist/img/placeholder.svg') }} 600w,
+                {{ isset($b->documentation->filename) ? asset('storage/dokumentasi/'. $b->documentation->filename.'?w=900') : asset('adminlte/dist/img/placeholder.svg') }} 900w" 
+                src="{{ asset('adminlte/dist/img/placeholder.svg') }}" 
+                data-src="{{ isset($b->documentation->filename) ? asset('storage/dokumentasi/'. $b->documentation->filename) : asset('adminlte/dist/img/placeholder.svg')}}"
+                class="card-img-top lazyload" 
+                alt="..."
+                onerror="this.onerror=null;this.src='{{ asset('adminlte/dist/img/placeholder.svg') }}';">
     
-  </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ $b->job->job_name }}</h5>
+                <p class="card-text text-secondary text-sm">{{ $b->user->sales->sales_name }}</p>
+            </div>
+            <div class="card-footer">
+                <button onclick="modalSpesifikasi({{ $b->id }})" type="button" class="btn btn-sm btn-primary">Lihat Detail</button>
+            </div>
+        </div>
+    </div>    
+    <!-- ... other cards ... --> 
+    @endforeach
+    </div>
+    @endif
     <div class="row">
         <div class="mt-3">
             <div class="d-flex justify-content-center">
