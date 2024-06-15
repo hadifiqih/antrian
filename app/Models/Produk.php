@@ -25,12 +25,17 @@ class Produk extends Model
 
     public function stokBahan()
     {
-        return $this->hasMany(StokBahan::class);
+        return $this->hasOne(StokBahan::class);
     }
 
     public function produkHarga()
     {
         return $this->hasMany(ProdukHarga::class);
+    }
+
+    public function mutasiStok()
+    {
+        return $this->hasMany(MutasiStok::class);
     }
 
     public static function getProducts()

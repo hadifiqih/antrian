@@ -74,30 +74,15 @@ class StokController extends Controller
 
     public function daftarStokJson()
     {
-        function getStokMasuk($id)
-        {
-            $cabang = auth()->user()->cabang_id;
-            $mutasi = MutasiStok::where('produk_id', $id)->where('cabang_id', $cabang)->where('kategori_mutasi', 'masuk')->sum('jumlah_stok');
-            return $mutasi;
-        }
+        $cabang = auth()->user()->cabang_id;
 
-        function getStokKeluar($id)
-        {
-            $cabang = auth()->user()->cabang_id;
-            $mutasi = MutasiStok::where('produk_id', $id)->where('cabang_id', $cabang)->where('kategori_mutasi', 'keluar')->sum('jumlah_stok');
-            return $mutasi;
-        }
+        // Menggunakan eager loading untuk mengambil data produk dan stok
+        $stocks = Produk::with(['mutasiStok' => function($query) use ($cabang) {
+            $query->where('cabang_id', $cabang);
+        }, 'stokBahan' => function($query) use ($cabang) {
+            $query->where('cabang_id', $cabang)->select('produk_id', 'jumlah_stok');
+        }])->get();
 
-        function getStok($id)
-        {
-            $cabang = auth()->user()->cabang_id;
-            $stok = StokBahan::where('produk_id', $id)->where('cabang_id', $cabang)->first();
-            return $stok->jumlah_stok;
-        }
-
-        //yajra datatable
-        $stocks = Produk::all();
-        
         return Datatables::of($stocks)
             ->addColumn('sku', function ($stock) {
                 return $stock->kode_produk;
@@ -105,14 +90,17 @@ class StokController extends Controller
             ->addColumn('nama', function ($stock) {
                 return $stock->nama_produk;
             })
-            ->addColumn('masuk', function ($stock) {
-                return getStokMasuk($stock->id) ?? 0;
+            ->addColumn('masuk', function ($stock) use ($cabang) {
+                // Menghitung stok masuk dari relasi mutasiStok
+                return $stock->mutasiStok->where('kategori_mutasi', 'masuk')->sum('jumlah_stok') ?? 0;
             })
-            ->addColumn('terjual', function ($stock) {
-                return getStokKeluar($stock->id) ?? 0;
+            ->addColumn('terjual', function ($stock) use ($cabang) {
+                // Menghitung stok keluar dari relasi mutasiStok
+                return $stock->mutasiStok->where('kategori_mutasi', 'keluar')->sum('jumlah_stok') ?? 0;
             })
             ->addColumn('stok', function ($stock) {
-                return getStok($stock->id);
+                // Mengambil jumlah stok dari relasi stokBahan
+                return $stock->stokBahan->jumlah_stok ?? 0;
             })
             ->addColumn('satuan', function ($stock) {
                 return 'pcs';
@@ -125,10 +113,10 @@ class StokController extends Controller
         if($request->has('periode')){
             $periode = $request->periode;
             $cabang = auth()->user()->cabang_id;
-            $mutasi = MutasiStok::where('cabang_id', $cabang)->whereMonth('created_at', $periode)->get();
+            $mutasi = MutasiStok::with('produk')->where('cabang_id', $cabang)->whereMonth('created_at', $periode)->get();
         }else{
             $cabang = auth()->user()->cabang_id;
-            $mutasi = MutasiStok::where('cabang_id', $cabang)->whereMonth('created_at', date('m'))->get();
+            $mutasi = MutasiStok::with('produk')->where('cabang_id', $cabang)->whereMonth('created_at', date('m'))->get();
         }
 
         //yajra datatable
@@ -160,53 +148,5 @@ class StokController extends Controller
             })
             ->rawColumns(['kategori'])
             ->make(true);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

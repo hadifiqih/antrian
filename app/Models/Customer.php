@@ -40,7 +40,7 @@ class Customer extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public static function sales()
+    public function sales()
     {
         return $this->belongsTo(Sales::class);
     }
