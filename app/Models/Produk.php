@@ -13,6 +13,8 @@ class Produk extends Model
 
     protected $table = 'produk';
 
+    protected $with = ['stokBahan', 'produkHarga'];
+
     protected $fillable = [
         'kode_produk',
         'nama_produk',

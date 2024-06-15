@@ -217,7 +217,7 @@ class DesignController extends Controller
 
     public function indexPenugasanDatatables()
     {
-        $designs = DesignQueue::where('status', 0)->orderBy('created_at', 'desc')->get();
+        $designs = DesignQueue::with('sales', 'job')->where('status', 0)->orderBy('created_at', 'desc')->get();
 
         return Datatables::of($designs)
             ->addIndexColumn()
@@ -252,7 +252,7 @@ class DesignController extends Controller
 
     public function indexPenugasanSelesaiDatatables()
     {
-        $designs = DesignQueue::where('status', 2)->orderBy('created_at', 'desc')->get();
+        $designs = DesignQueue::with('designer', 'sales', 'job')->where('status', 2)->orderBy('created_at', 'desc')->get();
 
         return Datatables::of($designs)
             ->addIndexColumn()

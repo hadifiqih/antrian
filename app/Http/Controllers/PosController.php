@@ -118,10 +118,83 @@ class PosController extends Controller
         return view('page.kasir.manage-product');
     }
 
+    // public function manageProductJson()
+    // {
+    //     //Give example 5 data for product with id, kode_produk, nama_produk, price, sell price, stok
+    //     $products = Produk::getProducts();
+
+    //     return Datatables::of($products)
+    //         ->addIndexColumn()
+    //         ->addColumn('kode_produk', function($row){
+    //             return $row->kode_produk;
+    //         })
+    //         ->addColumn('nama_produk', function($row){
+    //             return $row->nama_produk;
+    //         })
+    //         ->addColumn('harga_kulak', function($row){
+    //             $cabang = auth()->user()->cabang_id;
+    //             if($cabang == 1){
+    //                 $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
+    //             }else{
+    //                 $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
+    //             }
+
+    //             if($kulak == null){
+    //                 return 'Belum Diatur';
+    //             }else{
+    //                 return CustomHelper::addCurrencyFormat($kulak->harga_kulak);
+    //             }
+    //         })
+    //         ->addColumn('harga_jual', function($row){
+    //             $cabang = auth()->user()->cabang_id;
+    //             if($cabang == 1){
+    //                 $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
+    //             }else{
+    //                 $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
+    //             }
+
+    //             if($jual == null){
+    //                 return 'Belum Diatur';
+    //             }else{
+    //                 return CustomHelper::addCurrencyFormat($jual->harga_jual);
+    //             }
+    //         })
+    //         ->addColumn('stok_bahan', function($row){
+    //             $cabang = auth()->user()->cabang_id;
+    //             $stok = StokBahan::where('produk_id', $row->id)->where('cabang_id', $cabang)->first();
+    //             if($stok == null){
+    //                 return 'Belum Diatur';
+    //             }
+    //             return $stok->jumlah_stok;
+    //         })
+    //         ->addColumn('action', function($row){
+    //             $actionBtn = '<div class="btn-group">';
+    //             $actionBtn .= '<a href="'.route('pos.editProduct', $row->id).'" class="edit btn btn-warning btn-sm"><i class="fas fa-edit"></i> Ubah</a>';
+    //             $actionBtn .= '<button type="button" class="delete btn btn-danger btn-sm" onclick="hapusProduk('.$row->id.')"><i class="fas fa-trash"></i> Hapus</button>';
+    //             $actionBtn .= '</div>';
+    //             return $actionBtn;
+    //         })
+    //         ->rawColumns(['action', 'stok_bahan'])
+    //         ->make(true);
+    // }
+
     public function manageProductJson()
     {
-        //Give example 5 data for product with id, kode_produk, nama_produk, price, sell price, stok
+        // Ambil semua produk
         $products = Produk::getProducts();
+
+        // Ambil semua data ProdukHarga berdasarkan cabang user yang sedang login.
+        $cabangId = auth()->user()->cabang_id;
+        $produkHarga = ProdukHarga::where('cabang_id', $cabangId)->get();
+
+        // Ambil semua data StokBahan berdasarkan cabang user yang sedang login.
+        $stokBahan = StokBahan::where('cabang_id', $cabangId)->get();
+
+        // Ubah data ProdukHarga dan StokBahan menjadi bentuk array 
+        // dengan key produk_id agar mudah diakses.
+        $hargaKulak = $produkHarga->keyBy('produk_id');
+        $hargaJual = $produkHarga->keyBy('produk_id');
+        $stokBahan = $stokBahan->keyBy('produk_id');
 
         return Datatables::of($products)
             ->addIndexColumn()
@@ -131,41 +204,29 @@ class PosController extends Controller
             ->addColumn('nama_produk', function($row){
                 return $row->nama_produk;
             })
-            ->addColumn('harga_kulak', function($row){
-                $cabang = auth()->user()->cabang_id;
-                if($cabang == 1){
-                    $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
+            ->addColumn('harga_kulak', function($row) use ($hargaKulak) {
+                // Cek apakah data harga_kulak ada untuk produk ini.
+                if(isset($hargaKulak[$row->id])){
+                    return CustomHelper::addCurrencyFormat($hargaKulak[$row->id]->harga_kulak);
                 }else{
-                    $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
-                }
-
-                if($kulak == null){
                     return 'Belum Diatur';
-                }else{
-                    return CustomHelper::addCurrencyFormat($kulak->harga_kulak);
                 }
             })
-            ->addColumn('harga_jual', function($row){
-                $cabang = auth()->user()->cabang_id;
-                if($cabang == 1){
-                    $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
+            ->addColumn('harga_jual', function($row) use ($hargaJual) {
+                // Cek apakah data harga_jual ada untuk produk ini.
+                if(isset($hargaJual[$row->id])){
+                    return CustomHelper::addCurrencyFormat($hargaJual[$row->id]->harga_jual);
                 }else{
-                    $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
-                }
-
-                if($jual == null){
                     return 'Belum Diatur';
-                }else{
-                    return CustomHelper::addCurrencyFormat($jual->harga_jual);
                 }
             })
-            ->addColumn('stok_bahan', function($row){
-                $cabang = auth()->user()->cabang_id;
-                $stok = StokBahan::where('produk_id', $row->id)->where('cabang_id', $cabang)->first();
-                if($stok == null){
+            ->addColumn('stok_bahan', function($row) use ($stokBahan) {
+                // Cek apakah data stok_bahan ada untuk produk ini.
+                if(isset($stokBahan[$row->id])){
+                    return $stokBahan[$row->id]->jumlah_stok;
+                }else{
                     return 'Belum Diatur';
                 }
-                return $stok->jumlah_stok;
             })
             ->addColumn('action', function($row){
                 $actionBtn = '<div class="btn-group">';
@@ -932,6 +993,7 @@ class PosController extends Controller
     public function itemsJson(Request $request)
     {
         $sales = auth()->user()->sales->id;
+        $cabang = auth()->user()->cabang_id;
         $filter = $request->query('bulan') ?? date('m');
         if(!isset($filter)){
             $awal = date('Y-m-01');
@@ -941,9 +1003,11 @@ class PosController extends Controller
             $akhir = date('Y-'.$filter.'-t');
         }
 
-        $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sales){
+        $penjualanDetail = PenjualanDetail::with(['penjualan', 'produk'])
+        ->whereHas('penjualan', function($q) use($sales){
             $q->where('sales_id', $sales);
-        })->whereBetween('created_at', [$awal, $akhir])->get();
+        })->whereBetween('created_at', [$awal, $akhir])
+        ->get();
 
         return Datatables::of($penjualanDetail)
             ->addIndexColumn()
@@ -957,7 +1021,6 @@ class PosController extends Controller
                 return $row->jumlah;
             })
             ->addColumn('kulak', function($row){
-                $cabang = auth()->user()->cabang_id;
                 $harga = ProdukHarga::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->first();
                 return CustomHelper::addCurrencyFormat($harga->harga_kulak);
             })
@@ -969,7 +1032,6 @@ class PosController extends Controller
                 return CustomHelper::addCurrencyFormat($total);
             })
             ->addColumn('laba', function($row){
-                $cabang = auth()->user()->cabang_id;
                 $harga = ProdukHarga::where('produk_id', $row->produk_id)->where('cabang_id', $cabang)->first();
                 $laba = ($row->harga - $harga->harga_kulak) * $row->jumlah;
                 return CustomHelper::addCurrencyFormat($laba);
@@ -979,6 +1041,7 @@ class PosController extends Controller
             ->make(true);
     }
 
+    
     public function penjualanItemBulanan($bulan)
     {
         $items = PenjualanDetail::whereHas('penjualan', function($q){
