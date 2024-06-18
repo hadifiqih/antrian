@@ -37,11 +37,14 @@
                             <label for="harga_jual">Harga Jual</label>
                             <input type="text" class="form-control maskMoney" id="harga_jual" name="harga_jual" value="{{ isset($harga->harga_jual) ? $harga->harga_jual : '' }}">
                         </div>
+                        @if(!isset($stok))
                         <div class="form-group">
                             <label for="stok">Stok</label>
                             <input type="number" class="form-control" id="stok" name="stok" value="{{ isset($stok->jumlah_stok) ? $stok->jumlah_stok : '' }}">
                         </div>
-
+                        @else
+                        <input type="hidden" id="stok" name="stok" value="{{ $stok->jumlah_stok }}">
+                        @endif
                         <div class="form-group">
                             <label for="grosir">Grosir</label>
                             <button id="btnTambahGrosir" type="button" class="btn btn-sm btn-outline-primary ml-2"><i class="fas fa-plus"></i> Tambah Harga Grosir</button>
@@ -139,7 +142,7 @@
             });
 
             $.ajax({
-                url: "{{ route('pos.updateProduct') }}",
+                url: "{{ route('pos.updateProduct', $produk->id) }}",
                 type: "POST",
                 data: {
                     _token: token,

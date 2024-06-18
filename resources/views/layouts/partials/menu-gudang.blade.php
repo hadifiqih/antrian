@@ -17,16 +17,10 @@
                 <p>Antrian Workshop</p>
                 </a>
             </li>
-            <li>
-                <a href="{{ route('customer.index') }}" class="nav-link {{ request()->routeIs('customer.index') ? 'active' : '' }}">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Data Pelanggan</p>
-                </a>
-            </li>
         </ul>
         </li>
-        <li class="nav-item {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') ? 'active' : '' }}">
+        <li class="nav-item {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') || request()->routeIs('pos.manageProduct') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('daftarStok') || request()->routeIs('mutasiStok') || request()->routeIs('daftarMutasi') || request()->routeIs('pos.manageProduct') ? 'active' : '' }}">
               <i class="nav-icon fas fa-box"></i>
                 <p>
                     Kelola Stok

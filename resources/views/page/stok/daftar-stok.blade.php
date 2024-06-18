@@ -14,7 +14,7 @@
         <div class="col-md-12">
             <div class="card card-primary card-outline">
                 <div class="card-header">
-                    <h3 class="card-title">Daftar Stok</h3>
+                <h3 class="card-title">Daftar Stok {{ auth()->user()->cabang->nama_cabang}}</h3>
                     <a href="{{ route('mutasiStok') }}" class="btn btn-primary btn-sm float-right">
                         <i class="fas fa-plus-circle"></i> Mutasi Stok
                     </a>

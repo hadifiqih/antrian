@@ -178,6 +178,8 @@
                     @include('layouts.partials.menu-estimator')
                 @elseif(Auth::user()->role_id == 5)
                     @include('layouts.partials.menu-spv-desain')
+                @elseif(Auth::user()->role_id == 14)
+                    @include('layouts.partials.menu-gudang')
                 @else
                     <li class="nav-item">
                         <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') || request()->routeIs('antrian.show') ? 'active' : '' }}">
