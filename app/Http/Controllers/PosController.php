@@ -364,11 +364,13 @@ class PosController extends Controller
     public function simpanProduk(Request $request)
     {
         $validated = $request->validate([
-            'kode_produk' => 'required|unique:produk,kode_produk',
+            'kode_produk' => 'required|unique:produk',
             'nama_produk' => 'required|max:255',
             'harga_kulak' => 'required|numeric',
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer'
+        ], [
+            'kode_produk.unique' => 'Kode produk sudah digunakan'
         ]);
 
         $cabang_id = auth()->user()->cabang_id;
@@ -424,52 +426,116 @@ class PosController extends Controller
         return view('page.kasir.ubah-produk', compact('produk', 'cabang', 'harga', 'grosir', 'stok'));
     }
 
+    // public function updateProduct(Request $request, string $id)
+    // {
+    //     $validated = $request->validate([
+    //         'id_produk' => 'required',
+    //         'kode_produk' => 'required|unique:produk,kode_produk',
+    //         'nama_produk' => 'required|max:255',
+    //         'harga_kulak' => 'required|numeric',
+    //         'harga_jual' => 'required|numeric',
+    //         'stok' => 'required|integer',
+    //         'min.*' => 'required|numeric',
+    //         'max.*' => 'required|numeric',
+    //         'harga.*' => 'required|numeric',
+    //     ], [
+    //         'harga.*.required' => 'Kolom harga grosir harus diisi',
+    //         'kode_produk.unique' => 'Kode produk sudah digunakan',
+    //     ]);
+
+    //     $cabang_id = auth()->user()->cabang_id;
+    //     $idProduk = $validated['id_produk'];
+
+    //     $produk = Produk::find($idProduk);
+    //     $produk->kode_produk = $validated['kode_produk'];
+    //     $produk->nama_produk = ucwords(strtolower($validated['nama_produk']));
+    //     $produk->save();
+
+    //     $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
+    //     $harga->harga_kulak = $validated['harga_kulak'];
+    //     $harga->harga_jual = $validated['harga_jual'];
+    //     $harga->save();
+
+    //     $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
+    //     $stok->jumlah_stok = $validated['stok'];
+    //     $stok->save();
+
+    //     if(isset($request->min) && isset($request->max)){
+    //         //perulangan untuk menambahkan harga grosir
+    //         for($i = 0; $i < count($request->min); $i++){
+    //             $grosir = ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->get();
+    //             $grosir[$i]->min_qty = $request->min[$i];
+    //             $grosir[$i]->max_qty = $request->max[$i];
+    //             $grosir[$i]->harga_grosir = $request->harga[$i];
+    //             $grosir[$i]->save();
+    //         }
+    //     }
+
+    //     if($produk->save() && $harga->save() && $stok->save() && $grosir->save()){
+    //         return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
+    //     }elseif($produk->save() && $harga->save() && $stok->save()){
+    //         return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
+    //     }else{
+    //         return redirect()->route('pos.manageProduct')->with('error', 'Produk gagal ditambahkan');
+    //     }
+    // }
+
     public function updateProduct(Request $request, string $id)
     {
+        // Validasi input dengan pesan error yang lebih deskriptif
         $validated = $request->validate([
             'id_produk' => 'required',
-            'kode_produk' => 'required|unique:produk,kode_produk',
+            'kode_produk' => 'required',
             'nama_produk' => 'required|max:255',
-            'harga_kulak' => 'required|numeric',
-            'harga_jual' => 'required|numeric',
-            'stok' => 'required|integer'
+            'harga_kulak' => 'required',
+            'harga_jual' => 'required',
+            'stok' => 'required',
+            'min.*' => 'nullable', 
+            'max.*' => 'nullable', 
+            'harga.*' => 'nullable', 
         ]);
 
         $cabang_id = auth()->user()->cabang_id;
         $idProduk = $validated['id_produk'];
 
-        $produk = Produk::find($idProduk);
+        // Temukan model hanya sekali di awal
+        $produk = Produk::findOrFail($idProduk);
+        $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
+        $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
+
+        // Assign value ke property model
         $produk->kode_produk = $validated['kode_produk'];
         $produk->nama_produk = ucwords(strtolower($validated['nama_produk']));
-        $produk->save();
 
-        $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
         $harga->harga_kulak = $validated['harga_kulak'];
         $harga->harga_jual = $validated['harga_jual'];
-        $harga->save();
 
-        $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
         $stok->jumlah_stok = $validated['stok'];
-        $stok->save();
 
-        if(isset($request->min) && isset($request->max)){
-            //perulangan untuk menambahkan harga grosir
-            for($i = 0; $i < count($request->min); $i++){
-                $grosir = ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->get();
-                $grosir[$i]->min_qty = $request->min[$i];
-                $grosir[$i]->max_qty = $request->max[$i];
-                $grosir[$i]->harga_grosir = $request->harga[$i];
-                $grosir[$i]->save();
+        // Gunakan transaction untuk memastikan konsistensi data
+        DB::transaction(function () use ($produk, $harga, $stok, $request, $idProduk, $cabang_id) {
+            $produk->save();
+            $harga->save();
+            $stok->save();
+
+            // Hapus semua data grosir sebelumnya
+            ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->delete();
+
+            // Tambahkan data grosir baru
+            if (isset($request->min) && isset($request->max) && isset($request->harga)) {
+                foreach ($request->min as $index => $minQty) {
+                    ProdukGrosir::create([
+                        'produk_id' => $idProduk,
+                        'cabang_id' => $cabang_id,
+                        'min_qty' => $minQty,
+                        'max_qty' => $request->max[$index],
+                        'harga_grosir' => $request->harga[$index],
+                    ]);
+                }
             }
-        }
+        });
 
-        if($produk->save() && $harga->save() && $stok->save() && $grosir->save()){
-            return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
-        }elseif($produk->save() && $harga->save() && $stok->save()){
-            return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
-        }else{
-            return redirect()->route('pos.manageProduct')->with('error', 'Produk gagal ditambahkan');
-        }
+        return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil diperbarui');
     }
 
     public function destroyProduct(string $id)

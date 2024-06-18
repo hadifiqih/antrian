@@ -9,6 +9,21 @@
 @section('breadcrumb', 'Ubah Produk')
 
 @section('content')
+
+@if($errors->any())
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Whoops!</strong> Terdapat kesalahan dalam input data:
+    <ul>
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+@endif
+
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -17,13 +32,11 @@
                     <h3 class="card-title">Ubah Produk</h3>
                 </div>
                 <div class="card-body">
-                    <form id="formUbahProduk" action="" enctype="text/plain" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="id_produk" value="{{ $produk->id }}">
+                    <form id="formUbahProduk">
+                        <input type="hidden" id="produkId" name="produkId" value="{{ $produk->id }}">
                         <div class="form-group">
                             <label for="kode_produk">Kode Produk</label>
-                            <input type="text" class="form-control" id="kode_produk" name="kode_produk" value="{{ $produk->kode_produk }}">
+                            <input type="text" class="form-control" id="kode_produk" name="kode_produk" value="{{ $produk->kode_produk }}" disabled>
                         </div>
                         <div class="form-group">
                             <label for="nama_produk">Nama Produk</label>
@@ -123,10 +136,10 @@
         });
 
         // Tambah Produk
-        $('#formTambahProduk').submit(function(e) {
+        $('#formUbahProduk').submit(function(e) {
             e.preventDefault();
             var token = $('meta[name="csrf-token"]').attr('content');
-            var id_produk = $('#id_produk').val();
+            var id_produk = $('#produkId').val();
             var kode_produk = $('#kode_produk').val();
             var nama_produk = $('#nama_produk').val();
             var harga_kulak = removeCurrency($('#harga_kulak').val());
@@ -143,7 +156,7 @@
 
             $.ajax({
                 url: "{{ route('pos.updateProduct', $produk->id) }}",
-                type: "POST",
+                type: "PUT",
                 data: {
                     _token: token,
                     id_produk: id_produk,
@@ -157,10 +170,31 @@
                     harga: harga
                 },
                 success: function(response) {
-                    console.log(response);
+                    if(response.status == 'success') {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if(result.isConfirmed) {
+                                window.location.href = "{{ route('pos.manageProduct') }}";
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
                 }
+                });
             });
         });
-    });
 </script>
 @endsection
