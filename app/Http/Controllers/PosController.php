@@ -18,6 +18,7 @@ use App\Models\KeranjangItem;
 use App\Models\PenjualanDetail;
 
 use App\Models\SumberPelanggan;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\NotaResource;
 use Illuminate\Support\Facades\Http;
 use Mike42\Escpos\CapabilityProfile;
@@ -118,65 +119,12 @@ class PosController extends Controller
         return view('page.kasir.manage-product');
     }
 
-    // public function manageProductJson()
-    // {
-    //     //Give example 5 data for product with id, kode_produk, nama_produk, price, sell price, stok
-    //     $products = Produk::getProducts();
+    public function showProduct($id)
+    {
+        $produk = Produk::find($id);
 
-    //     return Datatables::of($products)
-    //         ->addIndexColumn()
-    //         ->addColumn('kode_produk', function($row){
-    //             return $row->kode_produk;
-    //         })
-    //         ->addColumn('nama_produk', function($row){
-    //             return $row->nama_produk;
-    //         })
-    //         ->addColumn('harga_kulak', function($row){
-    //             $cabang = auth()->user()->cabang_id;
-    //             if($cabang == 1){
-    //                 $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
-    //             }else{
-    //                 $kulak = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
-    //             }
-
-    //             if($kulak == null){
-    //                 return 'Belum Diatur';
-    //             }else{
-    //                 return CustomHelper::addCurrencyFormat($kulak->harga_kulak);
-    //             }
-    //         })
-    //         ->addColumn('harga_jual', function($row){
-    //             $cabang = auth()->user()->cabang_id;
-    //             if($cabang == 1){
-    //                 $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 1)->first();
-    //             }else{
-    //                 $jual = ProdukHarga::where('produk_id', $row->id)->where('cabang_id', 2)->first();
-    //             }
-
-    //             if($jual == null){
-    //                 return 'Belum Diatur';
-    //             }else{
-    //                 return CustomHelper::addCurrencyFormat($jual->harga_jual);
-    //             }
-    //         })
-    //         ->addColumn('stok_bahan', function($row){
-    //             $cabang = auth()->user()->cabang_id;
-    //             $stok = StokBahan::where('produk_id', $row->id)->where('cabang_id', $cabang)->first();
-    //             if($stok == null){
-    //                 return 'Belum Diatur';
-    //             }
-    //             return $stok->jumlah_stok;
-    //         })
-    //         ->addColumn('action', function($row){
-    //             $actionBtn = '<div class="btn-group">';
-    //             $actionBtn .= '<a href="'.route('pos.editProduct', $row->id).'" class="edit btn btn-warning btn-sm"><i class="fas fa-edit"></i> Ubah</a>';
-    //             $actionBtn .= '<button type="button" class="delete btn btn-danger btn-sm" onclick="hapusProduk('.$row->id.')"><i class="fas fa-trash"></i> Hapus</button>';
-    //             $actionBtn .= '</div>';
-    //             return $actionBtn;
-    //         })
-    //         ->rawColumns(['action', 'stok_bahan'])
-    //         ->make(true);
-    // }
+        return view('page.kasir.detail-produk', compact('produk'));
+    }
 
     public function manageProductJson()
     {
@@ -232,6 +180,7 @@ class PosController extends Controller
                 $actionBtn = '<div class="btn-group">';
                 $actionBtn .= '<a href="'.route('pos.editProduct', $row->id).'" class="edit btn btn-warning btn-sm"><i class="fas fa-edit"></i> Ubah</a>';
                 $actionBtn .= '<button type="button" class="delete btn btn-danger btn-sm" onclick="hapusProduk('.$row->id.')"><i class="fas fa-trash"></i> Hapus</button>';
+                $actionBtn .= '<a href="'.route('pos.showProduct', $row->id).'" class="show btn btn-primary btn-sm"><i class="fas fa-eye"></i> Detail</a>';
                 $actionBtn .= '</div>';
                 return $actionBtn;
             })
@@ -426,60 +375,6 @@ class PosController extends Controller
         return view('page.kasir.ubah-produk', compact('produk', 'cabang', 'harga', 'grosir', 'stok'));
     }
 
-    // public function updateProduct(Request $request, string $id)
-    // {
-    //     $validated = $request->validate([
-    //         'id_produk' => 'required',
-    //         'kode_produk' => 'required|unique:produk,kode_produk',
-    //         'nama_produk' => 'required|max:255',
-    //         'harga_kulak' => 'required|numeric',
-    //         'harga_jual' => 'required|numeric',
-    //         'stok' => 'required|integer',
-    //         'min.*' => 'required|numeric',
-    //         'max.*' => 'required|numeric',
-    //         'harga.*' => 'required|numeric',
-    //     ], [
-    //         'harga.*.required' => 'Kolom harga grosir harus diisi',
-    //         'kode_produk.unique' => 'Kode produk sudah digunakan',
-    //     ]);
-
-    //     $cabang_id = auth()->user()->cabang_id;
-    //     $idProduk = $validated['id_produk'];
-
-    //     $produk = Produk::find($idProduk);
-    //     $produk->kode_produk = $validated['kode_produk'];
-    //     $produk->nama_produk = ucwords(strtolower($validated['nama_produk']));
-    //     $produk->save();
-
-    //     $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
-    //     $harga->harga_kulak = $validated['harga_kulak'];
-    //     $harga->harga_jual = $validated['harga_jual'];
-    //     $harga->save();
-
-    //     $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
-    //     $stok->jumlah_stok = $validated['stok'];
-    //     $stok->save();
-
-    //     if(isset($request->min) && isset($request->max)){
-    //         //perulangan untuk menambahkan harga grosir
-    //         for($i = 0; $i < count($request->min); $i++){
-    //             $grosir = ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->get();
-    //             $grosir[$i]->min_qty = $request->min[$i];
-    //             $grosir[$i]->max_qty = $request->max[$i];
-    //             $grosir[$i]->harga_grosir = $request->harga[$i];
-    //             $grosir[$i]->save();
-    //         }
-    //     }
-
-    //     if($produk->save() && $harga->save() && $stok->save() && $grosir->save()){
-    //         return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
-    //     }elseif($produk->save() && $harga->save() && $stok->save()){
-    //         return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil ditambahkan');
-    //     }else{
-    //         return redirect()->route('pos.manageProduct')->with('error', 'Produk gagal ditambahkan');
-    //     }
-    // }
-
     public function updateProduct(Request $request, string $id)
     {
         // Validasi input dengan pesan error yang lebih deskriptif
@@ -495,38 +390,49 @@ class PosController extends Controller
             'harga.*' => 'nullable', 
         ]);
 
-        $cabang_id = auth()->user()->cabang_id;
+        $cabang = auth()->user()->cabang_id;
         $idProduk = $validated['id_produk'];
 
         // Temukan model hanya sekali di awal
         $produk = Produk::findOrFail($idProduk);
-        $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
-        $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->first();
+        $harga = ProdukHarga::where('produk_id', $idProduk)->where('cabang_id', $cabang)->first();
+        $stok = StokBahan::where('produk_id', $idProduk)->where('cabang_id', $cabang)->first();
 
         // Assign value ke property model
-        $produk->kode_produk = $validated['kode_produk'];
         $produk->nama_produk = ucwords(strtolower($validated['nama_produk']));
 
-        $harga->harga_kulak = $validated['harga_kulak'];
-        $harga->harga_jual = $validated['harga_jual'];
+        if(!$harga){
+            $harga = new ProdukHarga;
+            $harga->produk_id = $idProduk;
+            $harga->cabang_id = $cabang;
+        }
+
+        $harga->harga_kulak = CustomHelper::removeCurrencyFormat($validated['harga_kulak']);
+        $harga->harga_jual = CustomHelper::removeCurrencyFormat($validated['harga_jual']);
+        
+        if(!$stok){
+            $stok = new StokBahan;
+            $stok->produk_id = $idProduk;
+            $stok->cabang_id = $cabang;
+        }
 
         $stok->jumlah_stok = $validated['stok'];
 
         // Gunakan transaction untuk memastikan konsistensi data
-        DB::transaction(function () use ($produk, $harga, $stok, $request, $idProduk, $cabang_id) {
+        DB::transaction(function () use ($produk, $harga, $stok, $request, $idProduk, $cabang) {
             $produk->save();
             $harga->save();
             $stok->save();
 
             // Hapus semua data grosir sebelumnya
-            ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang_id)->delete();
+            ProdukGrosir::where('produk_id', $idProduk)->where('cabang_id', $cabang)->delete();
 
             // Tambahkan data grosir baru
             if (isset($request->min) && isset($request->max) && isset($request->harga)) {
                 foreach ($request->min as $index => $minQty) {
                     ProdukGrosir::create([
                         'produk_id' => $idProduk,
-                        'cabang_id' => $cabang_id,
+                        'cabang_id' => $cabang,
                         'min_qty' => $minQty,
                         'max_qty' => $request->max[$index],
                         'harga_grosir' => $request->harga[$index],
@@ -535,7 +441,7 @@ class PosController extends Controller
             }
         });
 
-        return redirect()->route('pos.manageProduct')->with('success', 'Produk berhasil diperbarui');
+        return response()->json(['message' => 'Produk berhasil diperbarui!'], 200);
     }
 
     public function destroyProduct(string $id)

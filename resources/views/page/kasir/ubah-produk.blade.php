@@ -142,8 +142,8 @@
             var id_produk = $('#produkId').val();
             var kode_produk = $('#kode_produk').val();
             var nama_produk = $('#nama_produk').val();
-            var harga_kulak = removeCurrency($('#harga_kulak').val());
-            var harga_jual = removeCurrency($('#harga_jual').val());
+            var kulak = $('#harga_kulak').val();
+            var jual = $('#harga_jual').val();
             var stok = $('#stok').val();
             var min = [];
             var max = [];
@@ -162,15 +162,16 @@
                     id_produk: id_produk,
                     kode_produk: kode_produk,
                     nama_produk: nama_produk,
-                    harga_kulak: harga_kulak,
-                    harga_jual: harga_jual,
+                    harga_kulak: kulak,
+                    harga_jual: jual,
                     stok: stok,
                     min: min,
                     max: max,
                     harga: harga
                 },
                 success: function(response) {
-                    if(response.status == 'success') {
+                    console.log(response);
+                    if(response.status == 200) {
                         Swal.fire({
                             title: 'Berhasil!',
                             text: response.message,

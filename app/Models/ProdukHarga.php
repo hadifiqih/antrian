@@ -12,6 +12,13 @@ class ProdukHarga extends Model
 
     protected $table = 'produk_harga';
 
+    protected $fillable = [
+        'produk_id',
+        'cabang_id',
+        'harga_kulak',
+        'harga_jual',
+    ];
+
     public function produk()
     {
         return $this->belongsTo(Produk::class, 'produk_id', 'id');

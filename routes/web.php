@@ -294,6 +294,7 @@ Route::controller(PosController::class)->middleware('auth')->group(function(){
     Route::get('/pos/manage-product-json', 'manageProductJson')->name('pos.manageProductJson');
     Route::get('/pos/get-product-name', 'getProductName')->name('pos.getProductName');
     Route::get('/pos/manage-product/create', 'createProduct')->name('pos.createProduct');
+    Route::get('/pos/show-product/{id}', 'showProduct')->name('pos.showProduct');
     Route::post('/pos/manage-product/store', 'simpanProduk')->name('pos.simpanProduk');
     Route::get('/pos/manage-product/{id}/edit', 'editProduct')->name('pos.editProduct');
     Route::put('/pos/manage-product/update/{id}', 'updateProduct')->name('pos.updateProduct');
