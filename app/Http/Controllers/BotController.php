@@ -3,14 +3,32 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class BotController extends Controller
 {
+    public function __construct()
+    {
+        //tambahkan middleware auth dan limitchatbot
+        $this->middleware('auth');
+        $this->middleware('limit.chatbot');
+    }
 
     public function index()
     {
-        return view('page.bot.index');
+        if(Auth::check()){
+            $user = Auth::user();
+            $key = 'chatbot_limit_' . $user->id;
+            $limit = 30;
+
+            $interaction = Cache::get($key, 0);
+
+            $remainingInteractions = $limit - $interaction;
+            
+            return view('page.bot.index', compact('remainingInteractions'));
+        }
     }
 
     public function sendMessage(Request $request)

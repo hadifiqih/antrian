@@ -56,14 +56,6 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('mutasiStok') }}" class="nav-link {{ request()->routeIs('mutasiStok') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>
-                           Tambah Mutasi Stok
-                        </p>
-                    </a>
-                </li>
             </ul>
         </li>
     </ul>

@@ -43,6 +43,9 @@
             <div class="card card-primary card-outline">
                 <div class="card-header">
                     <h3 class="card-title">Mutasi Stok</h3>
+                    <a href="{{ route('mutasiStok') }}" class="btn btn-primary btn-sm float-right">
+                        <i class="fas fa-plus-circle"></i> Mutasi Stok
+                    </a>
                 </div>
                 <div class="card-body">
                     <table id="tableMutasi" class="table table-borderless table-striped">

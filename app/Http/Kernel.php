@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         // 'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkrole' => \App\Http\Middleware\CheckRoleMiddleware::class,
         // 'checkLogin' => \App\Http\Middleware\CheckLogin::class,
+        'limit.chatbot' => \App\Http\Middleware\LimitChatbot::class,
     ];
 }

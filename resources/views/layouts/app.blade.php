@@ -181,13 +181,10 @@
                 @elseif(Auth::user()->role_id == 14)
                     @include('layouts.partials.menu-gudang')
                 @else
-                    <li class="nav-item">
-                        <a href="{{ route('antrian.index') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') || request()->routeIs('antrian.show') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p>Antrian Workshop</p>
-                        </a>
-                    </li>
+                    @include('layouts.partials.menu-bot')
                 @endif
+                {{-- tambahkan pada semua role --}}
+                @include('layouts.partials.menu-bot')
       <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->

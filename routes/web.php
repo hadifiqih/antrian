@@ -344,7 +344,7 @@ Route::controller(StokController::class)->middleware('auth')->group(function(){
     Route::post('/stok/simpan-mutasi', 'simpanMutasi')->name('simpanMutasi');
 });
 
-Route::controller(BotController::class)->middleware('auth')->group(function(){
+Route::controller(BotController::class)->middleware(['auth', 'limit.chatbot'])->group(function(){
     Route::get('/bot', 'index')->name('bot.index');
     Route::get('/bot/get-response', 'getResponse')->name('bot.getResponse');
     Route::post('/bot/send-message', 'sendMessage')->name('bot.sendMessage');

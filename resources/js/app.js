@@ -130,9 +130,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             },
-            error: function() {
+            error: function(response) {
                 loading.hide();
-                addMessage('bot', 'Maaf, terjadi kesalahan. Silahkan mencoba lagi.');
+                if (response.status == 429) {
+                    addMessage('bot', 'Maaf, Anda telah mengirim terlalu banyak pesan. Silakan coba lagi nanti.');
+                } else {
+                    addMessage('bot', 'Maaf, terjadi kesalahan.');
+                }
             }
         });
     });
