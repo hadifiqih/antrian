@@ -603,20 +603,17 @@ class ReportController extends Controller
             $selesai = date('Y-m-d 23:59:59');
         }
 
+        $query = Barang::with(['antrian', 'job', 'customer'])
+            ->whereHas('antrian', function ($query) use ($mulai, $selesai) {
+                $query->whereBetween('created_at', [$mulai, $selesai]);
+            });
+
         if(auth()->user()->role_id == 11) {
             $user = auth()->user()->id;
-
-            $barangs = Barang::whereHas('antrian', function ($query) use ($mulai, $selesai) {
-                $query->whereBetween('created_at', [$mulai, $selesai]);
-            })
-            ->where('user_id', $user)
-            ->get();
-        } else {
-            $barangs = Barang::whereHas('antrian', function ($query) use ($mulai, $selesai) {
-                $query->whereBetween('created_at', [$mulai, $selesai]);
-            })
-            ->get();
+            $query->where('user_id', $user);   
         }
+
+        $barangs = $query->get();
 
         return Datatables::of($barangs)
         ->addIndexColumn()

@@ -44,7 +44,7 @@
         color: #333;
         border-radius: 15px;
         padding: 10px 15px;
-        max-width: 60%;
+        max-width: 80%;
     }
 
     .message.user .msg-content {
@@ -52,7 +52,7 @@
         color: #fff;
         border-radius: 15px;
         padding: 10px 15px;
-        max-width: 60%;
+        max-width: 80%;
         margin-left: auto;
         text-align: left;
     }
@@ -73,7 +73,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0 flex-fill">Chatbot</h4>
                     <p class="text-sm mb-0">Kuota Interaksi : {{ $remainingInteractions ?? 30 }}</p>

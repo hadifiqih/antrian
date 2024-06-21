@@ -1,7 +1,3 @@
-<nav class="mt-2">
-    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-      <!-- Add icons to the links using the .nav-icon class
-           with font-awesome or any other icon font library -->
       <li class="nav-item {{ request()->routeIs('antrian.index') || request()->routeIs('customer.index') ? 'menu-open' : '' }}">
         <a href="{{ url('/dashboard') }}" class="nav-link {{ request()->routeIs('antrian.index') || request()->routeIs('customer.index') ? 'active' : '' }}">
           <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -52,5 +48,3 @@
                 </li>
             </ul>
         </li>
-    </ul>
-</nav>

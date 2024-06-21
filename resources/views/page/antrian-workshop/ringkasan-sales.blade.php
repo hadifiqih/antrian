@@ -126,7 +126,7 @@
                     ajax: {
                         url: "{{ route('ringkasan.omsetSales') }}",
                         type: 'GET',
-                        data: {month: month}
+                        data: { month: month }
                     },
                     columns: [
                         {data: 'DT_RowIndex', name: 'DT_RowIndex'},

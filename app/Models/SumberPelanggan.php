@@ -11,4 +11,14 @@ class SumberPelanggan extends Model
 
     protected $table = 'sumber_pelanggan';
 
+    protected $fillable = [
+        'nama_sumber',
+        'code_sumber',
+    ];
+
+    public function iklan()
+    {
+        return $this->hasMany(Iklan::class, 'platform', 'code_sumber');
+    }
+
 }

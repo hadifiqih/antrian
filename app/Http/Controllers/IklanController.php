@@ -44,7 +44,7 @@ class IklanController extends Controller
 
     public function iklanJson()
     {
-        $iklans = Iklan::with('user', 'job', 'sales')->where('status', 1)->get();
+        $iklans = Iklan::with(['user', 'job', 'sales', 'job.kategori', 'platform'])->where('status', 1)->get();
         
         return Datatables()->of($iklans)
             ->addIndexColumn()
@@ -73,8 +73,8 @@ class IklanController extends Controller
                 return $row->sales->sales_name;
             })
             ->addColumn('platform', function($row){
-                $sumber = SumberPelanggan::where('code_sumber', 'LIKE', $row->platform)->first();
-                return $sumber->nama_sumber;
+                dd($row->platform->nama_sumber);
+                return $row->platform ? $row->platform->nama_sumber : 'Tidak ada data';
             })
             ->addColumn('biaya_iklan', function($row){
                 $biaya_iklan = 'Rp. '.number_format($row->biaya_iklan,0,',','.');
@@ -98,7 +98,7 @@ class IklanController extends Controller
 
     public function selesaiJson()
     {
-        $iklans = Iklan::with('user', 'job', 'sales')->where('status', 2)->get();
+        $iklans = Iklan::with(['user', 'job', 'job.kategori', 'sales', 'platform'])->where('status', 2)->get();
         
         return Datatables()->of($iklans)
             ->addIndexColumn()
@@ -127,8 +127,8 @@ class IklanController extends Controller
                 return $row->sales->sales_name;
             })
             ->addColumn('platform', function($row){
-                $sumber = SumberPelanggan::where('code_sumber', 'LIKE', $row->platform)->first();
-                return $sumber->nama_sumber;
+                dd($row->platform->nama_sumber);
+                return $row->platform ? $row->platform->nama_sumber : 'Tidak ada data';
             })
             ->addColumn('biaya_iklan', function($row){
                 $biaya_iklan = 'Rp. '.number_format($row->biaya_iklan,0,',','.');
@@ -311,7 +311,7 @@ class IklanController extends Controller
 
     public function penjualanIklan(Request $request)
     {
-        $iklans = BarangIklan::get();
+        $iklans = BarangIklan::with('barang')->get();
 
         $omset = 0;
         foreach($iklans as $iklan){
@@ -385,9 +385,9 @@ class IklanController extends Controller
         if($request->bulan != null || $request->tahun != null){
             $bulan = $request->bulan;
             $tahun = $request->tahun;
-            $iklans = BarangIklan::with('barang')->where('periode_iklan', 'LIKE', '%'.$tahun.'-'.$bulan.'%')->get();
+            $iklans = BarangIklan::with(['barang', 'sales', 'job', 'job.kategori'])->where('periode_iklan', 'LIKE', '%'.$tahun.'-'.$bulan.'%')->get();
         }else{
-            $iklans = BarangIklan::with('barang')->get();
+            $iklans = BarangIklan::with(['barang', 'sales', 'job', 'job.kategori'])->get();
         }
         
         $omset = 0;
