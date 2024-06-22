@@ -27,6 +27,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define('delete', AntrianPolicy::class.'@delete'); 
+        Gate::define('view-tambah-bahan-produksi', function ($user) {
+            return $user->role_id == 10;
+        });
     }
 }

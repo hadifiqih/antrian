@@ -62,10 +62,13 @@ class AntrianController extends Controller
         $productId = $request->get('produk');
         $branchId = $request->get('cabang');
         $salesId = $request->get('sales');
+
         // Build the query with eager loading
-        $antrians = DataAntrian::with('sales', 'customer', 'job', 'barang', 'dataKerja', 'cabang', 'buktiBayar')
-            ->where('status', 1) // Ensure active entries
-            ->orderByDesc('created_at');
+        $antrians = DataAntrian::with(['sales', 'customer', 'job', 'barang.job', 'dataKerja', 'cabang', 'buktiBayar'])
+        ->select(['id', 'ticket_order', 'sales_id', 'customer_id', 'cabang_id', 'status', 'created_at'])
+        ->where('status', 1)
+        ->orderByDesc('created_at');
+
         // Apply filters if any parameters are provided
         if ($request->has('kategori') || $request->has('cabang') || $request->has('sales')) {
             if ($productId !== null) {
@@ -95,9 +98,8 @@ class AntrianController extends Controller
                 return $antrian->customer->nama;
             })
             ->addColumn('produk', function ($antrian) {
-                $barang = Barang::where('ticket_order', $antrian->ticket_order)->get();
                 $produk = '';
-                foreach ($barang as $item) {
+                foreach ($antrian->barang as $item) {
                     $produk .= '- '. $item->job->job_name . '<br>';
                 }
                 return rtrim($produk, '<br>');
@@ -135,7 +137,7 @@ class AntrianController extends Controller
         $salesId = $request->get('sales');
 
         // Build the query with eager loading
-        $antrians = DataAntrian::with('sales', 'customer', 'job', 'barang', 'dataKerja', 'cabang', 'buktiBayar')
+        $antrians = DataAntrian::with(['sales', 'customer', 'job', 'barang', 'dataKerja', 'cabang', 'buktiBayar'])
             ->where('status', 2) // Ensure active entries
             ->orderByDesc('created_at');
 

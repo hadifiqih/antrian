@@ -92,7 +92,7 @@ class DataAntrian extends Model
 
     public function barang()
     {
-        return $this->belongsTo(Barang::class, 'ticket_order', 'ticket_order');
+        return $this->hasMany(Barang::class, 'ticket_order', 'ticket_order');
     }
 
     public function dataKerja()

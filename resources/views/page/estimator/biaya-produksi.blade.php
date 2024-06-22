@@ -22,7 +22,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Biaya Produksi</h3>
-                    <button class="btn btn-sm btn-primary float-right" onclick="modalTambahBahan()">Tambah Bahan Produksi</button>
+                    <button @if($canViewModal) class="btn btn-sm btn-primary float-right" onclick="modalTambahBahan()" @else class="btn btn-sm btn-secondary float-right disabled" @endif>Tambah Bahan Produksi</button>
                 </div>
                 <div class="card-body">
                     <a href="{{ route('estimator.unduhBPExcel', $barang->id) }}" class="btn btn-sm btn-success mb-3"><i class="fas fa-print"></i> Unduh Excel</a>

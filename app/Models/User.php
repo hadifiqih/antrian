@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Role;
 use App\Models\Cabang;
 use App\Models\DesignQueue;
 use Laravel\Sanctum\HasApiTokens;
@@ -92,6 +93,11 @@ class User extends Authenticatable
     public function isProduksi()
     {
         return $this->role_id == 13 || $this->role_id == 17;
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 
     public function cabang()

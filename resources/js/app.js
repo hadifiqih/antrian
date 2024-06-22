@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const loading = $('#loading');
     const converter = new showdown.Converter();
+    const kuota = document.getElementById('kuota');
 
     var submitButton = document.getElementById('submitUploadDokumentasi');
 
@@ -111,6 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         loading.show();
 
+        //panggil var kuota (<span></span>) convert ke int
+
         $.ajax({
             url: '/bot/send-message',
             method: 'POST',
@@ -121,6 +124,11 @@ document.addEventListener('DOMContentLoaded', function () {
             data: JSON.stringify({ message: message }),
             success: function(data) {
                 loading.hide();
+                //decrement kuota
+                let kuotaInt = parseInt(kuota.innerHTML);
+                kuotaInt -= 1;
+                kuota.innerHTML = kuotaInt;
+
                 let messages = data.messages;
                 for (let i = 0; i < messages.length; i++) {
                     if (messages[i].type == 'answer') {

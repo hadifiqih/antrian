@@ -15,6 +15,7 @@ use App\Exports\UsersExport;
 use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
 use App\Exports\AntrianExport;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -41,14 +42,27 @@ class EstimatorController extends Controller
             $akhir = date('Y-m-d');
         }
 
-        $antrians = Barang::whereHas('antrian', function($query) use ($awal, $akhir){
+        $antrians = Barang::with(['user.sales', 'kategori', 'job', 'dataKerja', 'designQueue.designer'])
+        ->whereHas('antrian', function($query) use ($awal, $akhir){
             $query->whereBetween('created_at', [$awal, $akhir]);
         })->get();
+
+        // Kumpulkan semua ID employee yang unik
+        $employeeIds = [];
+        foreach ($antrians as $antrian) {
+            $employeeIds = array_merge($employeeIds, explode(',', $antrian->dataKerja->operator_id ?? ''));
+            $employeeIds = array_merge($employeeIds, explode(',', $antrian->dataKerja->finishing_id ?? ''));
+            $employeeIds = array_merge($employeeIds, explode(',', $antrian->dataKerja->qc_id ?? ''));
+        }
+        $employeeIds = array_unique(array_filter($employeeIds, function($id) { return $id !== 'r'; }));
+
+        // Ambil data semua employee yang dibutuhkan sekaligus
+        $employees = Employee::whereIn('id', $employeeIds)->pluck('name', 'id');
 
         return Datatables::of($antrians)
             ->addIndexColumn()
             ->addColumn('ticket_order', function ($antrian) {
-                return $antrian->ticket_order;
+                return '<a class="text-primary" href="'.route('biaya.produksi', $antrian->id).'">'.$antrian->ticket_order.'</a>';
             })
             ->addColumn('sales', function ($antrian) {
                 return $antrian->user->sales->sales_name;
@@ -75,7 +89,7 @@ class EstimatorController extends Controller
                     return $antrian->designQueue->designer->name;
                 }
             })
-            ->addColumn('operator', function ($antrian) {
+            ->addColumn('operator', function ($antrian) use ($employees){
                 if($antrian->dataKerja->operator_id == null){
                     return '<span class="text-danger">OPERATOR KOSONG</span>';
                 }else{
@@ -86,13 +100,13 @@ class EstimatorController extends Controller
                         if($o == 'r'){
                             $namaOperator[] = "<span class='text-primary'>Rekanan</span>";
                         }else{
-                            $namaOperator[] = Employee::where('id', $o)->first()->name;
+                            $namaOperator[] = $employees[$o] ?? '';
                         }
                     }
                     return implode(', ', $namaOperator);
                 }
             })
-            ->addColumn('finishing', function ($antrian) {
+            ->addColumn('finishing', function ($antrian) use ($employees){
                 if($antrian->dataKerja->finishing_id == null){
                     return '<span class="text-danger">FINISHING KOSONG</span>';
                 }else{
@@ -103,13 +117,13 @@ class EstimatorController extends Controller
                         if($f == 'r'){
                             $namaFinishing[] = "<span class='text-primary'>Rekanan</span>";
                         }else{
-                            $namaFinishing[] = Employee::where('id', $f)->first()->name;
+                            $namaFinishing[] = $employees[$f] ?? ''; 
                         }
                     }
                     return implode(', ', $namaFinishing);
                 }
             })
-            ->addColumn('qc', function ($antrian) {
+            ->addColumn('qc', function ($antrian) use ($employees){
                 if($antrian->dataKerja->qc_id == null){
                     return '<span class="text-danger">QC KOSONG</span>';
                 }else{
@@ -117,7 +131,7 @@ class EstimatorController extends Controller
                     $qc = explode(',', $antrian->dataKerja->qc_id);
                     $namaQc = [];
                     foreach($qc as $q){
-                        $namaQc[] = Employee::where('id', $q)->first()->name;
+                        $namaQc[] = $employees[$q] ?? ''; 
                     }
                     return implode(', ', $namaQc);
                 }
@@ -148,6 +162,8 @@ class EstimatorController extends Controller
 
     public function biayaProduksi($id)
     {
+        $canViewModal = Gate::allows('view-tambah-bahan-produksi');
+
         $barang = Barang::find($id);
 
         $bahan = Bahan::where('barang_id', $id)->get();
@@ -158,7 +174,7 @@ class EstimatorController extends Controller
 
         $biayaLainnya = BiayaLain::all();
 
-        return view('page.estimator.biaya-produksi', compact('barang', 'bahan', 'totalProduksi', 'biayaLainnya'));
+        return view('page.estimator.biaya-produksi', compact('barang', 'bahan', 'totalProduksi', 'biayaLainnya', 'canViewModal'));
     }
 
     public function tambahBahanProduksi(Request $request)

@@ -11,6 +11,7 @@ use App\Models\BarangIklan;
 use App\Models\DataAntrian;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
+use Illuminate\Support\Facades\Log;
 
 class IklanController extends Controller
 {
@@ -44,7 +45,7 @@ class IklanController extends Controller
 
     public function iklanJson()
     {
-        $iklans = Iklan::with(['user', 'job', 'sales', 'job.kategori', 'platform'])->where('status', 1)->get();
+        $iklans = Iklan::with(['user', 'job', 'sales', 'job.kategori', 'sumber'])->where('status', 1)->get();
         
         return Datatables()->of($iklans)
             ->addIndexColumn()
@@ -73,8 +74,7 @@ class IklanController extends Controller
                 return $row->sales->sales_name;
             })
             ->addColumn('platform', function($row){
-                dd($row->platform->nama_sumber);
-                return $row->platform ? $row->platform->nama_sumber : 'Tidak ada data';
+                return $row->sumber->nama_sumber;
             })
             ->addColumn('biaya_iklan', function($row){
                 $biaya_iklan = 'Rp. '.number_format($row->biaya_iklan,0,',','.');
@@ -98,7 +98,7 @@ class IklanController extends Controller
 
     public function selesaiJson()
     {
-        $iklans = Iklan::with(['user', 'job', 'job.kategori', 'sales', 'platform'])->where('status', 2)->get();
+        $iklans = Iklan::with(['user', 'job', 'job.kategori', 'sales', 'sumber'])->where('status', 2)->get();
         
         return Datatables()->of($iklans)
             ->addIndexColumn()
@@ -127,8 +127,7 @@ class IklanController extends Controller
                 return $row->sales->sales_name;
             })
             ->addColumn('platform', function($row){
-                dd($row->platform->nama_sumber);
-                return $row->platform ? $row->platform->nama_sumber : 'Tidak ada data';
+                return $row->sumber->nama_sumber;
             })
             ->addColumn('biaya_iklan', function($row){
                 $biaya_iklan = 'Rp. '.number_format($row->biaya_iklan,0,',','.');

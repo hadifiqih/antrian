@@ -4,7 +4,7 @@
 
 @section('username', Auth::user()->name ?? 'Guest')
 
-@section('page', 'AI')
+@section('page', 'Generative AI')
 
 @section('breadcrumb', 'ChatBot')
 
@@ -17,6 +17,7 @@
     .card {
         border-radius: 15px;
         overflow: hidden;
+        font-family: 'Poppins', sans-serif;
     }
 
     .card-header {
@@ -75,8 +76,8 @@
         <div class="col-md-8">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0 flex-fill">Chatbot</h4>
-                    <p class="text-sm mb-0">Kuota Interaksi : {{ $remainingInteractions ?? 30 }}</p>
+                    <h4 class="mb-0 flex-fill"><strong>Antra</strong> <small class="text-xs">GPT-4o</small></h4>
+                    <p class="text-sm mb-0">Kuota Interaksi : <span id="kuota">{{ $remainingInteractions ?? 30 }}</span></p>
                 </div>
                 <div class="card-body chat-box" id="chat-box">
                     <div class="message bot">

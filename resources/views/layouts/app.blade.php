@@ -182,8 +182,8 @@
                     @include('layouts.partials.menu-spv-desain')
                 @elseif(Auth::user()->role_id == 14)
                     @include('layouts.partials.menu-gudang')
-                @else
-                    @include('layouts.partials.menu-bot')
+                @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 1 || Auth::user()->role_id == 9)
+                    @include('layouts.partials.menu-ceo-dirut')
                 @endif
                 @include('layouts.partials.menu-bot')
                 

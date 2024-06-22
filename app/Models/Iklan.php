@@ -49,7 +49,7 @@ class Iklan extends Model
         return $this->belongsTo(Kategori::class);
     }
 
-    public function platform()
+    public function sumber()
     {
         return $this->belongsTo(SumberPelanggan::class, 'platform', 'code_sumber');
     }
