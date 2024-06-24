@@ -14,7 +14,7 @@ use App\Models\DataAntrian;
 use App\Exports\UsersExport;
 use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
-use App\Exports\AntrianExport;
+use App\Exports\WorkshopExport;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -28,7 +28,8 @@ class EstimatorController extends Controller
 
     public function laporanWorkshopExcel()
     {
-        return Excel::download(new AntrianExport, 'laporan-workshop.xlsx');
+        $tanggal = date('Y-m-d');
+        return Excel::download(new WorkshopExport, 'Laporan Workshop - '.$tanggal.'.xlsx');
     }
 
     public function laporanPenugasanJson(Request $request)

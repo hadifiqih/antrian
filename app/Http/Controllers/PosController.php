@@ -851,8 +851,12 @@ class PosController extends Controller
 
     public function penjualanToday(string $bulan)
     {
-        $sales = auth()->user()->sales->id;
-        $penjualan = Penjualan::where('sales_id', $sales)->whereDate('created_at', date('Y-'.$bulan.'-d'))->get();
+        if(auth()->user()->role_id == 11){
+            $sales = auth()->user()->sales->id;
+            $penjualan = Penjualan::where('sales_id', $sales)->whereDate('created_at', date('Y-'.$bulan.'-d'))->get();
+        }else{
+            $penjualan = Penjualan::whereDate('created_at', date('Y-'.$bulan.'-d'))->get();
+        }
 
         $omsetToday = 0;
         foreach($penjualan as $p){
@@ -864,10 +868,14 @@ class PosController extends Controller
         return response()->json($omsetToday);
     }
 
-    public function penjualanBulanan($bulan)
+    public function penjualanBulanan(string $bulan)
     {
-        $sales = auth()->user()->sales->id;
-        $penjualan = Penjualan::where('sales_id', $sales)->whereMonth('created_at', $bulan)->get();
+        if(auth()->user()->role_id == 11){
+            $sales = auth()->user()->sales->id;
+            $penjualan = Penjualan::where('sales_id', $sales)->whereMonth('created_at', $bulan)->get();
+        }else{
+            $penjualan = Penjualan::whereMonth('created_at', $bulan)->get();
+        }
 
         $omsetMonth = 0;
         foreach($penjualan as $p){
@@ -881,7 +889,6 @@ class PosController extends Controller
 
     public function laporanBahan(Request $request)
     {
-        $sales = auth()->user()->sales->id;
         $bulan = $request->query('bulan') ?? date('m');
         if(!isset($bulan)){
             $awal = date('Y-m-01');
@@ -896,7 +903,6 @@ class PosController extends Controller
 
     public function laporanBahanJson(Request $request)
     {
-        $sales = auth()->user()->sales->id;
         $filter = $request->query('bulan') ?? date('m');
         if(!isset($filter)){
             $awal = date('Y-m-01');
@@ -906,8 +912,12 @@ class PosController extends Controller
             $akhir = date('Y-'.$filter.'-t');
         }
 
-        $penjualan = Penjualan::where('sales_id', $sales)->whereBetween('created_at', [$awal, $akhir])->get();
-
+        if(auth()->user()->role_id == 11){
+            $sales = auth()->user()->sales->id;
+            $penjualan = Penjualan::where('sales_id', $sales)->whereBetween('created_at', [$awal, $akhir])->get();
+        }else{
+            $penjualan = Penjualan::whereBetween('created_at', [$awal, $akhir])->get();
+        }
         return Datatables::of($penjualan)
             ->addIndexColumn()
             ->addColumn('no_invoice', function($row){
@@ -1013,6 +1023,49 @@ class PosController extends Controller
             ->make(true);
     }
 
+    // public function laporanItemAll()
+    // {
+    //     $awal = date('Y-m-01');
+    //     $akhir = date('Y-m-t');
+    //     $bulan = date('m');
+    
+    //     // Mengambil semua data sales
+    //     $sales = Sales::all();
+    
+    //     // Inisialisasi array untuk menyimpan data penjualan setiap sales
+    //     $dataPenjualan = [];
+    
+    //     // Looping untuk setiap sales
+    //     foreach($sales as $sale){
+    //         $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sale){
+    //             $q->where('sales_id', $sale->id);
+    //         })->whereBetween('created_at', [$awal, $akhir])->get();
+    
+    //         $laba = 0;
+    //         foreach($penjualanDetail as $p){
+    //             $cabang = $sale->cabang_id; // Mengambil cabang ID dari data sales
+    //             $harga = ProdukHarga::where('produk_id', $p->produk_id)->where('cabang_id', $cabang)->first();
+    //             $laba += ($p->harga - $harga->harga_kulak) * $p->jumlah;
+    //         }
+    //         $laba = CustomHelper::addCurrencyFormat($laba);
+    
+    //         $total = 0;
+    //         foreach($penjualanDetail as $p){
+    //             $subtotal = ($p->harga * $p->jumlah) - $p->diskon;
+    //             $total += $subtotal;
+    //         }
+    //         $total = CustomHelper::addCurrencyFormat($total);
+    
+    //         // Menyimpan data penjualan setiap sales ke dalam array
+    //         $dataPenjualan[$sale->id] = [
+    //             'penjualanDetail' => $penjualanDetail,
+    //             'laba' => $laba,
+    //             'total' => $total,
+    //         ];
+    //     }
+    
+    //     return view('page.kasir.penjualan-item', compact('dataPenjualan', 'bulan', 'sales'));
+    // }
     
     public function penjualanItemBulanan($bulan)
     {

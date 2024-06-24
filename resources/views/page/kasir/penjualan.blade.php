@@ -66,7 +66,7 @@
                     </div>
                     <div class="col-md-9 col-sm-6 text-right">
                         <div class="form-group">
-                            <button class="btn btn-success"><i class="fas fa-download"></i> Laporan Excel</button>
+                            <button class="btn btn-success btn-sm"><i class="fas fa-download"></i> Laporan Excel</button>
                         </div>
                     </div>
                 </div>
