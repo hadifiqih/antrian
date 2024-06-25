@@ -21,6 +21,27 @@ use Yajra\DataTables\Facades\DataTables;
 
 class EstimatorController extends Controller
 {
+    public function cekExcel()
+    {
+        $data = Barang::with(['dataKerja', 'job', 'user', 'designQueue'])
+                        ->where('ticket_order', '!=', null)
+                        ->get();
+
+        $totalStempel = $data->where('kategori_id', 1)->sum('price');
+        $totalNonStempel = $data->where('kategori_id', 2)->sum('price');
+        $totalAdvertising = $data->where('kategori_id', 3)->sum('price');
+        $totalDigital = $data->where('kategori_id', 4)->sum('price');
+        $totalServis = $data->where('kategori_id', 5)->sum('price');
+        
+        $stempels = $data->where('kategori_id', 1);
+        $nonStempels = $data->where('kategori_id', 2);
+        $advertisings = $data->where('kategori_id', 3);
+        $digitals = $data->where('kategori_id', 4);
+        $servis = $data->where('kategori_id', 5);
+
+        return view('page.antrian-workshop.laporan-workshop-excel', compact('stempels', 'nonStempels', 'advertisings', 'digitals', 'servis', 'totalStempel', 'totalNonStempel', 'totalAdvertising', 'totalDigital', 'totalServis'));
+    }
+
     public function laporanPenugasan()
     {
         return view('page.estimator.laporan-penugasan');

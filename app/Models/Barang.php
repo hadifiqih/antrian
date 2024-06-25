@@ -47,11 +47,6 @@ class Barang extends Model
         return $this->belongsTo(DesignQueue::class, 'design_queue_id', 'id');
     }
 
-    public function desainer()
-    {
-        return $this->belongsTo(User::class, 'desainer_id', 'id');
-    }
-
     public function refdesain()
     {
         return $this->belongsTo(RefDesain::class);

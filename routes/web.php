@@ -160,6 +160,7 @@ Route::controller(EstimatorController::class)->middleware('auth')->group(functio
     Route::get('/estimator/unduh-bp-excel/{id}', 'unduhBPExcel')->name('estimator.unduhBPExcel');
     Route::get('/estimator/biaya-produksi/{id}', 'biayaProduksi')->name('biaya.produksi');
     Route::post('/estimator/tambah-bahan-produksi', 'tambahBahanProduksi')->name('tambahBahanProduksi');
+    Route::get('/cek-excel', 'cekExcel')->name('cekExcel');
 });
 
 Route::controller(IklanController::class)->middleware('auth')->group(function(){

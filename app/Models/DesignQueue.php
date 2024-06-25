@@ -48,7 +48,7 @@ class DesignQueue extends Model
 
     public function designer()
     {
-        return $this->belongsTo(User::class, 'designer_id');
+        return $this->belongsTo(User::class, 'designer_id', 'id');
     }
 
     public function barang()
