@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
-
+use App\Http\Controllers\Api\StrukController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,6 +16,10 @@ use App\Http\Controllers\ReportController;
 |
 */
 
+Route::get('/cetak-struk/{id}', [StrukController::class, 'notaOrderJson'])->name('cetakStruk');
+
 Route::apiResource('omset', ReportController::class);
 
-Route::get('/omset', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');
+Route::get('/omset-global', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');
+
+

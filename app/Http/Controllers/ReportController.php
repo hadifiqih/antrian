@@ -212,8 +212,10 @@ class ReportController extends Controller
             return implode("\n", $hasilBaris) . "\n";
         }
 
-        $order = DataAntrian::where('ticket_order', $id)->first();
-        $items = Barang::where('ticket_order', $id)->get();
+        $order = DataAntrian::with(['customer', 'sales', 'pembayaran', 'pengiriman'])
+                        ->where('ticket_order', $id)
+                        ->first();
+        $items = Barang::with(['job'])->where('ticket_order', $id)->get();
         $sales = Sales::where('id', $order->sales_id)->first();
 
         //HITUNG TOTAL HARGA
@@ -227,7 +229,7 @@ class ReportController extends Controller
             $totalHarga += $item->price * $item->qty;
         }
 
-        $infoBayar = Pembayaran::where('ticket_order', $id)->first();
+        $infoBayar = Pembayaran::where('ticket_order', $id)->orderBy('created_at', 'desc')->first();
         $totalPacking = $infoBayar->biaya_packing;
         $totalPasang = $infoBayar->biaya_pasang;
         $diskon = $infoBayar->diskon;
@@ -286,6 +288,52 @@ class ReportController extends Controller
 
         $printer->cut();
         $printer->close();
+    }
+
+    public function notaOrderJson($id)
+    {
+        $order = DataAntrian::with([
+            'customer', 
+            'sales', 
+            'pembayaran' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'pengiriman'
+        ])->where('ticket_order', $id)->first();
+
+        $items = Barang::with(['job'])->where('ticket_order', $id)->get();
+        $sales = $order->sales; // Already loaded with eager loading
+        $infoBayar = $order->pembayaran->first(); // Since pembayaran is ordered by created_at desc
+
+        // HITUNG TOTAL HARGA
+        $totalHarga = 0;
+        $totalPacking = $order->pembayaran->biaya_packing ?? 0;
+        $totalPasang = $infoBayar->biaya_pasang ?? 0;
+        $diskon = $infoBayar->diskon ?? 0;
+
+        foreach ($items as $item) {
+            $totalHarga += $item->price * $item->qty;
+        }
+
+        $infoPengiriman = $order->pengiriman->first();
+        $totalOngkir = $infoPengiriman->ongkir ?? 0;
+
+        $grandTotal = $totalHarga + $totalPacking + $totalOngkir + $totalPasang - $diskon;
+        $sisaTagihan = $grandTotal - $infoBayar->dibayarkan;
+
+        return response()->json([
+            'order' => $order,
+            'items' => $items,
+            'sales' => $sales,
+            'totalHarga' => $totalHarga,
+            'totalPacking' => $totalPacking,
+            'totalOngkir' => $totalOngkir,
+            'totalPasang' => $totalPasang,
+            'diskon' => $diskon,
+            'grandTotal' => $grandTotal,
+            'sisaTagihan' => $sisaTagihan,
+            'infoBayar' => $infoBayar,
+        ]);
     }
 
     public function fakturPenjualan($tiket)

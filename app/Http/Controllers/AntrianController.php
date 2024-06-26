@@ -740,17 +740,23 @@ class AntrianController extends Controller
     {
         $tiket = $id;
 
-        $antrian = DataAntrian::with('dataKerja', 'customer', 'sales', 'pembayaran', 'buktiBayar')->where('ticket_order', $id)->first();
+        $antrian = DataAntrian::with([
+                'dataKerja', 
+                'customer', 
+                'sales', 
+                'pembayaran' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                }, 
+                'buktiBayar'
+                ])->where('ticket_order', $id)->first();
 
         $items = Barang::with('job', 'designQueue')->where('ticket_order', $id)->get();
-
-        $pembayaran = Pembayaran::where('ticket_order', $id)->first();
 
         $pengiriman = Pengiriman::where('ticket_order', $id)->first();
 
         $ekspedisi = Ekspedisi::all();
 
-        $omset = $pembayaran->total_harga;
+        $omset = $antrian->pembayaran->total_harga;
 
         $satuPersen = 1;
         $duaPersen = 2;
@@ -786,9 +792,9 @@ class AntrianController extends Controller
 
         $profit = $omset - $totalBiaya;
 
-        $sisaPembayaran = $total - $pembayaran->dibayarkan;
+        $sisaPembayaran = $total - $antrian->pembayaran->dibayarkan;
 
-        return view('page.antrian-workshop.show', compact('tiket', 'antrian', 'total', 'items', 'pembayaran', 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran'));
+        return view('page.antrian-workshop.show', compact('tiket', 'antrian', 'total', 'items', 'bahan', 'totalBahan', 'biayaSales', 'biayaDesain', 'biayaPenanggungJawab', 'biayaPekerjaan', 'biayaBPJS', 'biayaTransportasi', 'biayaOverhead', 'biayaAlatListrik', 'totalBiaya', 'profit', 'pengiriman', 'ekspedisi', 'sisaPembayaran'));
     }
 
     public function updateDeadline(Request $request)
