@@ -305,6 +305,10 @@ class ReportController extends Controller
         $sales = $order->sales; // Already loaded with eager loading
         $infoBayar = $order->pembayaran->first(); // Since pembayaran is ordered by created_at desc
 
+        $namaSales = $sales->sales_name;
+        $alamatSales = $sales->address;
+        $waSales = $sales->sales_phone;
+
         // HITUNG TOTAL HARGA
         $totalHarga = 0;
         $totalPacking = $order->pembayaran->biaya_packing ?? 0;
@@ -322,6 +326,9 @@ class ReportController extends Controller
         $sisaTagihan = $grandTotal - $infoBayar->dibayarkan;
 
         return response()->json([
+            'nama_toko' => $namaSales,
+            'alamat_toko' => $alamatSales,
+            'telepon' => $waSales,
             'order' => $order,
             'items' => $items,
             'sales' => $sales,
