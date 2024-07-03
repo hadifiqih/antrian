@@ -95,7 +95,7 @@ class AntrianController extends Controller
                 return $antrian->sales->sales_name;
             })
             ->addColumn('customer', function ($antrian) {
-                return $antrian->customer->nama;
+                return $antrian->customer->nama ?? '-';
             })
             ->addColumn('produk', function ($antrian) {
                 $produk = '';
@@ -118,7 +118,7 @@ class AntrianController extends Controller
                 } elseif(auth()->user()->isProduksi()) {
                     $btn .= '<a href="' . route('documentation.uploadProduksi', $antrian->ticket_order) . '" class="btn btn-warning btn-sm"><i class="fas fa-camera"></i> Unggah Dokumentasi</a>';
                 } elseif(auth()->user()->isSales()) {
-                    $btn .= '<a href="'. route('order.notaOrder', $antrian->ticket_order) .'" class="btn btn-info btn-sm"><i class="fas fa-print"></i>Print Struk</a>';
+                    $btn .= '<button class="btn btn-info btn-sm cetakStruk" data-ticket="'. $antrian->ticket_order .'"><i class="fas fa-print"></i>Print Struk</button>';
                 } else {
                     $btn .= '<a href="'.route('antrian.show', $antrian->ticket_order).'" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
                 }
@@ -173,7 +173,7 @@ class AntrianController extends Controller
                 return $antrian->sales->sales_name;
             })
             ->addColumn('customer', function ($antrian) {
-                return $antrian->customer->nama;
+                return $antrian->customer->nama ?? '-';
             })
             ->addColumn('action', function ($antrian) {
                 $btn = '<div class="btn-group">';

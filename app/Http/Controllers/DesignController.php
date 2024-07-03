@@ -32,11 +32,11 @@ class DesignController extends Controller
     public function indexDatatables()
     {
         if(auth()->user()->isSales()){
-            $designs = DesignQueue::where('sales_id', auth()->user()->sales->id)->where('status', 0)->orWhere('status', 1)->orderBy('created_at', 'desc')->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('sales_id', auth()->user()->sales->id)->where('status', 0)->orWhere('status', 1)->orderBy('created_at', 'desc')->get();
         }else if(auth()->user()->isDesigner()){
-            $designs = DesignQueue::where('designer_id', auth()->user()->id)->where('status', 1)->orderBy('created_at', 'desc')->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('designer_id', auth()->user()->id)->where('status', 1)->orderBy('created_at', 'desc')->get();
         }else{
-            $designs = DesignQueue::where('status', 1)->orderBy('created_at', 'desc')->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('status', 1)->orderBy('created_at', 'desc')->get();
         }
 
         return Datatables::of($designs)
@@ -107,11 +107,11 @@ class DesignController extends Controller
     public function indexSelesaiDatatables()
     {
         if(auth()->user()->isSales()){
-            $designs = DesignQueue::where('sales_id', auth()->user()->sales->id)->orderBy('created_at', 'desc')->where('status', 2)->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('sales_id', auth()->user()->sales->id)->orderBy('created_at', 'desc')->where('status', 2)->get();
         }else if(auth()->user()->isDesigner()){
-            $designs = DesignQueue::where('designer_id', auth()->user()->id)->where('status', 2)->orderBy('created_at', 'desc')->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('designer_id', auth()->user()->id)->where('status', 2)->orderBy('created_at', 'desc')->get();
         }else{
-            $designs = DesignQueue::where('status', 2)->orderBy('created_at', 'desc')->get();
+            $designs = DesignQueue::with(['sales', 'designer', 'job'])->where('status', 2)->orderBy('created_at', 'desc')->get();
         }
 
         return Datatables::of($designs)

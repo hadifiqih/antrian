@@ -16,10 +16,15 @@ use App\Http\Controllers\Api\StrukController;
 |
 */
 
-Route::get('/cetak-struk/{id}', [StrukController::class, 'notaOrderJson'])->name('cetakStruk');
-
 Route::apiResource('omset', ReportController::class);
 
 Route::get('/omset-global', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');
 
+//Cetak Struk Jasa
+Route::get('/cetak-struk/{id}', [StrukController::class, 'notaOrderJson'])->name('cetakStruk');
 
+//Cetak Struk Retail
+Route::get('/daftar-retail/{id}', [ReportController::class, 'retailJson'])->name('retailJson');
+Route::get('/sales', [ReportController::class, 'listSales'])->name('sales');
+Route::get('/retail-cetak/{id}', [ReportController::class, 'retailCetakById'])->name('retailCetakById');
+Route::get('/sales-info/{id}', [ReportController::class, 'salesInfo'])->name('salesInfo');

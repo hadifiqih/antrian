@@ -73,7 +73,7 @@
 </style>
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0 flex-fill"><strong>Antra</strong> <small class="text-xs">GPT-4o</small></h4>

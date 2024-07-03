@@ -268,7 +268,7 @@
         $('#nama_pelanggan').select2({
             placeholder: 'Pilih Pelanggan',
             ajax: {
-                url: "/pelanggan-all/{{ auth()->user()->sales->id }}",
+                url: "/pelanggan-all",
                 dataType: 'json',
                 data: function (params) {
                     return {

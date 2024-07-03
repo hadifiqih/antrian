@@ -142,12 +142,12 @@ class CustomerController extends Controller
     public function getAllCustomers(Request $request)
     {
         $searchTerm = $request->q;
-        $sales =  auth()->user()->sales->id;
+        $sales = auth()->user()->sales->id;
 
         if($searchTerm == ''){
-            $customers = Customer::where('sales_id', $sales)->orderBy('nama', 'asc')->select('id', 'nama', 'telepon')->limit(10)->get();
+            $customers = Customer::where('sales_id', $sales)->orderBy('created_at', 'desc')->select('id', 'nama', 'telepon')->limit(10)->get();
         }else{
-            $customers = Customer::where('sales_id', $sales)->orderBy('nama', 'asc')->select('id', 'nama', 'telepon')->where('nama', 'LIKE', "%".$searchTerm."%")->orWhere('telepon', 'LIKE', "%".$searchTerm."%")->limit(10)->get();
+            $customers = Customer::where('sales_id', $sales)->orderBy('created_at', 'desc')->select('id', 'nama', 'telepon')->where('nama', 'LIKE', "%".$searchTerm."%")->orWhere('telepon', 'LIKE', "%".$searchTerm."%")->limit(10)->get();
         }
 
         return response()->json($customers);

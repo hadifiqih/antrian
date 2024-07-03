@@ -191,8 +191,29 @@
             })
         }
 
+        function openStruk(ticketData){
+            var encodedTicket = encodeURIComponent(ticketData);
+            var intentUrl = 'intent://open#Intent;scheme=cetakstrukantree;package=com.example.cetakstruk;S.ticketData=' + encodedTicket + ';end;';
+            var directUrl = 'cetakstrukantree://open?ticketData=' + encodedTicket;
+
+            window.location = intentUrl;
+
+            setTimeout(function(){
+                window.location = directUrl;
+            }, 500);
+        }
+
         $(document).ready(function() {
             var kategori = $('#kategori').val();
+            var btnStruk = $('.btnStruk');
+
+            //perulangan untuk setiap tombol struk
+            btnStruk.each(function(btn){
+                btn.on('click', function(){
+                    var tiketData = this.getAttribute('data-ticket');
+                    openStruk(tiketData);
+                });
+            });
 
             $('.maskRupiah').maskMoney({prefix:'Rp ', thousands:'.', decimal:',', precision:0});
 
@@ -294,7 +315,7 @@
                 tableDikerjakan.ajax.url("{{ route('antrian.indexData') }}?produk=" + jenisProduk + "&cabang=" + cabang + "&sales=" + sales).load();
                 tableSelesai.ajax.url("{{ route('antrian.indexSelesai') }}?produk=" + jenisProduk + "&cabang=" + cabang + "&sales=" + sales).load();
             });
-            //select2
+
             $('.select2').select2();
         });
     </script>

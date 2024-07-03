@@ -220,8 +220,6 @@ class PosController extends Controller
 
     public function simpanItem(Request $request, string $id_produk)
     {
-        
-
         $id_keranjang = $request->id_keranjang;
         $produk = Produk::find($id_produk);
         $cabang = auth()->user()->cabang_id;
@@ -914,9 +912,9 @@ class PosController extends Controller
 
         if(auth()->user()->role_id == 11){
             $sales = auth()->user()->sales->id;
-            $penjualan = Penjualan::where('sales_id', $sales)->whereBetween('created_at', [$awal, $akhir])->get();
+            $penjualan = Penjualan::with(['customer'])->where('sales_id', $sales)->whereBetween('created_at', [$awal, $akhir])->get();
         }else{
-            $penjualan = Penjualan::whereBetween('created_at', [$awal, $akhir])->get();
+            $penjualan = Penjualan::with(['customer'])->whereBetween('created_at', [$awal, $akhir])->get();
         }
         return Datatables::of($penjualan)
             ->addIndexColumn()
@@ -1022,50 +1020,6 @@ class PosController extends Controller
             ->rawColumns(['tanggal', 'produk', 'jumlah', 'kulak', 'harga', 'total', 'laba'])
             ->make(true);
     }
-
-    // public function laporanItemAll()
-    // {
-    //     $awal = date('Y-m-01');
-    //     $akhir = date('Y-m-t');
-    //     $bulan = date('m');
-    
-    //     // Mengambil semua data sales
-    //     $sales = Sales::all();
-    
-    //     // Inisialisasi array untuk menyimpan data penjualan setiap sales
-    //     $dataPenjualan = [];
-    
-    //     // Looping untuk setiap sales
-    //     foreach($sales as $sale){
-    //         $penjualanDetail = PenjualanDetail::whereHas('penjualan', function($q) use($sale){
-    //             $q->where('sales_id', $sale->id);
-    //         })->whereBetween('created_at', [$awal, $akhir])->get();
-    
-    //         $laba = 0;
-    //         foreach($penjualanDetail as $p){
-    //             $cabang = $sale->cabang_id; // Mengambil cabang ID dari data sales
-    //             $harga = ProdukHarga::where('produk_id', $p->produk_id)->where('cabang_id', $cabang)->first();
-    //             $laba += ($p->harga - $harga->harga_kulak) * $p->jumlah;
-    //         }
-    //         $laba = CustomHelper::addCurrencyFormat($laba);
-    
-    //         $total = 0;
-    //         foreach($penjualanDetail as $p){
-    //             $subtotal = ($p->harga * $p->jumlah) - $p->diskon;
-    //             $total += $subtotal;
-    //         }
-    //         $total = CustomHelper::addCurrencyFormat($total);
-    
-    //         // Menyimpan data penjualan setiap sales ke dalam array
-    //         $dataPenjualan[$sale->id] = [
-    //             'penjualanDetail' => $penjualanDetail,
-    //             'laba' => $laba,
-    //             'total' => $total,
-    //         ];
-    //     }
-    
-    //     return view('page.kasir.penjualan-item', compact('dataPenjualan', 'bulan', 'sales'));
-    // }
     
     public function penjualanItemBulanan($bulan)
     {
@@ -1260,6 +1214,19 @@ class PosController extends Controller
         $printer->close();
     }
 
+    public function printNotaJson(string $id)
+    {
+        $sales = Sales::find(auth()->user()->sales->id);
+        $penjualan = Penjualan::find($id);
+        $items = PenjualanDetail::where('penjualan_id', $id)->get();
+
+        return response()->json([
+            'sales' => $sales,
+            'penjualan' => $penjualan,
+            'items' => $items
+        ], 200);
+    }
+
     public function notaPenjualan($id)
     {
         $penjualan = Penjualan::find($id);
@@ -1284,8 +1251,6 @@ class PosController extends Controller
         $penjualan = Penjualan::find($id);
         $items = PenjualanDetail::where('penjualan_id', $id)->get();
         $sales = Sales::find($penjualan->sales_id);
-
-        
 
         return view('page.kasir.detail-transaksi', compact('penjualan', 'items', 'sales'));
     }
