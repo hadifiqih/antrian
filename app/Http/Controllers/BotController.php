@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use App\Traits\ChatbotInteractionTrait;
 
 class BotController extends Controller
 {
+    use ChatbotInteractionTrait;
+
     public function __construct()
     {
         //tambahkan middleware auth dan limitchatbot
@@ -33,33 +36,88 @@ class BotController extends Controller
 
     public function sendMessage(Request $request)
     {
-        $message = $request->message;
+        $message = $request->input('message');
+        $userId = Auth::id();
+        //userId tostring
+        $userId = strval($userId);
         $apikey = env('COZE_API_KEY');
-        // Data yang akan dikirim dalam permintaan POST
-        $data = [
-            'bot_id' => env('BOT_COZE_API_KEY'), // Ganti dengan Bot ID Anda yang sebenarnya
-            'user' => '29032201862555',
-            'query' => $message,
-            'stream' => false
+        $isNewChat = $request->input('new_chat', false);
+        
+        $chatHistoryKey = 'chat_history_' . $userId;
+        $chatHistory = Cache::get($chatHistoryKey, []);
+        $conversationId = Cache::get('conversation_id_' . $userId);
+
+        if ($isNewChat) {
+            Cache::forget($chatHistoryKey);
+            Cache::forget($conversationId);
+        }
+
+        $chatHistory[] = [
+            'role' => 'user',
+            'content' => $message,
+            'content_type' => 'text'
         ];
 
-        // Mengirim permintaan POST dengan header yang sesuai
+        $data = [
+            'bot_id' => env('BOT_COZE_API_KEY'),
+            'user' => $userId,
+            'query' => $message,
+            'stream' => false,
+            'chat_history' => $chatHistory,
+            'conversation_id' => $conversationId
+        ];
+
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer'. $apikey, // Ganti dengan Personal Access Token Anda yang sebenarnya
+            'Authorization' => 'Bearer ' . $apikey,
             'Content-Type' => 'application/json',
             'Accept' => '*/*',
             'Host' => 'api.coze.com',
             'Connection' => 'keep-alive'
         ])->post('https://api.coze.com/open_api/v2/chat', $data);
 
-        // Menangani respons
         if ($response->successful()) {
-            // Mengambil dan mengembalikan data respons jika permintaan berhasil
             $responseData = $response->json();
-            return response()->json($responseData);
+            
+            if ($this->isValidResponse($responseData)) {
+                $this->incrementChatbotInteraction();
+
+                foreach ($responseData['messages'] as $botMessage) {
+                    if ($botMessage['type'] === 'answer') {
+                        $chatHistory[] = [
+                            'role' => 'assistant',
+                            'type' => 'answer',
+                            'content' => $botMessage['content'],
+                            'content_type' => 'text'
+                        ];
+                    }
+                }
+
+                Cache::put($chatHistoryKey, $chatHistory, now()->addDays(1));
+                Cache::put('conversation_id_' . $userId, $responseData['conversation_id'], now()->addDays(1));
+
+                return response()->json($responseData);
+            } else {
+                return response()->json(['error' => 'Invalid response from bot'], 500);
+            }
         } else {
-            // Menangani error jika permintaan gagal
             return response()->json(['error' => 'Request failed'], $response->status());
         }
+    }
+
+    private function isValidResponse($response)
+    {
+        return isset($response['messages']) && is_array($response['messages']) && !empty($response['messages']) && $response['code'] === 0 && $response['msg'] === 'success';
+    }
+
+    public function resetChat()
+    {
+        $userId = Auth::id();
+        $chatHistoryKey = 'chat_history_' . $userId;
+        $conversationId = 'conversation_id_' . $userId;
+
+        Cache::forget($chatHistoryKey);
+        Cache::forget($conversationId);
+
+        return response()->json(['message' => 'Chat history has been reset']);
     }
 }

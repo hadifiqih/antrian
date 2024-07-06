@@ -66,7 +66,7 @@
                     </div>
                     <div class="col-md-9 col-sm-6 text-right">
                         <div class="form-group">
-                            <button class="btn btn-success btn-sm"><i class="fas fa-download"></i> Laporan Excel</button>
+                            <button class="btn btn-success btn-sm disabled"><i class="fas fa-download"></i> Laporan Excel</button>
                         </div>
                     </div>
                 </div>
@@ -98,60 +98,82 @@
 
 @section('script')
 <script>
-    function printStruk($id) {
-        //menggunakan ajax untuk mengirim data ke server
+    const baseUrl = '/pos/'; // Ganti dengan URL dasar yang sesuai
+
+    function printStruk(id) {
         $.ajax({
-          url: "/pos/nota-print/" + $id,
-          type: "GET",
-          success: function(response) {
-            //sweetalert2 untuk menampilkan pesan berhasil
-            Swal.fire({
-              icon: 'success',
-              title: 'Berhasil',
-              text: 'Struk berhasil dicetak',
-              showConfirmButton: false,
-              timer: 1500
-            });
-          }
+            url: baseUrl + "nota-print/" + id,
+            type: "GET",
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Struk berhasil dicetak',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Terjadi kesalahan saat mencetak struk',
+                });
+            }
         });
-      }
+    }
+
+    function updatePenjualanData(bulan) {
+        $.ajax({
+            url: baseUrl + "penjualan-data/" + bulan,
+            type: "GET",
+            dataType: 'json',
+            success: function(data) {
+                $('#omsetToday').html(data.today);
+                $('#omsetMonth').html(data.monthly);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching penjualan data:", error);
+            }
+        });
+    }
 
     $(document).ready(function() {
-        $.get('/pos/omset-today/' + $('#bulan').val(), function(data) {
-            $('#omsetToday').html(data);
-        });
+        // Fungsi untuk menyesuaikan select option berdasarkan bulan saat ini
+        function setCurrentMonth() {
+            var currentDate = new Date();
+            var currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Bulan dalam format 2 digit (01-12)
+            $('#bulan').val(currentMonth);
+        }
 
-        $.get('/pos/omset-bulanan/' + $('#bulan').val(), function(data) {
-            $('#omsetMonth').html(data);
-        });
+        // Panggil fungsi setCurrentMonth saat dokumen siap
+        setCurrentMonth();
 
-        $('#table').DataTable({
+        var table = $('#table').DataTable({
             processing: true,
             serverSide: true,
             scrollX: true,
-            ajax: "{{ route('pos.laporanBahanJson') }}",
+            ajax: {
+                url: baseUrl + "laporan-bahan-json",
+                data: function(d) {
+                    d.bulan = $('#bulan').val();
+                }
+            },
             columns: [
-                    {data: 'DT_RowIndex', name: 'DT_RowIndex'},
-                    {data: 'no_invoice', name: 'no_invoice'},
-                    {data: 'tanggal', name: 'tanggal'},
-                    {data: 'customer', name: 'customer'},
-                    {data: 'total', name: 'total'},
-                    {data: 'action', name: 'action'},
-                ]
+                {data: 'DT_RowIndex', name: 'DT_RowIndex'},
+                {data: 'no_invoice', name: 'no_invoice'},
+                {data: 'tanggal', name: 'tanggal'},
+                {data: 'customer', name: 'customer'},
+                {data: 'total', name: 'total'},
+                {data: 'action', name: 'action'},
+            ]
         });
 
-        $('#bulan').on('change', function() {
-            var bulan = $(this).val();
-            // change data in datatable with selected month
-            $('#table').DataTable().ajax.url("/pos/laporan-bahan-json?bulan=" + bulan).load();
-            //reload url
-            $.get('/pos/omset-today/' + $('#bulan').val(), function(data) {
-                $('#omsetToday').html(data);
-            });
+        updatePenjualanData($('#bulan').val());
 
-            $.get('/pos/omset-bulanan/' + $('#bulan').val(), function(data) {
-                $('#omsetMonth').html(data);
-            });
+        $('#bulan').on('change', function() {
+            table.ajax.reload();
+            updatePenjualanData($(this).val());
         });
     });
 </script>

@@ -63,22 +63,22 @@
                 <div class="col-md">
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan </label>
-                        <p>{{ $antrian->customer->nama }} <span class="badge bg-danger">Repeat Order</span></p>
+                        <p>{{ $antrian->customer->nama ?? '-' }} <span class="badge bg-danger">{{ $antrian->customer->frekuensi_order >= 2 ? 'Repeat Order' }}</span></p>
                     </div>
                 </div>
                 <div class="col-md">
                     <div class="form-group">
                         <label for="nama">Telepon</label>
-                        <p>{{ $antrian->customer->telepon }}</p>
+                        <p>{{ $antrian->customer->telepon ?? '-' }}</p>
                     </div>
                 </div>
                 <div class="col-md">
                     <label for="alamat">Sumber Pelanggan</label>
-                    <p>{{ $antrian->customer->infoPelanggan }}</p>
+                    <p>{{ $antrian->customer->infoPelanggan ?? '-' }}</p>
                 </div>
                 <div class="col-md">
                     <label for="alamat">Instansi</label>
-                    <p>{{ $antrian->customer->instansi }}</p>
+                    <p>{{ $antrian->customer->instansi ?? '-'}}</p>
                 </div>
                 <div class="col-md">
                     <label for="iklan">Status Iklan</label>
@@ -89,7 +89,7 @@
             <div class="row">
                 <div class="col-12">
                     <label for="alamat">Alamat</label>
-                    <p>{{ $antrian->customer->alamat }}</p>
+                    <p>{{ $antrian->customer->alamat ?? '-'}}</p>
                 </div>
             </div>
         </div>

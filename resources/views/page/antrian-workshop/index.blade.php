@@ -194,7 +194,7 @@
         function openStruk(ticketData){
             var encodedTicket = encodeURIComponent(ticketData);
             var intentUrl = 'intent://open#Intent;scheme=cetakstrukantree;package=com.example.cetakstruk;S.ticketData=' + encodedTicket + ';end;';
-            var directUrl = 'cetakstrukantree://open?ticketData=' + encodedTicket;
+            var directUrl = 'cetakstrukantree://workshop?ticket=' + encodedTicket;
 
             window.location = intentUrl;
 
@@ -205,7 +205,7 @@
 
         $(document).ready(function() {
             var kategori = $('#kategori').val();
-            var btnStruk = $('.btnStruk');
+            var btnStruk = $('.cetakStruk');
 
             //perulangan untuk setiap tombol struk
             btnStruk.each(function(btn){

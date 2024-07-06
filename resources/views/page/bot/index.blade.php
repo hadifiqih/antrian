@@ -92,10 +92,17 @@
                     </span>
                 </div>
                 <div class="card-footer">
-                    <div class="input-group">
-                        <textarea rows="4" type="text" id="message-input" class="form-control" placeholder="Masukkan perintah disini.."></textarea>
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="button" id="send-button">Kirim</button>
+                    <div class="row d-flex align-items-center justify-content-center">
+                        <div class="col-md-auto">
+                            <button class="btn btn-danger btn-sm" type="button" id="newChatButton"><i class="fas fa-eraser"></i></button>
+                        </div>
+                        <div class="col-md-11">
+                            <div class="input-group mt-0">
+                                <textarea rows="4" type="text" id="message-input" class="form-control" placeholder="Masukkan perintah disini.."></textarea>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="button" id="send-button">Kirim</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

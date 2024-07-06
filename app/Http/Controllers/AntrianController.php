@@ -178,7 +178,7 @@ class AntrianController extends Controller
             ->addColumn('action', function ($antrian) {
                 $btn = '<div class="btn-group">';
                 if(auth()->user()->isSales()) {
-                    $btn .= '<a href="'. route('order.notaOrder', $antrian->ticket_order) .'" class="btn btn-dark btn-sm"><i class="fas fa-print"></i> Print Struk</a>';
+                    $btn .= '<button class="btn btn-dark btn-sm cetakStruk" data-ticket="'. $antrian->ticket_order .'"><i class="fas fa-print"></i> Print Struk</button>';
                 }
                 $btn .= '<a href="'.route('antrian.show', $antrian->ticket_order).'" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>';
                 $btn .= '</div>';

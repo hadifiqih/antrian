@@ -24,11 +24,11 @@ use App\Http\Controllers\OrderController;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DesignController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AntrianController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Notification;
@@ -291,17 +291,8 @@ Route::controller(OrderController::class)->middleware('auth')->group(function(){
 
 Route::controller(PosController::class)->middleware('auth')->group(function(){
     Route::get('/pos/add-order', 'addOrder')->middleware('auth')->name('pos.addOrder');
-    Route::get('/pos/manage-product', 'manageProduct')->name('pos.manageProduct');
-    Route::get('/pos/manage-product-json', 'manageProductJson')->name('pos.manageProductJson');
-    Route::get('/pos/get-product-name', 'getProductName')->name('pos.getProductName');
-    Route::get('/pos/manage-product/create', 'createProduct')->name('pos.createProduct');
-    Route::get('/pos/show-product/{id}', 'showProduct')->name('pos.showProduct');
-    Route::post('/pos/manage-product/store', 'simpanProduk')->name('pos.simpanProduk');
-    Route::get('/pos/manage-product/{id}/edit', 'editProduct')->name('pos.editProduct');
-    Route::put('/pos/manage-product/update/{id}', 'updateProduct')->name('pos.updateProduct');
-    Route::get('/pos/manage-product/delete/{id}', 'destroyProduct')->name('pos.destroyProduct');
     Route::get('/pos/get-product-by-id/{id}', 'getProductById')->name('pos.getProductById');
-    Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
+    
     Route::post('/pos/tambah-item', 'tambahItem')->name('pos.tambahItem');
     Route::get('/pos/laporan-bahan', 'laporanBahan')->name('pos.laporanBahan');
     Route::get('/pos/laporan-bahan-json', 'laporanBahanJson')->name('pos.laporanBahanJson');
@@ -327,8 +318,7 @@ Route::controller(PosController::class)->middleware('auth')->group(function(){
     //Pelanggan
     Route::get('/pos/daftar-pelanggan', 'daftarPelanggan')->name('pos.daftarPelanggan');
     //Fungsi tambahan
-    Route::get('/pos/omset-today/{bulan}', 'penjualanToday')->name('pos.penjualanToday');
-    Route::get('/pos/omset-bulanan/{bulan}', 'penjualanBulanan')->name('pos.penjualanBulanan');
+    Route::get('/pos/penjualan-data/{bulan}', 'updatePenjualanBahan')->name('pos.updatePenjualanBahan');
     Route::get('/pos/omset-item-bulanan/{bulan}', 'penjualanItemBulanan')->name('pos.penjualanItemBulanan');
     Route::get('/pos/omset-laba/{bulan}', 'labaBulanan')->name('pos.labaBulanan');
 });
@@ -349,6 +339,7 @@ Route::controller(BotController::class)->middleware(['auth', 'limit.chatbot'])->
     Route::get('/bot', 'index')->name('bot.index');
     Route::get('/bot/get-response', 'getResponse')->name('bot.getResponse');
     Route::post('/bot/send-message', 'sendMessage')->name('bot.sendMessage');
+    Route::post('/bot/reset-chat', 'resetChat')->name('bot.reset-chat');
 });
 
 Route::controller(AntrianController::class)->middleware('auth')->group(function(){
@@ -391,7 +382,18 @@ Route::controller(PaymentController::class)->middleware('auth')->group(function(
     Route::put('/payment/unggah-pelunasan', 'unggahPelunasan')->name('unggahPelunasan');
 });
 
-Route::resource('product', ProductController::class)->middleware('auth');
+Route::controller(ProdukController::class)->middleware('auth')->group(function(){
+    Route::get('/pos/manage-product', 'manageProduct')->name('pos.manageProduct');
+    Route::get('/pos/manage-product-json', 'manageProductJson')->name('pos.manageProductJson');
+    Route::get('/pos/get-product-name', 'getProductName')->name('pos.getProductName');
+    Route::get('/pos/manage-product/create', 'createProduct')->name('pos.createProduct');
+    Route::get('/pos/show-product/{id}', 'showProduct')->name('pos.showProduct');
+    Route::post('/pos/manage-product/store', 'simpanProduk')->name('pos.simpanProduk');
+    Route::get('/pos/manage-product/{id}/edit', 'editProduct')->name('pos.editProduct');
+    Route::put('/pos/manage-product/update/{id}', 'updateProduct')->name('pos.updateProduct');
+    Route::get('/pos/manage-product/delete/{id}', 'destroyProduct')->name('pos.destroyProduct');
+    Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
+});
 
 Route::controller(CustomerController::class)->middleware('auth')->group(function(){
     Route::get('/customer', 'index')->name('customer.index');

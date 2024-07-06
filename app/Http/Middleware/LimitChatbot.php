@@ -26,9 +26,6 @@ class LimitChatbot
                         'message' => 'Anda telah mencapai batas interaksi per hari. Silahkan coba lagi besok.'
                     ], 429);
                 }
-
-                Cache::increment($key);
-                Cache::put($key, $interaction + 1, now()->endOfDay());
             }
 
             $remainingInteractions = $limit - $interaction;

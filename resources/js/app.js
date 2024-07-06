@@ -2,6 +2,7 @@ import './bootstrap';
 import '../css/app.css';
 import axios from 'axios';
 import showdown from 'showdown';
+import Swal from 'sweetalert2';
 
 //Dropzone
 import 'dropzone/dist/dropzone.css';
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatBox = $('#chat-box');
     const sendButton = $('#send-button');
     const messageInput = $('#message-input');
+    const newChatButton = $('#newChatButton');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const loading = $('#loading');
     const converter = new showdown.Converter();
@@ -58,35 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     }
 
-    window.setMessage = function setMessage(message) {
-        loading.show();
-        addMessage('user', message);
-        $.ajax({
-            url: '/bot/send-message',
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({ message: message }),
-            success: function(data) {
-                loading.hide();
-                let messages = data.messages;
-                for (let i = 0; i < messages.length; i++) {
-                    if (messages[i].type == 'answer') {
-                        addMessage('bot', converter.makeHtml(messages[i].content));
-                    } else if (messages[i].type == 'follow_up') {
-                        recommendationMessage(messages[i].content);
-                    }
-                }
-            },
-            error: function() {
-                loading.hide();
-                addMessage('bot', 'Maaf, terjadi kesalahan.');
-            }
-        });
-    }
-
     function addMessage(sender, message) {
         const messageElement = $('<div></div>').addClass('message').addClass(sender);
         messageElement.html(`<span class="msg-content">${message}</span>`);
@@ -94,14 +67,10 @@ document.addEventListener('DOMContentLoaded', function () {
         chatBox.scrollTop(chatBox.prop('scrollHeight'));
     }
 
-    function recommendationMessage(message) {
-        const recomMessage = $('<div></div>').addClass('message-recommendation').addClass('bot');
-        recomMessage.html(`<button type="button" onclick="setMessage('${message}')" class="btn msg-content"><p class="text-secondary mb-0">${message}</p></button>`);
-        chatBox.append(recomMessage);
-        chatBox.scrollTop(chatBox.prop('scrollHeight'));
-    }
-
     sendButton.on('click', function() {
+        let conversationId = null;
+        let isNewChat = false;
+
         const message = messageInput.val();
         if (message.trim() === '') {
             return;
@@ -112,8 +81,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         loading.show();
 
-        //panggil var kuota (<span></span>) convert ke int
-
         $.ajax({
             url: '/bot/send-message',
             method: 'POST',
@@ -121,7 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify({ message: message }),
+            data: JSON.stringify({ 
+                message: message,
+                new_chat: isNewChat
+            }),
             success: function(data) {
                 loading.hide();
                 //decrement kuota
@@ -129,14 +99,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 kuotaInt -= 1;
                 kuota.innerHTML = kuotaInt;
 
+                if (data.conversation_id) {
+                    conversationId = data.conversation_id;
+                }
+
                 let messages = data.messages;
                 for (let i = 0; i < messages.length; i++) {
                     if (messages[i].type == 'answer') {
                         addMessage('bot', converter.makeHtml(messages[i].content));
-                    } else if (messages[i].type == 'follow_up') {
-                        recommendationMessage(messages[i].content);
                     }
                 }
+
+                isNewChat = false;
             },
             error: function(response) {
                 loading.hide();
@@ -148,4 +122,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    newChatButton.on('click', function() {
+        let isNewChat = true;
+        let conversationId = null;
+
+        Swal.fire({
+            title: 'Perhatian',
+            text: "Riwayat chat dan seluruh ingatan pada Bot akan dihapus!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+            //hapus semua pesan pada chatbox
+            chatBox.empty();
+
+            $.ajax({
+                url: '/bot/reset-chat',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({ 
+                    conversation_id: conversationId,
+                    new_chat: isNewChat
+                }),
+                success: function(response) {
+                    console.log(response.message);
+                    addMessage('bot', 'Halo, ada yang bisa saya bantu? 🧐');
+                },
+                error: function() {
+                    console.error('Gagal mereset chat');
+                }
+            });
+        }
+        });
+    })
 });

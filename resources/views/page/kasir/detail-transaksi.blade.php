@@ -60,16 +60,20 @@
                             </tr>
                             @endif
                             <tr>
-                                <td class="text-success py-0"><strong>Grand Total</strong></td>
-                                <td class="text-right text-success py-0"><strong>Rp {{ number_format($penjualan->total + $penjualan->ppn, 0, ',', '.') }}</strong></td>
+                                <td class="py-0">Diskon</td>
+                                <td class="text-right py-0">Rp {{ number_format($penjualan->diskon, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-success h5 py-0"><strong>Grand Total</strong></td>
+                                <td class="text-right h5 text-success py-0"><strong>Rp {{ number_format($penjualan->total + $penjualan->ppn, 0, ',', '.') }}</strong></td>
                             </tr>
                             <tr>
                                 <td class="py-0">Bayar</td>
-                                <td class="text-right py-0"">Rp {{ number_format($penjualan->dibayarkan, 0, ',', '.') }}</td>
+                                <td class="text-right py-0"">Rp {{ number_format($penjualan->diterima, 0, ',', '.') }}</td>
                             </tr>
                             <tr>
                                 <td class="py-0">Kembalian</td>
-                                <td class="text-right py-0"">Rp {{ number_format($penjualan->dibayarkan - $penjualan->total < 0 ? '0' : $penjualan->dibayarkan - $penjualan->total , 0, ',', '.') }}</td>
+                                <td class="text-right py-0"">Rp {{ number_format($penjualan->diterima - $penjualan->total < 0 ? '0' : $penjualan->diterima - $penjualan->total , 0, ',', '.') }}</td>
                             </tr>
                         </tbody>
                     </table>
