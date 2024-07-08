@@ -410,6 +410,8 @@ Route::controller(CustomerController::class)->middleware('auth')->group(function
     Route::post('/customer/store', 'store')->name('pelanggan.store');
     Route::get('/pelanggan/status/{id}', 'statusPelanggan')->name('pelanggan.status');
     Route::get('/get-info-pelanggan', 'getInfoPelanggan')->name('getInfoPelanggan');
+    Route::get('/customer/export', 'export')->name('customer.export');
+    Route::get('/customer/show/{id}', 'show')->name('customer.show');
 });
 
 Route::controller(JobController::class)->middleware('auth')->group(function(){

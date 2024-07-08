@@ -8,14 +8,25 @@
 
 @section('content')
     <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12 d-flex justify-content-end">
+                <a href="{{ route('customer.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-1"></i>
+                    Tambah Pelanggan
+                </a>
+                <a href="{{ route('customer.export') }}" class="btn btn-success btn-sm ml-2">
+                    <i class="fas fa-file-excel mr-1"></i>
+                    Export Excel
+                </a>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Data Pelanggan</h3>
-                    </div>
                     <div class="card-body">
-                        @includeIf('page.customer.partials.table')
+                        <div class="table-responsive">
+                            @includeIf('page.customer.partials.table')
+                        </div>
                     </div>
                     @includeIf('page.customer.partials.modal-edit')
                 </div>
@@ -113,15 +124,12 @@
                 url: '{{ route('customer.indexJson') }}',
             },
             columns: [
-                {data: 'DT_RowIndex', searchable: false, sortable: false},
+                {data: 'DT_RowIndex', searchable: false},
                 {data: 'nama', name: 'Nama'},
                 {data: 'telepon', name: 'Telepon'},
-                {data: 'alamat', name: 'Alamat'},
                 {data: 'infoPelanggan', name: 'Info Pelanggan'},
-                {data: 'instansi', name: 'Instansi'},
-                {data: 'provinsi', name: 'Provinsi'},
-                {data: 'kota', name: 'Kota'},
                 {data: 'sales', name: 'Sales'},
+                {data: 'status', name: 'Status'},
                 {data: 'action', searchable: false, sortable: false},
             ]
         });

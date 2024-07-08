@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class CustomerController extends Controller
@@ -18,40 +19,53 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = Customer::with('sales')->get();
         $salesAll = Sales::all()->pluck('sales_name', 'id');
 
-        return view('page.customer.index', compact('customers', 'salesAll'));
+        return view('page.customer.index', compact('salesAll'));
     }
 
     public function indexJson()
     {
-        $customers = Customer::with(['sales'])->get();
+        if(auth()->user()->role_id == 11){
+            $customers = Customer::with(['sales'])->where('sales_id', auth()->user()->sales->id)->get();
+        }else{
+            $customers = Customer::with(['sales'])->get();
+        }
+        
         return Datatables::of($customers)
         ->addIndexColumn()
         ->addColumn('sales', function ($customer) {
             return $customer->sales->sales_name ?? '-';
         })
         ->addColumn('telepon', function ($customer) {
-            return $customer->telepon == null ? '-' : $customer->telepon;
+            $format = substr($customer->telepon, 0, 2);
+            //jika format no 08xx maka diubah menjadi 628xx
+            if($format == '08'){
+                $telp = '62'.substr($customer->telepon, 1);
+            }else{
+                $telp = $customer->telepon;
+            }
+            return "<a class='text-success' href='https://wa.me/$telp'><i class='fab fa-whatsapp'></i> $customer->telepon</a>";
         })
         ->addColumn('nama', function ($customer) {
-            return $customer->nama == null ? '-' : $customer->nama;
-        })
-        ->addColumn('alamat', function ($customer) {
-            return $customer->alamat ? Str::limit($customer->alamat, 30) : '-';
-        })
-        ->addColumn('instansi', function ($customer) {
-            return $customer->instansi == null ? '-' : $customer->instansi;
+            $nama = Str::limit($customer->nama, 20);
+            return "<a href='/customer/show/$customer->id'>$nama</a><br><small class='text-muted'>$customer->instansi</small>";
         })
         ->addColumn('infoPelanggan', function ($customer) {
             return $customer->infoPelanggan == null ? '-' : $customer->infoPelanggan;
         })
-        ->addColumn('provinsi', function ($customer) {
-            return $customer->provinsi ?? '-';
-        })
-        ->addColumn('kota', function ($customer) {
-            return $customer->kota ?? '-';
+        ->addColumn('status', function ($customer) {
+            $frekuensi = $customer->frekuensi_order;
+
+            if($frekuensi == 0){
+                $status = '<span class="badge badge-danger">Leads</span>';
+            }elseif($frekuensi == 1){
+                $status = '<span class="badge badge-warning">Pelanggan Baru</span>';
+            }elseif($frekuensi > 1){
+                $status = '<span class="badge badge-success">Repeat Order</span>';
+            }
+
+            return $status;
         })
         ->addColumn('action', function ($customer) {
             return '
@@ -61,6 +75,7 @@ class CustomerController extends Controller
             </div>
             ';
         })
+        ->rawColumns(['action', 'nama', 'telepon', 'status'])
         ->make(true);
     }
 
@@ -75,6 +90,20 @@ class CustomerController extends Controller
     {
         $customer = Customer::find($id);
         return response()->json($customer);
+    }
+
+    public function create()
+    {
+        $salesAll = Sales::all()->pluck('sales_name', 'id');
+        $sumberAll = SumberPelanggan::all()->pluck('nama_sumber', 'id');
+
+        return view('page.customer.create', compact('salesAll', 'sumberAll'));
+    }
+
+    public function show($id)
+    {
+        $customer = Customer::find($id);
+        return view('page.customer.show', compact('customer'));
     }
 
     public function edit(Request $request)
@@ -141,6 +170,11 @@ class CustomerController extends Controller
         $customer->delete();
 
         return response()->json(['success' => 'true', 'message' => 'Data berhasil dihapus !']);
+    }
+
+    public function export()
+    {
+        return Excel::download(new CustomerExport, 'customer.xlsx');
     }
 
     public function getAllCustomers(Request $request)
