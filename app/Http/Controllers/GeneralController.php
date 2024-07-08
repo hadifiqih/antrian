@@ -16,7 +16,7 @@ class GeneralController extends Controller
     public function getProvinsi()
     {
         //Mengambil data provinsi dari API
-        $provinsi = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_pro?thn=2023')->json();
+        $provinsi = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_pro?thn=2024')->json();
 
         //Mengembalikan data provinsi dalam bentuk JSON
         return response()->json($provinsi);
@@ -25,7 +25,7 @@ class GeneralController extends Controller
     public function getKota(Request $request)
     {
         //Mengambil data kota dari API
-        $kota = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_kab?thn=2023&lvl=11&pro=' . $request->provinsi)->json();
+        $kota = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_kab?thn=2024&lvl=11&pro=' . $request->provinsi)->json();
 
         //Mengembalikan data kota dalam bentuk JSON
         return response()->json($kota);

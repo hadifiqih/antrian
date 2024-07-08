@@ -322,15 +322,12 @@ class PosController extends Controller
     public function updateQty(Request $request)
     {
         $item = KeranjangItem::find($request->id);
-        //lakukan pengecekan stok
-        $stok = StokBahan::where('produk_id', $item->produk_id)->where('cabang_id', auth()->user()->cabang_id)->first()->jumlah_stok;
-        if($request->qty > $stok){
-            //jika qty melebihi stok, maka qty di set menjadi stok
-            $item->jumlah = $stok;
-            $item->save();
-        }else{
+
+        try{
             $item->jumlah = $request->qty;
             $item->save();
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Gagal mengubah jumlah produk', 'error' => $e->getMessage], 500);
         }
 
         $items = KeranjangItem::getItemByIdCart($item->keranjang_id);

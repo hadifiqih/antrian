@@ -52,7 +52,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('page.dashboard');
-});
+})->middleware('auth')->name('dashboard');
 
 Route::get('users/export/', [UserController::class, 'export']);
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sales;
 use App\Models\Customer;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
 use Yajra\DataTables\Facades\DataTables;
@@ -25,35 +26,38 @@ class CustomerController extends Controller
 
     public function indexJson()
     {
-        $customers = Customer::with('sales')->get();
+        $customers = Customer::with(['sales'])->get();
         return Datatables::of($customers)
         ->addIndexColumn()
-        ->addColumn('sales', function ($customers) {
-            return $customers->sales_id == 0 ? '-' : $customers->sales->sales_name;
+        ->addColumn('sales', function ($customer) {
+            return $customer->sales->sales_name ?? '-';
         })
-        ->addColumn('telepon', function ($customers) {
-            return $customers->telepon == null ? '-' : $customers->telepon;
+        ->addColumn('telepon', function ($customer) {
+            return $customer->telepon == null ? '-' : $customer->telepon;
         })
-        ->addColumn('nama', function ($customers) {
-            return $customers->nama == null ? '-' : $customers->nama;
+        ->addColumn('nama', function ($customer) {
+            return $customer->nama == null ? '-' : $customer->nama;
         })
-        ->addColumn('alamat', function ($customers) {
-            return $customers->alamat == null ? '-' : $customers->alamat;
+        ->addColumn('alamat', function ($customer) {
+            return $customer->alamat ? Str::limit($customer->alamat, 30) : '-';
         })
-        ->addColumn('instansi', function ($customers) {
-            return $customers->instansi == null ? '-' : $customers->instansi;
+        ->addColumn('instansi', function ($customer) {
+            return $customer->instansi == null ? '-' : $customer->instansi;
         })
-        ->addColumn('infoPelanggan', function ($customers) {
-            return $customers->infoPelanggan == null ? '-' : $customers->infoPelanggan;
+        ->addColumn('infoPelanggan', function ($customer) {
+            return $customer->infoPelanggan == null ? '-' : $customer->infoPelanggan;
         })
-        ->addColumn('wilayah', function ($customers) {
-            return $customers->wilayah == null ? '-' : $customers->wilayah;
+        ->addColumn('provinsi', function ($customer) {
+            return $customer->provinsi ?? '-';
         })
-        ->addColumn('action', function ($customers) {
+        ->addColumn('kota', function ($customer) {
+            return $customer->kota ?? '-';
+        })
+        ->addColumn('action', function ($customer) {
             return '
             <div class="btn-group">
-                <button class="btn btn-sm btn-primary" onclick="editForm(`'. route('customer.update', $customers->id) .'`)" ><i class="fa fa-edit"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="deleteForm(`'. route('customer.destroy', $customers->id) .'`)"><i class="fa fa-trash"></i></button> 
+                <button class="btn btn-sm btn-primary" onclick="editForm(`'. route('customer.update', $customer->id) .'`)" ><i class="fa fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteForm(`'. route('customer.destroy', $customer->id) .'`)"><i class="fa fa-trash"></i></button> 
             </div>
             ';
         })

@@ -114,13 +114,14 @@
             },
             columns: [
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
-                {data: 'sales', name: 'Sales'},
                 {data: 'nama', name: 'Nama'},
                 {data: 'telepon', name: 'Telepon'},
                 {data: 'alamat', name: 'Alamat'},
                 {data: 'infoPelanggan', name: 'Info Pelanggan'},
                 {data: 'instansi', name: 'Instansi'},
-                {data: 'wilayah', name: 'Wilayah'},
+                {data: 'provinsi', name: 'Provinsi'},
+                {data: 'kota', name: 'Kota'},
+                {data: 'sales', name: 'Sales'},
                 {data: 'action', searchable: false, sortable: false},
             ]
         });
