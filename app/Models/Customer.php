@@ -25,9 +25,9 @@ class Customer extends Model
         'kota',
     ];
 
-    public static function antrian()
+    public function antrian()
     {
-        return $this->hasMany(Antrian::class);
+        return $this->hasMany(DataAntrian::class);
     }
 
     public static function order()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sales;
 use App\Models\Customer;
+use App\Models\DataAntrian;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
@@ -100,16 +101,61 @@ class CustomerController extends Controller
         return view('page.customer.create', compact('salesAll', 'sumberAll'));
     }
 
+    private function getStatus($frekuensi)
+    {
+        if($frekuensi == 0){
+            $status = 'Leads';
+        }elseif($frekuensi == 1){
+            $status = 'Pelanggan Baru';
+        }elseif($frekuensi > 1){
+            $status = 'Repeat Order';
+        }
+
+        return $status;
+    }
+
+    private function getFormatWa($telp)
+    {
+        $format = substr($telp, 0, 2);
+        //jika format no 08xx maka diubah menjadi 628xx
+        if($format == '08'){
+            $telp = '62'.substr($telp, 1);
+        }else{
+            $telp = $telp;
+        }
+
+        return $telp;
+    }
+
+    private function getNamaProvinsiKota($kodeProvinsi, $kodeKota)
+    {
+        //Mengambil data provinsi dari API
+        $provinsi = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_pro?thn=2024')->json();
+
+        $namaProvinsi = $provinsi[$kodeProvinsi] ?? 'Provinsi tidak ditemukan';
+
+        //Mengambil data kota dari API
+        $kota = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_kab?thn=2024&lvl=11&pro=' . $provinsi)->json();
+        
+        $namaKota = $kota[$kodeKota] ?? 'Kota tidak ditemukan';
+
+        return ['provinsi' => $namaProvinsi, 'kota' => $namaKota];
+
+        
+    }
+
     public function show($id)
     {
         $customer = Customer::find($id);
-        return view('page.customer.show', compact('customer'));
-    }
+        $status = $this->getStatus($customer->frekuensi_order);
+        $telp = $this->getFormatWa($customer->telepon);
 
-    public function edit(Request $request)
-    {
-        $customer = Customer::find($request->id);
-        return response()->json($customer);
+        $orders = DataAntrian::where('customer_id', $id)->get();
+        $infoPelanggan = SumberPelanggan::all();
+
+        $provdankota = $this->getNamaProvinsiKota($customer->provinsi, $customer->kota);
+
+        return view('page.customer.show', compact('customer', 'status', 'telp', 'orders', 'infoPelanggan', 'provdankota'));
     }
 
     public function store(Request $request)
@@ -152,16 +198,16 @@ class CustomerController extends Controller
     public function update(Request $request, $id)
     {
         $customer = Customer::find($id);
-        $customer->nama = $request->namaPelanggan;
+        $customer->nama = $request->nama;
         $customer->telepon = $request->telepon;
         $customer->alamat = $request->alamat;
         $customer->instansi = $request->instansi;
         $customer->infoPelanggan = $request->infoPelanggan;
-        $customer->wilayah = $request->wilayah;
-        $customer->sales_id = $request->sales;
+        $customer->provinsi = $request->provinsi;
+        $customer->kota = $request->kota;
         $customer->save();
 
-        return response()->json(['success' => 'true', 'message' => 'Data berhasil diubah !']);
+        return response()->json(['success' => 'true', 'message' => 'Data berhasil diubah !'], 200);
     }
 
     public function destroy($id)
