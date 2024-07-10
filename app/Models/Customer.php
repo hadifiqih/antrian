@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\SumberPelanggan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,12 +31,17 @@ class Customer extends Model
         return $this->hasMany(DataAntrian::class);
     }
 
-    public static function order()
+    public function sumberPelanggan()
+    {
+        return $this->belongsTo(SumberPelanggan::class, 'infoPelanggan', 'id');
+    }
+
+    public function order()
     {
         return $this->hasMany(Order::class);
     }
 
-    public static function payment()
+    public function payment()
     {
         return $this->hasMany(Payment::class);
     }
@@ -45,12 +51,12 @@ class Customer extends Model
         return $this->belongsTo(Sales::class);
     }
 
-    public static function documentation()
+    public function documentation()
     {
         return $this->hasMany(Documentation::class);
     }
 
-    public static function getCustomer($id)
+    public function getCustomer($id)
     {
         return $this->where('id', $id)->first();
     }

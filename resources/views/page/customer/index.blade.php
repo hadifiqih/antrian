@@ -46,31 +46,6 @@
       timer: 3000
     });
 
-    function editForm(url) {
-            $('#modal-form').modal('show');
-            $('#modal-form .modal-title').text('Edit Data Pelanggan');
-
-            $('#modal-form form')[0].reset();
-            $('#modal-form form').attr('action', url);
-            $('#modal-form [name=_method]').val('put');
-            $('#modal-form [name=namaPelanggan]').focus();
-            
-            $.get(url)
-                .done((response) => {
-                    $('#modal-form [name=sales]').val(response.sales_id);
-                    $('#modal-form [name=namaPelanggan]').val(response.nama);
-                    $('#modal-form [name=telepon]').val(response.telepon);
-                    $('#modal-form [name=alamat]').val(response.alamat);
-                    $('#modal-form [name=infoPelanggan]').val(response.infoPelanggan);
-                    $('#modal-form [name=instansi]').val(response.instansi);
-                    $('#modal-form [name=wilayah]').val(response.wilayah);
-                })
-                .fail((errors) => {
-                    alert('Tidak dapat menampilkan data');
-                    return;
-                });
-        }
-
     function deleteForm(url){
         Swal.fire({
             title: 'Apakah anda yakin?',
@@ -132,50 +107,6 @@
                 {data: 'status', name: 'Status'},
                 {data: 'action', searchable: false, sortable: false},
             ]
-        });
-
-        $('#modal-form').on('submit', function (e) {
-            // Menghilangkan fungsi default form submit
-            e.preventDefault();
-            
-            // Mengambil url action pada form
-            let url = $('#modal-form form').attr('action');
-
-            // Mengambil data pada form
-            let data = $('#modal-form form').serialize();
-
-            // Mengirim data ke url action dengan method PUT
-            $.ajax({
-                url: url,
-                method: 'PUT',
-                data: data,
-                success: function (response) {
-                    // Menutup modal
-                    $('#modal-form').modal('hide');
-
-                    // Memberi notifikasi sukses dengan toastr
-                    toastr.fire({
-                        icon: 'success',
-                        title: 'Berhasil diubah !'
-                    })
-
-                    // Menghapus data pada datatable
-                    table.ajax.reload();
-                },
-                error: function (xhr) {
-                    // Menutup modal
-                    $('#modal-form').modal('hide');
-
-                    // Memberi notifikasi error dengan toastr
-                    toastr.fire({
-                        icon: 'error',
-                        title: 'Terjadi kesalahan !'
-                    })
-
-                    // Menghapus data pada datatable
-                    table.ajax.reload();
-                }
-            });
         });
     });
 </script>

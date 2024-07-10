@@ -63,7 +63,7 @@
                 <div class="col-md">
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan </label>
-                        <p>{{ $antrian->customer->nama ?? '-' }} <span class="badge bg-danger">{{ $antrian->customer->frekuensi_order >= 2 ? 'Repeat Order' }}</span></p>
+                        <p>{{ $antrian->customer->nama ?? '-' }} <span class="badge bg-danger">{{ $antrian->customer->frekuensi_order >= 2 ? 'Repeat Order' : 'Pelanggan Baru'}}</span></p>
                     </div>
                 </div>
                 <div class="col-md">

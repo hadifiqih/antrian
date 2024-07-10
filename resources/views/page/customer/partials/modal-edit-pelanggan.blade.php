@@ -41,13 +41,13 @@
             </div>
             <div class="form-group">
                 <label for="provinsi">Provinsi <span class="text-danger">*</span></label>
-                <select class="custom-select" name="provinsi" id="provinsi" required>
+                <select class="custom-select" name="provinsi" id="modalProvinsi" required>
                     <option value="" selected>Pilih Provinsi</option>
                 </select>
             </div>
             <div class="form-group" id="groupKota" style="display: none">
                 <label for="kota">Kabupaten/Kota <span class="text-danger">*</span></label>
-                <select class="custom-select " name="kota" id="kota" required>
+                <select class="custom-select " name="kota" id="modalKota" required>
                     <option value="" selected>Pilih Kota</option>
                 </select>
             </div>

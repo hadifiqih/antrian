@@ -8,6 +8,7 @@ use App\Models\DataAntrian;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
+use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -28,9 +29,9 @@ class CustomerController extends Controller
     public function indexJson()
     {
         if(auth()->user()->role_id == 11){
-            $customers = Customer::with(['sales'])->where('sales_id', auth()->user()->sales->id)->get();
+            $customers = Customer::with(['sales', 'sumberPelanggan'])->where('sales_id', auth()->user()->sales->id)->get();
         }else{
-            $customers = Customer::with(['sales'])->get();
+            $customers = Customer::with(['sales', 'sumberPelanggan'])->get();
         }
         
         return Datatables::of($customers)
@@ -53,7 +54,7 @@ class CustomerController extends Controller
             return "<a href='/customer/show/$customer->id'>$nama</a><br><small class='text-muted'>$customer->instansi</small>";
         })
         ->addColumn('infoPelanggan', function ($customer) {
-            return $customer->infoPelanggan == null ? '-' : $customer->infoPelanggan;
+            return $customer->sumberPelanggan->nama_sumber ?? '-';
         })
         ->addColumn('status', function ($customer) {
             $frekuensi = $customer->frekuensi_order;
@@ -71,7 +72,7 @@ class CustomerController extends Controller
         ->addColumn('action', function ($customer) {
             return '
             <div class="btn-group">
-                <button class="btn btn-sm btn-primary" onclick="editForm(`'. route('customer.update', $customer->id) .'`)" ><i class="fa fa-edit"></i></button>
+                <a href="'.route('customer.edit', $customer->id).'" class="btn btn-sm btn-primary" ><i class="fa fa-edit"></i></a>
                 <button class="btn btn-sm btn-danger" onclick="deleteForm(`'. route('customer.destroy', $customer->id) .'`)"><i class="fa fa-trash"></i></button> 
             </div>
             ';
@@ -135,13 +136,11 @@ class CustomerController extends Controller
         $namaProvinsi = $provinsi[$kodeProvinsi] ?? 'Provinsi tidak ditemukan';
 
         //Mengambil data kota dari API
-        $kota = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_kab?thn=2024&lvl=11&pro=' . $provinsi)->json();
+        $kota = Http::get('https://sipedas.pertanian.go.id/api/wilayah/list_kab?thn=2024&lvl=11&pro=' . $kodeProvinsi)->json();
         
         $namaKota = $kota[$kodeKota] ?? 'Kota tidak ditemukan';
 
         return ['provinsi' => $namaProvinsi, 'kota' => $namaKota];
-
-        
     }
 
     public function show($id)
@@ -150,12 +149,13 @@ class CustomerController extends Controller
         $status = $this->getStatus($customer->frekuensi_order);
         $telp = $this->getFormatWa($customer->telepon);
 
-        $orders = DataAntrian::where('customer_id', $id)->get();
+        $orders = DataAntrian::where('customer_id', $id)->orderBy('created_at', 'desc')->get();
         $infoPelanggan = SumberPelanggan::all();
+        $sumberPelanggan = SumberPelanggan::find($customer->infoPelanggan);
 
         $provdankota = $this->getNamaProvinsiKota($customer->provinsi, $customer->kota);
 
-        return view('page.customer.show', compact('customer', 'status', 'telp', 'orders', 'infoPelanggan', 'provdankota'));
+        return view('page.customer.show', compact('customer', 'status', 'telp', 'orders', 'infoPelanggan', 'provdankota', 'sumberPelanggan'));
     }
 
     public function store(Request $request)
@@ -193,6 +193,16 @@ class CustomerController extends Controller
         }
         $customer->save();
         return response()->json(['success' => 'true', 'message' => 'Pelanggan berhasil ditambahkan !']);
+    }
+
+    public function edit($id)
+    {
+        $customer = Customer::find($id);
+        $salesAll = Sales::all()->pluck('sales_name', 'id');
+        $sumberAll = SumberPelanggan::all();
+        $wilayah = $this->getNamaProvinsiKota($customer->provinsi, $customer->kota);
+
+        return view('page.customer.edit', compact('customer', 'salesAll', 'sumberAll', 'wilayah'));
     }
 
     public function update(Request $request, $id)
