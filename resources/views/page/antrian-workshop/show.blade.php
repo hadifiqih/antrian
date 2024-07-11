@@ -74,15 +74,11 @@
                 </div>
                 <div class="col-md">
                     <label for="alamat">Sumber Pelanggan</label>
-                    <p>{{ $antrian->customer->infoPelanggan ?? '-' }}</p>
+                    <p>{{ $antrian->customer->sumberPelanggan->nama_sumber ?? '-' }}</p>
                 </div>
                 <div class="col-md">
                     <label for="alamat">Instansi</label>
                     <p>{{ $antrian->customer->instansi ?? '-'}}</p>
-                </div>
-                <div class="col-md">
-                    <label for="iklan">Status Iklan</label>
-                    <p>Facebook / -</p>
                 </div>
             </div>
 

@@ -1,5 +1,5 @@
-<li class="nav-item">
-    <a href="{{ url('/dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+<li class="nav-item {{ request()->routeIs('customer.index') || request()->routeIs('customer.edit') || request()->routeIs('customer.create') ? 'menu-open' : '' }}">
+    <a href="{{ url('/dashboard') }}" class="nav-link {{ request()->routeIs('customer.index') || request()->routeIs('customer.edit') || request()->routeIs('customer.create') ? 'active' : '' }}">
         <i class="nav-icon fas fa-book"></i>
         <p> Kontak <i class="right fas fa-angle-left"></i> </p>
     </a>

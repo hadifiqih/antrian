@@ -117,7 +117,11 @@
                                             </div>
                                         @endforeach
                                         <div>
-                                            <i class="fas fa-clock bg-gray"></i>
+                                            @if($orders->isEmpty())
+                                                <i class="fas fa-shopping-cart bg-gray"></i><div class="timeline-item" style="box-shadow: 0px 0px 0px">Riwayat Tidak Ditemukan</div>
+                                            @else
+                                                <i class="fas fa-clock bg-gray"></i>
+                                            @endif
                                         </div>
                                     </div>
                                     
@@ -141,35 +145,11 @@
 
 @section('script')
 <script>
-    function editPelanggan(id) {
-        $.ajax({
-            url: '/pelanggan/' + id,
-            type: 'GET',
-            success: function(response) {
-                $('#modalEditPelanggan #modalNama').val(response.nama);
-                $('#modalEditPelanggan #modalTelepon').val(response.telepon);
-                $('#modalEditPelanggan #modalAlamat').text(response.alamat);
-                $('#modalEditPelanggan #modalInstansi').val(response.instansi);
-
-                // Memilih option yang sesuai untuk infoPelanggan berdasarkan nama_sumber
-                var namaSumber = response.infoPelanggan;
-                $('#modalEditPelanggan #infoPelanggan option').each(function() {
-                    if ($(this).text() === namaSumber) {
-                        $(this).prop('selected', true);
-                        return false; // Keluar dari loop setelah menemukan yang sesuai
-                    }
-                });
-                $('#modalEditPelanggan #provinsi').val(response.provinsi);
-                $('#modalEditPelanggan #kota').val(response.kota);
-                $('#modalEditPelanggan').modal('show');
-            }
-        });
-    }
     $(document).ready(function() {
         //tampilkan nama provinsi dan kota berdasarkan id
         var provinsi = "{{ $provdankota['provinsi'] }}";
         var kota = "{{ $provdankota['kota'] }}";
-        var infoPelanggan = "{{ $sumberPelanggan->nama_sumber }}";
+        var infoPelanggan = "{{ $sumberPelanggan->nama_sumber ?? '-'}}";
         var selectedProvinsi = "";
         $('#provinsi').val(provinsi);
         $('#kota').val(kota);

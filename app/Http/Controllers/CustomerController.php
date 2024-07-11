@@ -8,6 +8,7 @@ use App\Models\DataAntrian;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\SumberPelanggan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -160,6 +161,7 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        $sales = auth()->user()->sales->id;
         //Menyimpan no.telp dalam format seperti berikut 081234567890, tanpa spasi. strip, titik, dll
         $telp = preg_replace('/\D/', '', $request->telepon);
 
@@ -168,31 +170,31 @@ class CustomerController extends Controller
         }else{
             $telp = $telp;
         }
+        
+        try {
+            DB::transaction(function () use ($request, $telp) {
+                $customer = Customer::create([
+                    'nama' => $request->nama,
+                    'telepon' => $telp,
+                    'alamat' => $request->alamat,
+                    'instansi' => $request->instansi,
+                    'infoPelanggan' => $request->infoPelanggan,
+                    'frekuensi_order' => 0,
+                    'count_followUp' => 0,
+                    'sales_id' => $sales,
+                    'provinsi' => $request->provinsi,
+                    'kota' => $request->kota,
+                ]);
+            });
 
-        $customer = new Customer;
+            // Success message or logic after successful transaction
+            return response()->json(['message' => 'Pelanggan berhasil ditambahkan!'], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
 
-        $customer->telepon = $telp;
-        $customer->sales_id = $request->salesID;
-        $customer->provinsi = $request->provinsi;
-        $customer->kota = $request->kota;
-
-        if($request->nama){
-            $customer->nama = $request->nama;
+            // Error message or logic for handling the exception
+            return response()->json(['error' => 'Pelanggan gagal ditambahkan: ' . $e->getMessage()], 500);
         }
-
-        if($request->alamat){
-            $customer->alamat = $request->alamat;
-        }
-
-        if($request->instansi){
-            $customer->instansi = $request->instansi;
-        }
-
-        if($request->modalInfoPelanggan){
-            $customer->infoPelanggan = $request->infoPelanggan;
-        }
-        $customer->save();
-        return response()->json(['success' => 'true', 'message' => 'Pelanggan berhasil ditambahkan !']);
     }
 
     public function edit($id)
@@ -207,17 +209,21 @@ class CustomerController extends Controller
 
     public function update(Request $request, $id)
     {
-        $customer = Customer::find($id);
-        $customer->nama = $request->nama;
-        $customer->telepon = $request->telepon;
-        $customer->alamat = $request->alamat;
-        $customer->instansi = $request->instansi;
-        $customer->infoPelanggan = $request->infoPelanggan;
-        $customer->provinsi = $request->provinsi;
-        $customer->kota = $request->kota;
-        $customer->save();
+        try {
+            $customer = Customer::find($id);
+            $customer->nama = $request->nama;
+            $customer->telepon = $request->telepon;
+            $customer->alamat = $request->alamat;
+            $customer->instansi = $request->instansi;
+            $customer->infoPelanggan = $request->infoPelanggan;
+            $customer->provinsi = $request->provinsi;
+            $customer->kota = $request->kota;
+            $customer->save();
 
-        return response()->json(['success' => 'true', 'message' => 'Data berhasil diubah !'], 200);
+            return response()->json(['success' => 'true', 'message' => 'Data berhasil diubah !'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => 'false', 'message' => 'Data gagal diubah !'], 500);
+        }
     }
 
     public function destroy($id)

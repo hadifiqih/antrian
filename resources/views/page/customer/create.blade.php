@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Data Pelanggan')
+@section('title', 'Tambah Data Pelanggan')
 
-@section('breadcrumb', 'Edit Data Pelanggan')
+@section('breadcrumb', 'Tambah Data Pelanggan')
 
 @section('page', 'Kontak')
 
@@ -12,36 +12,35 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Edit Data Pelanggan</h5>
+                    <h5 class="card-title">Tambah Data Pelanggan</h5>
                 </div>
                 <div class="card-body">
                     <form id="pelanggan-form" method="POST" enctype="multipart/form-data">
                         @csrf
-                        @method('PUT')
                         <div class="form-group">
                             <label for="nama">Nama Pelanggan <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="modalNama" value="{{ $customer->nama }}" placeholder="Nama Pelanggan" name="namaPelanggan" required>
+                            <input type="text" class="form-control" id="modalNama" placeholder="Nama Pelanggan" name="namaPelanggan" required>
                         </div>
             
                         <div class="form-group">
                             <label for="noHp">No. HP / WA <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="modalTelepon" value="{{ $customer->telepon }}" placeholder="Nomor Telepon" name="telepon" required>
+                            <input type="tel" class="form-control" id="modalTelepon" placeholder="Nomor Telepon" name="telepon" required>
                         </div>
             
                         <div class="form-group">
                             <label for="alamat">Alamat <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="modalAlamat" placeholder="Alamat Pelanggan" name="alamat" required>{{ $customer->alamat }}</textarea>
+                            <textarea rows="3" class="form-control" id="modalAlamat" placeholder="Alamat Pelanggan" name="alamat" required></textarea>
                         </div>
                         <div class="form-group">
                             <label for="instansi">Instansi <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="modalInstansi" value="{{ $customer->instansi }}" placeholder="Instansi Pelanggan" name="instansi" required>
+                            <input type="text" class="form-control" id="modalInstansi" placeholder="Instansi Pelanggan" name="instansi" required>
                         </div>
                         <div class="form-group">
                             <label for="infoPelanggan">Sumber Pelanggan <span class="text-danger">*</span></label>
                             <select class="custom-select select2" id="infoPelanggan" name="infoPelanggan" required>
                                 <option value="" selected>Pilih Sumber Pelanggan</option>
-                                @foreach($sumberAll as $info)
-                                    <option value="{{ $info->id }}">{{ $info->nama_sumber }}</option>
+                                @foreach($sumberAll as $key => $value)
+                                    <option value="{{ $key }}">{{ $value }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -60,7 +59,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="history.back()">Kembali</button>
-                        <input type="submit" class="btn btn-primary" id="submitPelanggan" value="Update"><span id="loader" class="loader" style="display: none;"></span>
+                        <input type="submit" class="btn btn-primary" id="submitPelanggan" value="Tambah"><span id="loader" class="loader" style="display: none;"></span>
                     </div>
                 </form>
             </div>
@@ -70,33 +69,17 @@
 
 @section('script')
 <script>
-    var provinsi = "{{ $customer->provinsi }}";
-    var kota = "{{ $customer->kota }}";
-
-    //selected option infoPelanggan berdasarkan id
-    var idSumber = "{{ $customer->infoPelanggan }}";
-    $('#infoPelanggan option').each(function() {
-        if ($(this).val() == idSumber) {
-            $(this).prop('selected', true);
-            return false;
-        }
-    });
-
+    var provinsi = $('#modalProvinsi').val();
+    //function provinsi
     $.ajax({
         url: "{{ route('getProvinsi') }}",
         method: "GET",
         success: function(data){
             //foreach provinsi
             $.each(data, function(key, value){
-                if(key == provinsi){
-                    $('#modalProvinsi').append(`
-                        <option value="${key}" selected>${value}</option>
-                    `);
-                } else {
-                    $('#modalProvinsi').append(`
-                        <option value="${key}">${value}</option>
-                    `);
-                }
+                $('#modalProvinsi').append(`
+                    <option value="${key}">${value}</option>
+                `);
             });
         }
     });
@@ -111,22 +94,17 @@
         success: function(data){
             //foreach kota
             $.each(data, function(key, value){
-                if(key == kota){
-                    $('#modalKota').append(`
-                        <option value="${key}" selected>${value}</option>
-                    `);
-                } else {
-                    $('#modalKota').append(`
-                        <option value="${key}">${value}</option>
-                    `);
-                }
+                $('#modalKota').append(`
+                    <option value="${key}">${value}</option>
+                `);
             });
         }
     });
 
     // function kota
     $('#modalProvinsi').on('change', function(){
-        var provinsi = $(this).val();
+        provinsi = $(this).val();
+
         $('#modalKota').empty();
         $('#modalKota').append(`<option value="" selected disabled>Pilih Kota</option>`);
         $.ajax({
@@ -162,8 +140,8 @@
         var _token = $('input[name="_token"]').val();
 
         $.ajax({
-            url: "{{ route('customer.update', $customer->id) }}",
-            method: "PUT",
+            url: "{{ route('customer.store') }}",
+            method: "POST",
             data: {
                 nama: nama,
                 telepon: telepon,

@@ -34,6 +34,7 @@ use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Controllers\EstimatorController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\SocialAccountController;
 
 /*
 |--------------------------------------------------------------------------
@@ -418,6 +419,15 @@ Route::controller(JobController::class)->middleware('auth')->group(function(){
     Route::get('/job/search', 'search')->name('job.search');
     Route::get('/job/searchByNama', 'searchByNama')->name('job.searchByNama');
     Route::get('/job/searchByCategory', 'searchByCategory')->name('job.searchByCategory');
+});
+
+Route::controller(SocialAccountController::class)->middleware('auth')->group(function(){
+    Route::get('/social-account', 'index')->name('social.index');
+    Route::get('/social-account/create', 'create')->name('social.create');
+    Route::post('/social-account', 'store')->name('social.store');
+    Route::get('/social-account/{id}/edit', 'edit')->name('social.edit');
+    Route::put('/social-account/{id}', 'update')->name('social.update');
+    Route::delete('/social-account/{id}', 'destroy')->name('social.destroy');
 });
 
 Route::controller(DocumentationController::class)->middleware('auth')->group(function(){
