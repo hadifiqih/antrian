@@ -423,6 +423,7 @@ Route::controller(JobController::class)->middleware('auth')->group(function(){
 
 Route::controller(SocialAccountController::class)->middleware('auth')->group(function(){
     Route::get('/social-account', 'index')->name('social.index');
+    Route::get('/social-account/json', 'indexJson')->name('social.indexJson');
     Route::get('/social-account/create', 'create')->name('social.create');
     Route::post('/social-account', 'store')->name('social.store');
     Route::get('/social-account/{id}/edit', 'edit')->name('social.edit');
