@@ -13,14 +13,15 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StokController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Password;
+
 use App\Http\Controllers\BahanController;
-
 use App\Http\Controllers\IklanController;
-use App\Http\Controllers\OrderController;
 
+use App\Http\Controllers\OrderController;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DesignController;
@@ -429,6 +430,16 @@ Route::controller(SocialAccountController::class)->middleware('auth')->group(fun
     Route::get('/social-account/{id}/edit', 'edit')->name('social.edit');
     Route::put('/social-account/{id}', 'update')->name('social.update');
     Route::delete('/social-account/{id}', 'destroy')->name('social.destroy');
+});
+
+Route::controller(TaskController::class)->middleware('auth')->group(function(){
+    Route::get('/task', 'index')->name('task.index');
+    Route::get('/task/json', 'indexJson')->name('task.indexJson');
+    Route::get('/task/create', 'create')->name('task.create');
+    Route::post('/task', 'store')->name('task.store');
+    Route::get('/task/{id}/edit', 'edit')->name('task.edit');
+    Route::put('/task/{id}', 'update')->name('task.update');
+    Route::delete('/task/{id}', 'destroy')->name('task.destroy');
 });
 
 Route::controller(DocumentationController::class)->middleware('auth')->group(function(){

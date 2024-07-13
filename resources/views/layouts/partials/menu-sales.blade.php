@@ -1,15 +1,9 @@
 <li class="nav-item {{ request()->routeIs('customer.index') || request()->routeIs('customer.edit') || request()->routeIs('customer.create') ? 'menu-open' : '' }}">
     <a href="{{ url('/dashboard') }}" class="nav-link {{ request()->routeIs('customer.index') || request()->routeIs('customer.edit') || request()->routeIs('customer.create') ? 'active' : '' }}">
         <i class="nav-icon fas fa-book"></i>
-        <p> Kontak & Akun<i class="right fas fa-angle-left"></i> </p>
+        <p> CRM<i class="right fas fa-angle-left"></i> </p>
     </a>
     <ul class="nav nav-treeview">
-        <li class="nav-item">
-            <a href="{{ route('social.index') }}" class="nav-link {{ request()->routeIs('social.index') || request()->routeIs('social.edit') ? 'active' : '' }}">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Akun Sosmed</p>
-            </a>
-        </li>
         <li class="nav-item">
             <a href="{{ route('customer.index') }}" class="nav-link {{ request()->routeIs('customer.index') || request()->routeIs('customer.edit') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
@@ -17,9 +11,15 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('customer.create') }}" class="nav-link {{ request()->routeIs('customer.create') ? 'active' : '' }}">
+            <a href="{{ route('social.index') }}" class="nav-link {{ request()->routeIs('social.index') || request()->routeIs('social.edit') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Tambah Kontak</p>
+                <p>Daftar Akun Sosmed</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('task.index') }}" class="nav-link {{ request()->routeIs('task.index') || request()->routeIs('task.edit') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Daftar Aktivitas</p>
             </a>
         </li>
     </ul>

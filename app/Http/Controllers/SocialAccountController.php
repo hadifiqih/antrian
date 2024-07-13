@@ -28,7 +28,8 @@ class SocialAccountController extends Controller
 
     public function indexJson()
     {
-        $socialMediaAccounts = SocialAccount::with('sales')->get();
+        $sales = auth()->user()->sales->id;
+        $socialMediaAccounts = SocialAccount::with('sales')->where('sales_id', $sales)->get();
 
         return Datatables::of($socialMediaAccounts)
             ->addIndexColumn()
