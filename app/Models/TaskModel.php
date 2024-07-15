@@ -10,7 +10,7 @@ class TaskModel extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'task';
+    protected $table = 'tasks';
 
     protected $fillable = [
         'nama_task',

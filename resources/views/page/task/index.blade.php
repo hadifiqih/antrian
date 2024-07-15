@@ -14,27 +14,28 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h5>Daftar Aktivitas</h5>
-                    <a href="{{ route('task.create') }}" class="btn btn-primary btn-sm float-right">Tambah Aktivitas</a>
+                    <h5>Daftar Aktivitas<a href="{{ route('task.create') }}" class="btn btn-primary btn-sm float-right">Tambah Aktivitas</a></h5>
                 </div>
                 <div class="card-body">
-                    <table id="tableTask" class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Aktivitas</th>
-                                <th>Status</th>
-                                <th>Keterangan</th>
-                                <th>Deadline</th>
-                                <th>Update</th>
-                                <th>Sales</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table id="tableTask" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Aktivitas</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th>Deadline</th>
+                                    <th>Update</th>
+                                    <th>Sales</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
