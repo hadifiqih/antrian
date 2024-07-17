@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\TaskModel;
 use Illuminate\Http\Request;
+use App\Models\SumberPelanggan;
 use Yajra\DataTables\DataTables;
 
 class TaskController extends Controller
@@ -65,7 +67,8 @@ class TaskController extends Controller
      */
     public function create()
     {
-        return view('page.task.create');
+        $infoPelanggan = SumberPelanggan::all();
+        return view('page.task.create', compact('infoPelanggan'));
     }
 
     /**
@@ -73,7 +76,28 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama_task' => 'required',
+        ]);
+
+        $id = auth()->user()->id;
+
+        $task = new TaskModel();
+        $task->nama_task = $validated['nama_task'];
+        $task->user_id = $id;
+
+        $task->rincian = $request->rincian ?? '';
+        $task->hasil = $request->hasil ?? '';
+        $task->batas_waktu = $request->batas_waktu ?? '';
+        $task->akhir_batas_waktu = $request->akhir_batas_waktu ?? '';
+        $task->status = strtolower($request->status);
+        $task->priority = strtolower($request->priority) ?? '';
+        $task->category = strtolower($request->category) ?? '';
+        $task->gps_location = $request->gps_location ?? '';
+        $task->customer_id = $request->customer_id ?? '';
+        $task->save();
+
+        return redirect()->route('task.index')->with('success', 'Task created successfully.');
     }
 
     /**
@@ -106,5 +130,25 @@ class TaskController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function simpanPelanggan(Request $request)
+    {
+        try{
+            $newCustomer = new Customer;
+            $newCustomer->nama = $request->modalNama;
+            $newCustomer->telepon = $request->modalTelepon;
+            $newCustomer->alamat = $request->modalAlamat;
+            $newCustomer->infoPelanggan = $request->modalInfoPelanggan;
+            $newCustomer->instansi = $request->modalInstansi;
+            $newCustomer->sales_id = $request->salesID;
+            $newCustomer->provinsi = $request->provinsi;
+            $newCustomer->kota = $request->kota;
+            $newCustomer->save();
+
+            return response()->json(['status' => 'success', 'message' => 'Data berhasil disimpan']);
+        }catch(\Exception $e){
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 }

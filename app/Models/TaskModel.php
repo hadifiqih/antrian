@@ -24,4 +24,9 @@ class TaskModel extends Model
         'category',
         'gps_location',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

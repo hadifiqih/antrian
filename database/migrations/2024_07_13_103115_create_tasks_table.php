@@ -19,7 +19,8 @@ return new class extends Migration
             $table->dateTime('batas_waktu')->nullable();
             $table->dateTime('akhir_batas_waktu')->nullable();
             $table->string('status')->default('Belum Dimulai'); // Belum Dimulai, Sedang Berlangsung, Selesai
-            $table->string('sales_id')->nullable();
+            $table->bigInteger('user_id')->nullable();
+            $table->bigInteger('customer_id')->nullable();
             $table->string('priority')->nullable();
             $table->string('category')->nullable();
             $table->point('gps_location')->nullable();
