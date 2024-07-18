@@ -144,6 +144,7 @@ class TaskController extends Controller
             $newCustomer->sales_id = $request->salesID;
             $newCustomer->provinsi = $request->provinsi;
             $newCustomer->kota = $request->kota;
+            $newCustomer->customer_id = $request->customerID;
             $newCustomer->save();
 
             return response()->json(['status' => 'success', 'message' => 'Data berhasil disimpan']);

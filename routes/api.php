@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Api\StrukController;
 /*
 |--------------------------------------------------------------------------
@@ -28,3 +29,6 @@ Route::get('/daftar-retail/{id}', [ReportController::class, 'retailJson'])->name
 Route::get('/sales', [ReportController::class, 'listSales'])->name('sales');
 Route::get('/retail-cetak/{id}', [ReportController::class, 'retailCetakById'])->name('retailCetakById');
 Route::get('/sales-info/{id}', [ReportController::class, 'salesInfo'])->name('salesInfo');
+
+//Customer
+Route::get('/customer', [CustomerController::class, 'getAllCustomerApi'])->name('api.getAllCustomer');

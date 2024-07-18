@@ -91,49 +91,60 @@
 
 @section('script')
 <script>
-    if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        let latitude = position.coords.latitude;
-        let longitude = position.coords.longitude;
-    });
-    } else {
-        console.log("Geolocation is not supported by this browser.");
+    let latitude;
+    let longitude;
+
+    // Create a function to get geolocation with promise
+    function getGeolocation() {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                }, function(error) {
+                    reject(error);
+                });
+            } else {
+                reject(new Error("Geolocation is not supported by this browser."));
+            }
+        });
     }
 
     $(document).ready(function() {
         //fungsi submit form
-        $('#formTambahAktivitas').submit(function() {
-            //mengambil value dari form
-            let nama_task = $('#nama_task').val();
-            let rincian = $('#rincian').val();
-            let hasil = $('#hasil').val();
-            let lampiran = $('#lampiran').val();
-            let status = $('#status').val();
-            let batasWaktu = $('#batasWaktu').val();
-            let akhirBatas = $('#akhirBatas').val();
-            let namaKontak = $('#namaKontak').val();
-            let noTelp = $('#noTelp').val();
-            let customerId = $('#customerId').val();
+        $('#formTambahAktivitas').submit(async function (event){
+            event.preventDefault();
+
+            const position = await getGeolocation();
+            latitude = position.latitude;
+            longitude = position.longitude;
+            let data = $(this).serialize();
+            console.log(data, "latitude: ", latitude, "longitude: ", longitude);
 
             //ajax untuk mengirim data
             $.ajax({
                 type: 'POST',
                 url: $(this).attr('action'),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: {
-                    _token: $(this).find("input[name='_token']").val(),
-                    nama_task: nama_task,
-                    rincian: rincian,
-                    hasil: hasil,
-                    lampiran: lampiran,
-                    status: status,
-                    batasWaktu: batasWaktu,
-                    akhirBatas: akhirBatas,
-                    namaKontak: namaKontak,
-                    noTelp: noTelp
+                    data: data,
+                    latitude: latitude,
+                    longitude: longitude
                 },
                 success: function(data) {
-                    alert('Data berhasil disimpan');
-                    window.location.href = "{{ route('task.index') }}";
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Data berhasil disimpan',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(function() {
+                        window.location.href = "{{ route('task.index') }}";
+                    });
                 },
                 error: function(data) {
                     alert('Data gagal disimpan');
@@ -145,9 +156,14 @@
         $('#customerId').select2({
             placeholder: 'Pilih kontak',
             ajax: {
-                url: "{{ route('getAllCustomers') }}",
+                url: "/api/customer",
                 dataType: 'json',
-                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+                        sales: `{{ Auth::user()->sales->id }}`
+                    };
+                },
                 processResults: function(data) {
                     return {
                         results: $.map(data, function(item) {
