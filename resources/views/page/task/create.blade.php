@@ -121,20 +121,17 @@
             latitude = position.latitude;
             longitude = position.longitude;
             let data = $(this).serialize();
-            console.log(data, "latitude: ", latitude, "longitude: ", longitude);
+            //tambahkan latitude dan longitude ke dalam data
+            data += `&latitude=${latitude}&longitude=${longitude}`;
 
             //ajax untuk mengirim data
             $.ajax({
                 type: 'POST',
                 url: $(this).attr('action'),
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
-                data: {
-                    data: data,
-                    latitude: latitude,
-                    longitude: longitude
-                },
+                data: data,
                 success: function(data) {
                     Swal.fire({
                         icon: 'success',
@@ -158,6 +155,10 @@
             ajax: {
                 url: "/api/customer",
                 dataType: 'json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Authorization' : 'Bearer ' + localStorage.getItem('api-token')
+                },
                 data: function(params) {
                     return {
                         q: params.term,

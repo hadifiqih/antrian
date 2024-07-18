@@ -7,18 +7,29 @@
 @section('breadcrumb', 'Dashboard')
 
 @section('content')
-      <div class="container-fluid">
+    <div class="container-fluid">
         <div class="d-flex flex-column bd-highlight">
-        <div class="p-2 bd-highlight">
-            <h1 class="ml-4 pt-3">Selamat Datang, <br> <strong>{{ Auth::user()->name }}</strong>&#128075;</h1>
+            <div class="p-2 bd-highlight">
+                <h1 class="ml-4 pt-3">Selamat Datang, <br> <strong>{{ Auth::user()->name }}</strong>&#128075;</h1>
+            </div>
+            <div class="p-2 bd-highlight">
+                <h5 class="ml-4">Berikan yang terbaik untuk setiap tanggung jawab pekerjaan kamu ! &#128170;</h5>
+            </div>
+            <div class="p-2 bd-highlight">
+                <img src="{{ asset('adminlte') }}/dist/img/team-dashboard.png" class="img-fluid mt-3" alt="Team Dashboard">
+            </div>
         </div>
-        <div class="p-2 bd-highlight">
-            <h5 class="ml-4">Berikan yang terbaik untuk setiap tanggung jawab pekerjaan kamu ! &#128170;</h5>
-        </div>
-        <div class="p-2 bd-highlight">
-            <img src="{{ asset('adminlte') }}/dist/img/team-dashboard.png" class="img-fluid mt-3" alt="Team Dashboard">
-        </div>
-        </div>
-      </div>
+    </div>
+@endsection
+
+@section('script')
+<script>
+
+    $(document).ready(function() {
+        //SIMPAN TOKEN KE DALAM LOCAL STORAGE
+        let token = `{{ $token }}`;
+        localStorage.setItem('api-token', token);
+    });
+</script>
 @endsection
 

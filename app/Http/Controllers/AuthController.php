@@ -54,8 +54,19 @@ class AuthController extends Controller
                     return view('page.dashboard')->withCookie($cookie);
                 }
 
+                // Check if user already has an active token
+                $existingToken = $user->tokens()->where('name', 'api-token')->first();
+
+                if ($existingToken) {
+                    // Use the existing token
+                    $token = $existingToken->plainTextToken;
+                } else {
+                    // Generate new token
+                    $token = $user->createToken('api-token')->plainTextToken;
+                }
+
                 // Jika email dan password benar
-                return view('page.dashboard');
+                return view('page.dashboard', ['token' => $token]);
             }
         }
 

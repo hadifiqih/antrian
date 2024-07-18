@@ -31,4 +31,4 @@ Route::get('/retail-cetak/{id}', [ReportController::class, 'retailCetakById'])->
 Route::get('/sales-info/{id}', [ReportController::class, 'salesInfo'])->name('salesInfo');
 
 //Customer
-Route::get('/customer', [CustomerController::class, 'getAllCustomerApi'])->name('api.getAllCustomer');
+Route::get('/customer', [CustomerController::class, 'getAllCustomersApi'])->name('api.getAllCustomer');

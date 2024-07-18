@@ -78,6 +78,7 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'nama_task' => 'required',
+            'status' => 'required',
         ]);
 
         $id = auth()->user()->id;
@@ -85,7 +86,6 @@ class TaskController extends Controller
         $task = new TaskModel();
         $task->nama_task = $validated['nama_task'];
         $task->user_id = $id;
-
         $task->rincian = $request->rincian ?? '';
         $task->hasil = $request->hasil ?? '';
         $task->batas_waktu = $request->batas_waktu ?? '';
@@ -94,7 +94,7 @@ class TaskController extends Controller
         $task->priority = strtolower($request->priority) ?? '';
         $task->category = strtolower($request->category) ?? '';
         $task->gps_location = $request->gps_location ?? '';
-        $task->customer_id = $request->customer_id ?? '';
+        $task->customer_id = $request->customer_id ?? 0;
         $task->save();
 
         return redirect()->route('task.index')->with('success', 'Task created successfully.');
