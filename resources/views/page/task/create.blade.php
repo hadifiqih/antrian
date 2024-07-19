@@ -45,7 +45,7 @@
                             <label for="lampiran">Lampiran</label>
                             <div class="input-group">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="lampiran">
+                                    <input name="lampiran[]" type="file" class="custom-file-input" id="lampiran" multiple="multiple">
                                     <label class="custom-file-label" for="lampiran">Pilih file</label>
                                 </div>
                             </div>
@@ -63,9 +63,9 @@
                         <div class="form-group">
                             <label for="status">Status <span class="text-danger">*</span></label>
                             <select name="status" id="status" class="form-control" required>
-                                <option value="Belum Selesai">Belum Selesai</option>
-                                <option value="Proses">Proses</option>
-                                <option value="Selesai">Selesai</option>
+                                <option value="1">Belum Selesai</option>
+                                <option value="2">Proses</option>
+                                <option value="3">Selesai</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -91,38 +91,29 @@
 
 @section('script')
 <script>
-    let latitude;
-    let longitude;
-
-    // Create a function to get geolocation with promise
-    function getGeolocation() {
-        return new Promise((resolve, reject) => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    });
-                }, function(error) {
-                    reject(error);
-                });
-            } else {
-                reject(new Error("Geolocation is not supported by this browser."));
+    $(document).ready(function() {
+        // function provinsi
+        $('#provinsi').select2({
+            ajax: {
+                url: `{{ route('getProvinsi') }}`,
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                }
             }
         });
-    }
-
-    $(document).ready(function() {
         //fungsi submit form
         $('#formTambahAktivitas').submit(async function (event){
             event.preventDefault();
+            
+            //BUAT FORM DATA
+            var formData = new FormData(this);
 
-            const position = await getGeolocation();
-            latitude = position.latitude;
-            longitude = position.longitude;
-            let data = $(this).serialize();
-            //tambahkan latitude dan longitude ke dalam data
-            data += `&latitude=${latitude}&longitude=${longitude}`;
+            //ambil select2 customer id
+            var customerId = $('#customerId').val();
+            formData.append('customerId', customerId);
 
             //ajax untuk mengirim data
             $.ajax({
@@ -131,7 +122,9 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
-                data: data,
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(data) {
                     Swal.fire({
                         icon: 'success',
@@ -218,32 +211,25 @@
             });
         });
 
-        // function provinsi
-        $.ajax({
-            url: "{{ route('getProvinsi') }}",
-            method: "GET",
-            success: function(data){
-                //foreach provinsi
-                $.each(data, function(key, value){
-                    $('#provinsi').append(`<option value="${key}">${value}</option>`);
-                });
-            }
-        });
-
         // function kota
         $('#provinsi').on('change', function(){
             var provinsi = $(this).val();
             $('#groupKota').show();
             $('#kota').empty().append(`<option value="" selected disabled>Pilih Kota</option>`);
-            $.ajax({
-                url: "{{ route('getKota') }}",
-                method: "GET",
-                data: { provinsi: provinsi },
-                success: function(data){
-                    //foreach kota
-                    $.each(data, function(key, value){
-                        $('#kota').append(`<option value="${key}">${value}</option>`);
-                    });
+            $('#kota').select2({
+                ajax: {
+                    url: `{{ route('getKota') }}`,
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            provinsi: provinsi
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
                 }
             });
         });

@@ -23,8 +23,8 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Aktivitas</th>
+                                    <th>Pelanggan</th>
                                     <th>Status</th>
-                                    <th>Keterangan</th>
                                     <th>Deadline</th>
                                     <th>Update</th>
                                     <th>Sales</th>
@@ -45,6 +45,45 @@
 
 @section('script')
 <script>
+    function deleteTask(id) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/task/${id}`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(data) {
+                        Swal.fire(
+                            'Terhapus!',
+                            'Data berhasil dihapus.',
+                            'success',
+                        ).then(function() {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(data) {
+                        Swal.fire(
+                            'Gagal!',
+                            'Data gagal dihapus.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+
     $(document).ready(function() {
         $('#tableTask').DataTable({
             processing: true,
@@ -53,8 +92,8 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex' },
                 { data: 'nama_task', name: 'nama_task' },
+                { data: 'customer', name: 'customer' },
                 { data: 'status', name: 'status' },
-                { data: 'keterangan', name: 'keterangan' },
                 { data: 'deadline', name: 'deadline' },
                 { data: 'updated_at', name: 'updated_at' },
                 { data: 'sales', name: 'sales' },

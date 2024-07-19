@@ -440,6 +440,8 @@ Route::controller(TaskController::class)->middleware('auth')->group(function(){
     Route::get('/task/{id}/edit', 'edit')->name('task.edit');
     Route::put('/task/{id}', 'update')->name('task.update');
     Route::delete('/task/{id}', 'destroy')->name('task.destroy');
+    Route::delete('/attachment/{id}', 'destroyLampiran')->name('attachment.destroy');
+
 
     Route::post('/task/simpan-pelanggan', 'simpanPelanggan')->name('task.simpanPelanggan');
 });

@@ -42,9 +42,9 @@
             </div>
             <div class="form-group">
                 <label for="provinsi">Provinsi <span class="text-danger">*</span></label>
-                <select class="custom-select" name="provinsi" id="provinsi" required>
-                    <option value="" selected>Pilih Provinsi</option>
-                </select>
+                    <select class="custom-select" name="provinsi" id="provinsi" style="width: 100%" required>
+                        <option value="" selected>Pilih Provinsi</option>
+                    </select>
             </div>
             <div class="form-group" id="groupKota" style="display: none">
                 <label for="kota">Kabupaten/Kota <span class="text-danger">*</span></label>
