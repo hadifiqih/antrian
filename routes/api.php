@@ -32,3 +32,4 @@ Route::get('/sales-info/{id}', [ReportController::class, 'salesInfo'])->name('sa
 
 //Customer
 Route::get('/customer', [CustomerController::class, 'getAllCustomersApi'])->name('api.getAllCustomer');
+Route::get('/customer/{id}', [CustomerController::class, 'getCustomerByIdApi'])->name('api.getCustomerById');

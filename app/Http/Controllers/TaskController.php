@@ -131,7 +131,53 @@ class TaskController extends Controller
 
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'nama_task' => 'required',
+            'status' => 'required',
+        ]);
+
+        $task = TaskModel::find($id);
+        $task->nama_task = $validated['nama_task'];
+        $task->rincian = $request->rincian ?? '';
+        $task->hasil = $request->hasil ?? '';
+        $task->batas_waktu = $request->batasWaktu ?? '';
+        $task->akhir_batas_waktu = $request->akhirBatas ?? '';
+        $task->status = strtolower($request->status);
+        $task->priority = strtolower($request->priority) ?? '';
+        $task->category = strtolower($request->category) ?? '';
+        $task->customer_id = $request->customerId ?? 0;
+        $task->save();
+
+        //simpan lampiran
+        if($request->hasFile('lampiran')){
+            //jika lampiran lebih dari satu
+            if(count($request->file('lampiran')) > 1){
+                foreach($request->file('lampiran') as $lampiran){
+                    $lampiranName = time() . '.' . $lampiran->getClientOriginalExtension();
+                    Storage::disk('public')->put('lampiran/' . $lampiranName, file_get_contents($lampiran));
+
+                    //simpan ke database
+                    $lampiran = new Attachment;
+                    $lampiran->task_id = $task->id;
+                    $lampiran->file_name = $lampiranName;
+                    $lampiran->file_path = 'lampiran/' . $lampiranName;
+                    $lampiran->save();
+                }
+            }else{
+                $lampiran = $request->file('lampiran');
+                $lampiranName = time() . '.' . $lampiran[0]->getClientOriginalExtension();
+                Storage::disk('public')->put('lampiran/' . $lampiranName, file_get_contents($lampiran[0]));
+
+                //simpan ke database
+                $lampiran = new Attachment;
+                $lampiran->task_id = $task->id;
+                $lampiran->file_name = $lampiranName;
+                $lampiran->file_path = 'lampiran/' . $lampiranName;
+                $lampiran->save();
+            }
+        }
+
+        return redirect()->route('task.index')->with('success', 'Task updated successfully.');
     }
 
     public function destroy(string $id)

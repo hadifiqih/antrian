@@ -397,7 +397,7 @@ Route::controller(ProdukController::class)->middleware('auth')->group(function()
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
 });
 
-Route::controller(CustomerController::class)->middleware('auth')->group(function(){
+Route::controller(CustomerController::class)->middleware(['auth'])->group(function(){
     Route::get('/customer', 'index')->name('customer.index');
     Route::get('/customer/edit/{id}', 'edit')->name('customer.edit');
     Route::get('/customer/json', 'indexJson')->name('customer.indexJson');

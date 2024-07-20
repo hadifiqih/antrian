@@ -58,11 +58,11 @@
                     <h5>Edit Aktivitas</h5>
                 </div>
                 <div class="card-body">
-                    <form id="editAktivitas" action="{{ route('task.update', $task->id) }}" method="POST" enctype="multipart/form-data">
+                    <form id="editAktivitas" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-
-                        <input type="hidden" name="id" id="id" value="{{ $task->id }}">
+                        
+                        <input type="hidden" id="taskId" name="id" value="{{ $task->id }}">
                         <div class="form-group">
                             <label for="nama_task">Nama Aktivitas <span class="text-danger">*</span></label>
                             <input type="text" name="nama_task" id="nama_task" class="form-control" value="{{ $task->nama_task }}" placeholder="Follow Up PT. ABC" required>
@@ -77,7 +77,7 @@
                         </div>
                         <div class="form-group">
                             <label for="namaKontak">Nama Kontak</label>
-                            <select id="customerId" class="form-control select2" style="width: 100%;">
+                            <select id="customerId" name="customerId" class="form-control select2" style="width: 100%;">
                                 <option value="{{ $task->customer_id }}">{{ $task->customer->nama ?? 'Pilih Kontak' }}</option>
                             </select>
                             <button id="btnTambahPelanggan" type="button" class="btn btn-primary btn-sm mt-3">Tambah Kontak</button>
@@ -102,7 +102,7 @@
                                     <div class="col-md-2">
                                         <div class="attachment-wrapper">
                                             <img src="{{ asset('storage/lampiran/' . $attachment->file_name) }}" class="img-fluid" alt="attachment">
-                                            <a href="{{ route('attachment.destroy', $attachment->id) }}" data-id="{{ $attachment->id }}">
+                                            <a onclick="deleteLampiran({{ $attachment->id }})">
                                                 <div class="overlay">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </div>
@@ -120,18 +120,18 @@
                         <div class="form-group">
                             <label for="status">Status <span class="text-danger">*</span></label>
                             <select name="status" id="status" class="form-control" required>
-                                <option value="1">Belum Selesai</option>
-                                <option value="2">Proses</option>
-                                <option value="3">Selesai</option>
+                                <option value="1" {{ $task->status == 1 ? 'selected' : '' }}>Belum Selesai</option>
+                                <option value="2" {{ $task->status == 2 ? 'selected' : '' }}>Proses</option>
+                                <option value="3" {{ $task->status == 3 ? 'selected' : '' }}>Selesai</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="batasWaktu">Batas Waktu</label>
-                            <input type="datetime-local" name="batasWaktu" id="batasWaktu" class="form-control" required>
+                            <input type="datetime-local" name="batasWaktu" id="batasWaktu" class="form-control" value="{{ old('batasWaktu', $task->batas_waktu) }}" required>
                         </div>
                         <div class="form-group">
                             <label for="akhirBatas">Akhir Batas Waktu</label>
-                            <input type="datetime-local" name="akhirBatas" id="akhirBatas" class="form-control">
+                            <input type="datetime-local" name="akhirBatas" id="akhirBatas" class="form-control" value="{{ old('akhirBatas', $task->akhir_batas_waktu) }}">
                         </div>
                 </div>
                 <div class="card-footer">
@@ -173,5 +173,86 @@
             }
         });
     }
+
+$(document).ready(function(){
+    // preselected customer select2
+    $('#customerId').select2({
+        placeholder: 'Pilih Kontak',
+        ajax: {
+            url: '/api/customer',
+            headers: {
+                'Authorization' : 'Bearer ' + localStorage.getItem('api-token')
+            },
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    q: params.term,
+                    sales: `{{ Auth::user()->sales->id }}`
+                };
+            },
+            delay: 250,
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function(item) {
+                        return {
+                            text: item.nama,
+                            id: item.id
+                        }
+                    })
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Pre-select value
+    var preselectedCustomerId = '{{ $task->customer_id }}';
+    if (preselectedCustomerId) {
+        $.ajax({
+            type: 'GET',
+            url: '/api/customer/' + preselectedCustomerId, // assuming you have an endpoint that returns a single customer
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('api-token')
+            },
+            dataType: 'json'
+        }).then(function (data) {
+            // Create the pre-selected option and update the Select2 control
+            var option = new Option(data.nama, data.id, true, true);
+            $('#customerId').append(option).trigger('change');
+        });
+    }
+
+    //fungsi submit form
+    $('#editAktivitas').submit(function(e) {
+        e.preventDefault();
+
+        let taskId = $('#taskId').val();
+
+        var formData = new FormData(this);
+
+        //ajax untuk mengirim data
+        $.ajax({
+            url: `/task/${taskId}`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Data berhasil disimpan',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(function() {
+                    window.location.href = "{{ route('task.index') }}";
+                });
+            },
+            error: function(data) {
+                alert('Data gagal disimpan');
+            }
+        });
+    });
+});
 </script>
 @endsection

@@ -52,7 +52,7 @@
                         </div>
                         <div class="form-group">
                             <label for="namaKontak">Nama Kontak</label>
-                            <select id="customerId" class="form-control select2" style="width: 100%;">
+                            <select id="customerId" name="customerId" class="form-control select2" style="width: 100%;">
 
                             </select>
                             <button id="btnTambahPelanggan" type="button" class="btn btn-primary btn-sm mt-3">Tambah Kontak</button>
@@ -110,10 +110,6 @@
             
             //BUAT FORM DATA
             var formData = new FormData(this);
-
-            //ambil select2 customer id
-            var customerId = $('#customerId').val();
-            formData.append('customerId', customerId);
 
             //ajax untuk mengirim data
             $.ajax({

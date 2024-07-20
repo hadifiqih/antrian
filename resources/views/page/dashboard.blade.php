@@ -22,14 +22,3 @@
     </div>
 @endsection
 
-@section('script')
-<script>
-
-    $(document).ready(function() {
-        //SIMPAN TOKEN KE DALAM LOCAL STORAGE
-        let token = `{{ $token }}`;
-        localStorage.setItem('api-token', token);
-    });
-</script>
-@endsection
-
