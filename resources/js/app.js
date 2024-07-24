@@ -23,7 +23,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const kuota = document.getElementById('kuota');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 7fe7f620678d2107e76411b931c76e12388652d0
     // let calendarEl = document.getElementById('calendar');
     // let calendar = new Calendar(calendarEl, {
     //     plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
