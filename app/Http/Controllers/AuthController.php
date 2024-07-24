@@ -49,13 +49,25 @@ class AuthController extends Controller
                 // Menyimpan data pengguna ke dalam session
                 $request->session()->put('user', $user);
 
+                // Check if user already has an active token
+                $existingToken = $user->tokens()->where('name', 'api-token')->first();
+
+                if ($existingToken) {
+                    // Use the existing token
+                    $token = $existingToken->plainTextToken;
+                } else {
+                    // Generate new token
+                    $token = $user->createToken('api-token')->plainTextToken;
+                }
+
                 if ($remember) {
-                    $cookie = Cookie::make('user', $user, 1440);
-                    return view('page.dashboard')->withCookie($cookie);
+                    // Store token in cookie (secure and http-only)
+                    $cookie = Cookie::make('api-token', $token, 1440, null, null, true, true);
+                    return view('page.dashboard', ['token' => $token])->withCookie($cookie);
                 }
 
                 // Jika email dan password benar
-                return view('page.dashboard');
+                return view('page.dashboard', ['token' => $token]);
             }
         }
 

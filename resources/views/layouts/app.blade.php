@@ -16,8 +16,6 @@
   <!-- IonIcons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="{{ asset('adminlte') }}/dist/css/adminlte.min.css">
-  
   <link href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" rel="stylesheet">
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
@@ -26,7 +24,7 @@
 
   <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 
-  @vite(['resources/js/app.js', 'resources/css/app.css'])
+  @vite(['resources/js/app.js', 'resources/css/app.css', 'resources/css/adminlte.min.css', 'resources/js/adminlte.js', 'resources/js/bootstrap.bundle.min.js'])
 
   @yield('style')
   {{-- Pusher --}}
@@ -240,14 +238,8 @@
 <!-- REQUIRED SCRIPTS -->
 <!-- jQuery -->
 <script src="{{ asset('adminlte') }}/plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap -->
-<script src="{{ asset('adminlte') }}/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- SweetAlert2 -->
 <script src="{{ asset('adminlte') }}/plugins/sweetalert2/sweetalert2.min.js"></script>
-
-<script src="{{ asset('adminlte') }}/plugins/jszip/jszip.min.js"></script>
-<script src="{{ asset('adminlte') }}/plugins/pdfmake/pdfmake.min.js"></script>
-<script src="{{ asset('adminlte') }}/plugins/pdfmake/vfs_fonts.js"></script>
 
 <script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
 
@@ -259,8 +251,6 @@
 <script src="{{ asset('adminlte') }}/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
 
 <!-- AdminLTE -->
-<script src="{{ asset('adminlte') }}/dist/js/adminlte.js"></script>
-
 {{-- DayJS --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.7/dayjs.min.js"></script>
 

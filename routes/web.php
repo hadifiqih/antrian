@@ -397,7 +397,7 @@ Route::controller(ProdukController::class)->middleware('auth')->group(function()
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
 });
 
-Route::controller(CustomerController::class)->middleware('auth')->group(function(){
+Route::controller(CustomerController::class)->middleware(['auth'])->group(function(){
     Route::get('/customer', 'index')->name('customer.index');
     Route::get('/customer/edit/{id}', 'edit')->name('customer.edit');
     Route::get('/customer/json', 'indexJson')->name('customer.indexJson');
@@ -440,6 +440,10 @@ Route::controller(TaskController::class)->middleware('auth')->group(function(){
     Route::get('/task/{id}/edit', 'edit')->name('task.edit');
     Route::put('/task/{id}', 'update')->name('task.update');
     Route::delete('/task/{id}', 'destroy')->name('task.destroy');
+    Route::delete('/attachment/{id}', 'destroyLampiran')->name('attachment.destroy');
+
+
+    Route::post('/task/simpan-pelanggan', 'simpanPelanggan')->name('task.simpanPelanggan');
 });
 
 Route::controller(DocumentationController::class)->middleware('auth')->group(function(){

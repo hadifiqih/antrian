@@ -42,6 +42,8 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
         ],
     ];
 
@@ -57,15 +59,14 @@ class Kernel extends HttpKernel
         // 'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         // 'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         // 'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        // 'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        // 'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        // 'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-        // 'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
-        // 'signed' => \App\Http\Middleware\ValidateSignature::class,
-        // 'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        // 'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+        'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+        'signed' => \App\Http\Middleware\ValidateSignature::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkrole' => \App\Http\Middleware\CheckRoleMiddleware::class,
-        // 'checkLogin' => \App\Http\Middleware\CheckLogin::class,
         'limit.chatbot' => \App\Http\Middleware\LimitChatbot::class,
     ];
 }

@@ -253,6 +253,26 @@ class CustomerController extends Controller
         return response()->json($customers);
     }
 
+    public function getAllCustomersApi(Request $request)
+    {
+        $searchTerm = $request->q;
+        $sales = $request->sales;
+
+        if($searchTerm == ''){
+            $customers = Customer::where('sales_id', $sales)->orderBy('created_at', 'desc')->select('id', 'nama', 'telepon')->limit(10)->get();
+        }else{
+            $customers = Customer::where('sales_id', $sales)->orderBy('created_at', 'desc')->select('id', 'nama', 'telepon')->where('nama', 'LIKE', "%".$searchTerm."%")->orWhere('telepon', 'LIKE', "%".$searchTerm."%")->limit(10)->get();
+        }
+        
+        return response()->json($customers);
+    }
+
+    public function getCustomerByIdApi($id)
+    {
+        $customer = Customer::find($id);
+        return response()->json($customer);
+    }
+
     public function statusPelanggan($id)
     {
         $customer = Customer::find($id);
