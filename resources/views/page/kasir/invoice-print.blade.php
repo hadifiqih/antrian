@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte') }}/dist/css/adminlte.min.css">
-    
+
     <link href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" rel="stylesheet">
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
@@ -22,7 +22,7 @@
     {{-- Dropzone --}}
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 </head>
-<body>
+<body onload="printAndReturn()">
     <div class="wrapper">
         <section class="invoice">
             <div class="row mb-5">
@@ -129,7 +129,15 @@
         </section>
     </div>
     <script>
-        window.addEventListener("load", window.print());
+        function printAndReturn() {
+            window.onafterprint = function() {
+                // Navigasi kembali ke halaman sebelumnya setelah pencetakan selesai
+                window.history.back();
+            };
+
+            // Memulai pencetakan
+            window.print();
+        }
     </script>
 </body>
 </html>

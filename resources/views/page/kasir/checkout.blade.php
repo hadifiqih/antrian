@@ -17,16 +17,16 @@
           <div class="card-header">
             <h3 class="card-title">Konfirmasi Order</h3>
           </div>
-          <div class="card-body pb-0">
-            <div>
-              <table id="tableItems" class="table table-bordered display nowarp" style="width:100%">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="tableItems" class="table table-bordered">
                   <thead class="thead-dark">
                       <tr>
-                          <th scope="col">{{ __('Nama Produk') }}</th>
-                          <th scope="col">{{ __('Harga') }}</th>
-                          <th scope="col">{{ __('Qty') }}</th>
-                          <th scope="col">{{ __('Diskon') }}</th>
-                          <th scope="col">{{ __('Total') }}</th>
+                          <th>Produk</th>
+                          <th>Harga Satuan</th>
+                          <th>Qty</th>
+                          <th>Diskon</th>
+                          <th>Total</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -37,13 +37,23 @@
               <h6 class="font-weight-bold mx-3 mt-2">Total<span id="totalItems" class="float-right">{{ $total }}</span></h6>
           </div>
           {{-- Checkbox untuk penggunaan pajak --}}
-            
+
           <hr>
           <div class="card-body pt-0">
-            <div class="form-group">
-              <label for="customer">Pelanggan</label>
-              <input type="hidden" id="customer_id" name="customer_id" value="{{ $customer_id }}">
-              <input type="text" class="form-control" id="customer" name="customer" placeholder="Nama Pelanggan" value="{{ $nama_customer }}" disabled>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="customer">Pelanggan</label>
+                    <input type="hidden" id="customer_id" name="customer_id" value="{{ $customer_id }}">
+                    <input type="text" class="form-control" id="customer" name="customer" placeholder="Nama Pelanggan" value="{{ $nama_customer }}" disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="dikirimDari">Dikirim Dari</label>
+                    <select class="form-control" id="dikirimDari" name="dikirimDari" required>
+                        @foreach ($cabangs as $cabang)
+                        <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="row">
               <div class="col-md-12">
@@ -151,7 +161,6 @@
         ordering: false,
         paging: false,
         info: false,
-        scrollX: true,
         ajax: "/pos/checkout-json/{{ $cart_id }}",
         columns: [
             { data: 'nama_produk', name: 'nama_produk' },
@@ -212,11 +221,11 @@
       $('#totalBayar').on('keyup', function() {
           var totalText = $('#totalItems').text().replace(/\./g, '').replace('Rp ', '');
           var bayarText = $(this).val().replace(/\./g, '');
-          
+
           // Mengonversi teks menjadi angka, jika tidak valid akan menghasilkan NaN
           var total = parseInt(totalText);
           var bayar = parseInt(bayarText);
-          
+
           // Memeriksa apakah kedua nilai adalah angka yang valid
           if (!isNaN(total) && !isNaN(bayar)) {
               var kembalian = bayar - total;
@@ -258,6 +267,7 @@
             alamat: $('#alamat').val(),
             metode: $('#metode').val(),
             rekening: $('#rekening').val(),
+            dikirimDari: $('#dikirimDari').val(),
             total_bayar: $('#totalBayar').val(),
             total: total
           },
@@ -276,7 +286,7 @@
           }
         });
       });
-      
+
     });
 </script>
 @endsection

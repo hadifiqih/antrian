@@ -12,12 +12,6 @@ import Dropzone from 'dropzone';
 import 'lazysizes';
 import 'lazysizes/plugins/parent-fit/ls.parent-fit';
 
-//Fullcalendar
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-
 document.addEventListener('DOMContentLoaded', function () {
     const chatBox = $('#chat-box');
     const sendButton = $('#send-button');
@@ -27,18 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const loading = $('#loading');
     const converter = new showdown.Converter();
     const kuota = document.getElementById('kuota');
-
-    let calendarEl = document.getElementById('calendar');
-    let calendar = new Calendar(calendarEl, {
-        plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-        },
-    });
-    calendar.render();
 
     var submitButton = document.getElementById('submitUploadDokumentasi');
 
@@ -106,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'X-CSRF-TOKEN': csrfToken,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify({ 
+            data: JSON.stringify({
                 message: message,
                 new_chat: isNewChat
             }),
@@ -165,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     'X-CSRF-TOKEN': csrfToken,
                     'Content-Type': 'application/json'
                 },
-                data: JSON.stringify({ 
+                data: JSON.stringify({
                     conversation_id: conversationId,
                     new_chat: isNewChat
                 }),

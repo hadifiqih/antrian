@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sales;
+use App\Models\Cabang;
 use App\Models\Produk;
 use App\Models\Customer;
 use App\Models\Keranjang;
@@ -15,8 +16,8 @@ use App\Models\ProdukGrosir;
 use Illuminate\Http\Request;
 use App\Helpers\CustomHelper;
 use App\Models\KeranjangItem;
-use App\Models\PenjualanDetail;
 
+use App\Models\PenjualanDetail;
 use App\Models\SumberPelanggan;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\NotaResource;
@@ -34,7 +35,7 @@ class PosController extends Controller
     {
         $this->middleware('auth');
     }
-    
+
     public function notaStruk($id)
     {
         // //ambil data dari api
@@ -381,6 +382,8 @@ class PosController extends Controller
             return redirect()->route('pos.addOrder')->with('error', 'Keranjang tidak ditemukan');
         }
 
+        $cabangs = Cabang::all();
+
         $items = KeranjangItem::getItemByIdCart($cart_id);
         $total = 0;
         $diskon = 0;
@@ -401,7 +404,7 @@ class PosController extends Controller
         $total = CustomHelper::addCurrencyFormat($total);
         $diskon = CustomHelper::addCurrencyFormat($diskon);
 
-        return view('page.kasir.checkout', compact('items', 'total', 'diskon', 'cart_id', 'pembulatan', 'customer_id', 'nama_customer'));
+        return view('page.kasir.checkout', compact('cabangs','items', 'total', 'diskon', 'cart_id', 'pembulatan', 'customer_id', 'nama_customer'));
     }
 
     public function checkoutCartJson(string $cart_id)
@@ -453,7 +456,7 @@ class PosController extends Controller
 
         //get latest id from penjualan
         $latest = Penjualan::whereMonth('created_at', $month)->count();
-        
+
         if($latest == 0){
             $latestId = 1;
         }else{
@@ -478,6 +481,7 @@ class PosController extends Controller
         $penjualan->diskon = $diskon;
         $penjualan->diterima = CustomHelper::removeCurrencyFormat($request->total_bayar);
         $penjualan->keterangan = $request->keterangan;
+        $penjualan->cabang_id = $request->dikirimDari;
         $penjualan->metode_pembayaran = $request->metode;
         $penjualan->ppn = 0; //ppn 11%
         $penjualan->pph = 0; //pph 2,5%
@@ -528,7 +532,7 @@ class PosController extends Controller
 
     public function tampilFaktur(string $id)
     {
-        $penjualan = Penjualan::find($id);
+        $penjualan = Penjualan::with(['customer'])->find($id);
         $items = PenjualanDetail::where('penjualan_id', $id)->get();
         $salesId = auth()->user()->sales->id;
         $sales = Sales::find($salesId);
@@ -620,10 +624,10 @@ class PosController extends Controller
     {
         $bulan = $request->query('bulan', date('m'));
         $tahun = date('Y');
-    
+
         $awal = date("$tahun-$bulan-01");
         $akhir = date("$tahun-$bulan-t");
-    
+
         return view('page.kasir.penjualan', compact('bulan', 'awal', 'akhir'));
     }
 
@@ -744,11 +748,11 @@ class PosController extends Controller
                 $laba = ($row->harga - $harga->harga_kulak) * $row->jumlah;
                 return CustomHelper::addCurrencyFormat($laba);
             })
-            
+
             ->rawColumns(['tanggal', 'produk', 'jumlah', 'kulak', 'harga', 'total', 'laba'])
             ->make(true);
     }
-    
+
     public function penjualanItemBulanan($bulan)
     {
         $items = PenjualanDetail::whereHas('penjualan', function($q){
@@ -790,7 +794,7 @@ class PosController extends Controller
             // Mengatur lebar setiap kolom (dalam satuan karakter)
             $lebar_kolom_1 = 45;
 
-            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
 
             // Merubah hasil wordwrap menjadi array, kolom yang memiliki 2 index array berarti memiliki 2 baris (kena wordwrap)
@@ -802,10 +806,10 @@ class PosController extends Controller
             // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
             $hasilBaris = array();
 
-            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris
             for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
 
-                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan,
                 $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ");
 
                 // Menggabungkan kolom tersebut menjadi 1 baris dan ditampung ke variabel hasil (ada 1 spasi disetiap kolom)
@@ -823,7 +827,7 @@ class PosController extends Controller
             $lebar_kolom_2 = 15;
             $lebar_kolom_3 = 19;
 
-            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
             $kolom2 = wordwrap($kolom2, $lebar_kolom_2, "\n", true);
             $kolom3 = wordwrap($kolom3, $lebar_kolom_3, "\n", true);
@@ -839,10 +843,10 @@ class PosController extends Controller
             // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
             $hasilBaris = array();
 
-            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris
             for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
 
-                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan,
                 $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
                 // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
                 $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_RIGHT);
@@ -863,7 +867,7 @@ class PosController extends Controller
             $lebar_kolom_1 = 20;
             $lebar_kolom_2 = 25;
 
-            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n 
+            // Melakukan wordwrap(), jadi jika karakter teks melebihi lebar kolom, ditambahkan \n
             $kolom1 = wordwrap($kolom1, $lebar_kolom_1, "\n", true);
             $kolom2 = wordwrap($kolom2, $lebar_kolom_2, "\n", true);
 
@@ -877,10 +881,10 @@ class PosController extends Controller
             // Mendeklarasikan variabel untuk menampung kolom yang sudah di edit
             $hasilBaris = array();
 
-            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris 
+            // Melakukan perulangan setiap baris (yang dibentuk wordwrap), untuk menggabungkan setiap kolom menjadi 1 baris
             for ($i = 0; $i < $jmlBarisTerbanyak; $i++) {
 
-                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan, 
+                // memberikan spasi di setiap cell berdasarkan lebar kolom yang ditentukan,
                 $hasilKolom1 = str_pad((isset($kolom1Array[$i]) ? $kolom1Array[$i] : ""), $lebar_kolom_1, " ", STR_PAD_RIGHT);
                 // memberikan rata kanan pada kolom 3 dan 4 karena akan kita gunakan untuk harga dan total harga
                 $hasilKolom2 = str_pad((isset($kolom2Array[$i]) ? $kolom2Array[$i] : ""), $lebar_kolom_2, " ", STR_PAD_LEFT);
@@ -976,7 +980,7 @@ class PosController extends Controller
 
     public function detailTransaksi($id)
     {
-        $penjualan = Penjualan::find($id);
+        $penjualan = Penjualan::with(['customer', 'cabang'])->find($id);
         $items = PenjualanDetail::where('penjualan_id', $id)->get();
         $sales = Sales::find($penjualan->sales_id);
 
