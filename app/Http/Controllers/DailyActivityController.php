@@ -13,7 +13,48 @@ class DailyActivityController extends Controller
      */
     public function index()
     {
-        //
+        $dailyActivity = DailyActivity::all();
+        return view('daily-activities.index', compact('dailyActivity'));
+    }
+
+    public function marolActivity()
+    {
+        $activities = DailyActivity::with(['sales', 'user'])->all();
+        
+        return DataTables::of($activities)
+        ->addIndexColumn()
+        ->addColumn('sales', function($row){
+            return $row->sales->sales_name;
+        })
+        ->addColumn('tanggal', function($row){
+            return $row->created_at->format('d-m-Y');
+        })
+        ->addColumn('platform', function($row){
+            return $row->platform;
+        })
+        ->addColumn('jenis_konten', function($row){
+            return $row->jenis_konten;
+        })
+        ->addColumn('jumlah', function($row){
+            return $row->jumlah;
+        })
+        ->addColumn('keterangan', function($row){
+            return $row->keterangan;
+        })
+        ->addColumn('action', function($row){
+            return '<div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Aksi
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Edit</a>
+                    <a class="dropdown-item" href="#">Hapus</a>
+                </div>
+            </div>
+            ';
+        })
+        ->rawColumns(['action'])
+        ->make(true);
     }
 
     /**

@@ -385,6 +385,7 @@ Route::controller(PaymentController::class)->middleware('auth')->group(function 
 });
 
 Route::resource('daily-activity', DailyActivityController::class);
+Route::get('daily-activity/marol', [DailyActivityController::class, 'marolActivity'])->name('daily-activity.indexJson');
 Route::post('daily-activity/simpan-aktivitas-sales', [DailyActivityController::class, 'storeSalesActivity'])->name('storeSalesActivity');
 
 Route::controller(ProdukController::class)->middleware('auth')->group(function () {

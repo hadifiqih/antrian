@@ -63,7 +63,17 @@
                 <div class="col-md">
                     <div class="form-group">
                         <label for="nama">Nama Pelanggan </label>
-                        <p>{{ $antrian->customer->nama ?? '-' }} <span class="badge bg-danger">{{ $antrian->customer->frekuensi_order >= 2 ? 'Repeat Order' : 'Pelanggan Baru'}}</span></p>
+                        <p>{{ $antrian->customer->nama ?? '-' }} <span class="badge bg-danger">
+                            @if($antrian->customer->frekuensi_order == null || $antrian->customer->frekuensi_order == 0)
+                                Leads
+                            @else
+                                @if($antrian->customer->frekuensi_order == 1)
+                                    Pelanggan Lama
+                                @elseif($antrian->customer->frekuensi_order > 1)
+                                    RO WA
+                                @endif
+                            @endif
+                        </span></p>
                     </div>
                 </div>
                 <div class="col-md">

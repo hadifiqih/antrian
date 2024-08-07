@@ -40,10 +40,10 @@
     let table;
 
     var toastr = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
     });
 
     function deleteForm(url){
