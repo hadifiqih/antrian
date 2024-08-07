@@ -36,6 +36,12 @@
             <p>Laporan Penjualan</p>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('sales.summaryReport') }}" class="nav-link {{ request()->routeIs('sales.summaryReport') ? 'active' : '' }}">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Laporan Aktivitas Sales</p>
+            </a>
+        </li>
     </ul>
 </li>
 <li class="nav-item {{ request()->routeIs('documentation.gallery') ? 'menu-open' : '' }}">

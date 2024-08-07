@@ -1,41 +1,36 @@
 <?php
 
-use App\Models\User;
-use App\Models\Employee;
-use Illuminate\Http\Request;
-use Orhanerday\OpenAi\OpenAi;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
-use App\Events\SendGlobalNotification;
-use App\Notifications\AntrianWorkshop;
-use App\Http\Controllers\BotController;
-use App\Http\Controllers\JobController;
-use App\Http\Controllers\PosController;
+use App\Http\Controllers\AntrianController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BahanController;
+use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BotController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DailyActivityController;
+use App\Http\Controllers\DesignController;
+use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EstimatorController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\IklanController;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SocialAccountController;
+use App\Http\Controllers\SocialRecordController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Password;
-
-use App\Http\Controllers\BahanController;
-use App\Http\Controllers\IklanController;
-
-use App\Http\Controllers\OrderController;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
-use App\Http\Controllers\BarangController;
-use App\Http\Controllers\DesignController;
-use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\AntrianController;
-use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\EmployeeController;
-use Illuminate\Support\Facades\Notification;
-use App\Http\Controllers\EstimatorController;
-use App\Http\Controllers\DocumentationController;
-use App\Http\Controllers\SocialAccountController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,9 +78,9 @@ Route::get('/notification/mark-as-read/{id}', function ($id) {
     $notification = auth()->user()->unreadNotifications->where('id', $id)->first();
     $notification->markAsRead();
 
-    if($notification->data['link'] == '/design'){
+    if ($notification->data['link'] == '/design') {
         return redirect()->route('design.index');
-    }else{
+    } else {
         return redirect()->route('antrian.index');
     }
 })->middleware('auth')->name('notification.markAsRead');
@@ -114,7 +109,7 @@ Route::post('/reset-password', function (Request $request) {
         $request->only('email', 'password', 'password_confirmation', 'token'),
         function (User $user, string $password) {
             $user->forceFill([
-                'password' => Hash::make($password)
+                'password' => Hash::make($password),
             ])->setRememberToken(Str::random(60));
 
             $user->save();
@@ -146,7 +141,7 @@ Route::group(['middleware' => 'auth'], function () {
 });
 
 //membuat route group untuk AuthController
-Route::controller(AuthController::class)->group(function(){
+Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'index')->name('auth.index');
     Route::get('/register', 'create')->name('auth.register');
     Route::post('/login', 'login')->name('auth.login');
@@ -155,7 +150,7 @@ Route::controller(AuthController::class)->group(function(){
     Route::get('/beams-generateToken', 'generateToken')->name('beams.auth');
 })->middleware('guest');
 
-Route::controller(EstimatorController::class)->middleware('auth')->group(function(){
+Route::controller(EstimatorController::class)->middleware('auth')->group(function () {
     Route::get('/estimator/laporan-penugasan', 'laporanPenugasan')->name('estimator.laporanPenugasan');
     Route::get('/estimator/laporan-penugasan-json', 'laporanPenugasanJson')->name('estimator.laporanPenugasanJson');
     Route::get('/estimator/laporan-workshop-excel', 'laporanWorkshopExcel')->name('estimator.laporanWorkshopExcel');
@@ -165,7 +160,7 @@ Route::controller(EstimatorController::class)->middleware('auth')->group(functio
     Route::get('/cek-excel', 'cekExcel')->name('cekExcel');
 });
 
-Route::controller(IklanController::class)->middleware('auth')->group(function(){
+Route::controller(IklanController::class)->middleware('auth')->group(function () {
     Route::get('/iklan/json', 'iklanJson')->name('iklan.indexJson');
     Route::get('/iklan/selesai-json', 'selesaiJson')->name('iklan.selesaiJson');
     Route::get('/iklan', 'index')->name('iklan.index');
@@ -181,7 +176,12 @@ Route::controller(IklanController::class)->middleware('auth')->group(function(){
     Route::delete('/iklan/{id}', 'destroy')->name('iklan.destroy');
 });
 
-Route::controller(ReportController::class)->middleware('auth')->group(function(){
+Route::controller(SalesController::class)->middleware('auth')->group(function () {
+    Route::get('/sales/summary-report', 'summaryReport')->name('sales.summaryReport');
+    Route::get('/sales/get-sosmed-by-platform/{platform}', 'getSosmedByPlatform')->name('sales.getSosmedByPlatform');
+});
+
+Route::controller(ReportController::class)->middleware('auth')->group(function () {
     Route::get('/report-workshop', 'pilihTanggal')->name('laporan.workshop');
     Route::post('/report-workshop-pdf', 'exportLaporanWorkshopPDF')->name('laporan-workshop-pdf');
     Route::get('/cetak-espk/{id}', 'cetakEspk')->name('cetak-espk');
@@ -207,7 +207,7 @@ Route::controller(ReportController::class)->middleware('auth')->group(function()
     //--------------------------------------------
 });
 
-Route::controller(DesignController::class)->middleware('auth')->group(function(){
+Route::controller(DesignController::class)->middleware('auth')->group(function () {
     Route::post('/design/simpan-file-produksi', 'simpanFileProduksi')->name('simpanFileProduksi');
     Route::get('/design/download-file/{id}', 'downloadFile')->name('design.downloadFile');
     //Route Penugasan Otomatis
@@ -236,14 +236,14 @@ Route::controller(DesignController::class)->middleware('auth')->group(function()
 
 });
 
-Route::controller(EmployeeController::class)->middleware('auth')->group(function(){
+Route::controller(EmployeeController::class)->middleware('auth')->group(function () {
     Route::get('/employee', 'index')->middleware('auth')->name('employee.index');
     Route::get('/profile/{id}', 'show')->middleware('auth')->name('employee.show');
     Route::put('/profile/{id}', 'update')->middleware(['auth'])->name('employee.update');
     Route::post('/profile/upload-foto', 'uploadFoto')->middleware(['auth'])->name('employee.uploadFoto');
 });
 
-Route::controller(OrderController::class)->middleware('auth')->group(function(){
+Route::controller(OrderController::class)->middleware('auth')->group(function () {
     Route::get('/list-revisi', 'listRevisi')->name('list.revisi');
     Route::get('/list-desain/menunggu', 'listMenunggu')->name('list.menunggu');
     Route::get('/list-desain/dalam-proses', 'listDalamProses')->name('list.dalamProses');
@@ -291,10 +291,10 @@ Route::controller(OrderController::class)->middleware('auth')->group(function(){
     //--------------------------------------------
 });
 
-Route::controller(PosController::class)->middleware('auth')->group(function(){
+Route::controller(PosController::class)->middleware('auth')->group(function () {
     Route::get('/pos/add-order', 'addOrder')->middleware('auth')->name('pos.addOrder');
     Route::get('/pos/get-product-by-id/{id}', 'getProductById')->name('pos.getProductById');
-    
+
     Route::post('/pos/tambah-item', 'tambahItem')->name('pos.tambahItem');
     Route::get('/pos/laporan-bahan', 'laporanBahan')->name('pos.laporanBahan');
     Route::get('/pos/laporan-bahan-json', 'laporanBahanJson')->name('pos.laporanBahanJson');
@@ -325,26 +325,26 @@ Route::controller(PosController::class)->middleware('auth')->group(function(){
     Route::get('/pos/omset-laba/{bulan}', 'labaBulanan')->name('pos.labaBulanan');
 });
 
-Route::controller(StokController::class)->middleware('auth')->group(function(){
+Route::controller(StokController::class)->middleware('auth')->group(function () {
     Route::get('/stok/get-all-products', 'showAllProducts')->name('stok.showAllProducts');
     Route::get('/stok/daftar-stok', 'daftarStok')->name('daftarStok');
     Route::get('/stok/daftar-stok-json', 'daftarStokJson')->name('daftarStokJson');
     //Mutasi Stok
     Route::get('/stok/mutasi-stok', 'mutasiStok')->name('mutasiStok');
     Route::get('/stok/mutasi-stok-json', 'mutasiStokJson')->name('mutasiStokJson');
-    
+
     Route::get('/stok/daftar-mutasi', 'daftarMutasi')->name('daftarMutasi');
     Route::post('/stok/simpan-mutasi', 'simpanMutasi')->name('simpanMutasi');
 });
 
-Route::controller(BotController::class)->middleware(['auth', 'limit.chatbot'])->group(function(){
+Route::controller(BotController::class)->middleware(['auth', 'limit.chatbot'])->group(function () {
     Route::get('/bot', 'index')->name('bot.index');
     Route::get('/bot/get-response', 'getResponse')->name('bot.getResponse');
     Route::post('/bot/send-message', 'sendMessage')->name('bot.sendMessage');
     Route::post('/bot/reset-chat', 'resetChat')->name('bot.reset-chat');
 });
 
-Route::controller(AntrianController::class)->middleware('auth')->group(function(){
+Route::controller(AntrianController::class)->middleware('auth')->group(function () {
     Route::get('/antrian/indexAntrian', 'indexData')->middleware('auth')->name('antrian.indexData');
     Route::get('/antrian/selesai', 'indexSelesai')->middleware('auth')->name('antrian.indexSelesai');
     Route::post('/antrian/simpan-antrian', 'simpanAntrian')->middleware('auth')->name('antrian.simpanAntrian');
@@ -378,13 +378,16 @@ Route::controller(AntrianController::class)->middleware('auth')->group(function(
     Route::get('/workshop/penugasan-otomatis', 'penugasanOtomatis')->middleware('auth')->name('workshop.penugasanOtomatis');
 });
 
-Route::controller(PaymentController::class)->middleware('auth')->group(function(){
+Route::controller(PaymentController::class)->middleware('auth')->group(function () {
     Route::get('/payment/{id}', 'show')->name('payment.show');
     Route::post('/payment/pelunasan', 'updatePelunasan')->name('updatePelunasan');
     Route::put('/payment/unggah-pelunasan', 'unggahPelunasan')->name('unggahPelunasan');
 });
 
-Route::controller(ProdukController::class)->middleware('auth')->group(function(){
+Route::resource('daily-activity', DailyActivityController::class);
+Route::post('daily-activity/simpan-aktivitas-sales', [DailyActivityController::class, 'storeSalesActivity'])->name('storeSalesActivity');
+
+Route::controller(ProdukController::class)->middleware('auth')->group(function () {
     Route::get('/pos/manage-product', 'manageProduct')->name('pos.manageProduct');
     Route::get('/pos/manage-product-json', 'manageProductJson')->name('pos.manageProductJson');
     Route::get('/pos/get-product-name', 'getProductName')->name('pos.getProductName');
@@ -397,7 +400,7 @@ Route::controller(ProdukController::class)->middleware('auth')->group(function()
     Route::get('/pos/pilih-produk', 'pilihProduk')->name('pos.pilihProduk');
 });
 
-Route::controller(CustomerController::class)->middleware(['auth'])->group(function(){
+Route::controller(CustomerController::class)->middleware(['auth'])->group(function () {
     Route::get('/customer', 'index')->name('customer.index');
     Route::get('/customer/edit/{id}', 'edit')->name('customer.edit');
     Route::get('/customer/json', 'indexJson')->name('customer.indexJson');
@@ -416,13 +419,13 @@ Route::controller(CustomerController::class)->middleware(['auth'])->group(functi
     Route::get('/customer/show/{id}', 'show')->name('customer.show');
 });
 
-Route::controller(JobController::class)->middleware('auth')->group(function(){
+Route::controller(JobController::class)->middleware('auth')->group(function () {
     Route::get('/job/search', 'search')->name('job.search');
     Route::get('/job/searchByNama', 'searchByNama')->name('job.searchByNama');
     Route::get('/job/searchByCategory', 'searchByCategory')->name('job.searchByCategory');
 });
 
-Route::controller(SocialAccountController::class)->middleware('auth')->group(function(){
+Route::controller(SocialAccountController::class)->middleware('auth')->group(function () {
     Route::get('/social-account', 'index')->name('social.index');
     Route::get('/social-account/json', 'indexJson')->name('social.indexJson');
     Route::get('/social-account/create', 'create')->name('social.create');
@@ -432,7 +435,9 @@ Route::controller(SocialAccountController::class)->middleware('auth')->group(fun
     Route::delete('/social-account/{id}', 'destroy')->name('social.destroy');
 });
 
-Route::controller(TaskController::class)->middleware('auth')->group(function(){
+Route::resource('social-record', SocialRecordController::class);
+
+Route::controller(TaskController::class)->middleware('auth')->group(function () {
     Route::get('/task', 'index')->name('task.index');
     Route::get('/task/json', 'indexJson')->name('task.indexJson');
     Route::get('/task/create', 'create')->name('task.create');
@@ -442,11 +447,10 @@ Route::controller(TaskController::class)->middleware('auth')->group(function(){
     Route::delete('/task/{id}', 'destroy')->name('task.destroy');
     Route::delete('/attachment/{id}', 'destroyLampiran')->name('attachment.destroy');
 
-
     Route::post('/task/simpan-pelanggan', 'simpanPelanggan')->name('task.simpanPelanggan');
 });
 
-Route::controller(DocumentationController::class)->middleware('auth')->group(function(){
+Route::controller(DocumentationController::class)->middleware('auth')->group(function () {
     //documentation index
     Route::get('/documentation', 'index')->name('documentation.index');
     Route::get('/documentation/{id}/edit', 'edit')->name('documentation.edit');
@@ -460,13 +464,13 @@ Route::controller(DocumentationController::class)->middleware('auth')->group(fun
     Route::get('/documentation/hapus-file-sampah', 'hapusFileSampah')->name('hapusFileSampah');
 });
 
-Route::controller(UserController::class)->middleware('auth')->group(function(){
+Route::controller(UserController::class)->middleware('auth')->group(function () {
     Route::get('/user/superadmin', 'index')->middleware(['auth', 'checkrole:superadmin'])->name('user.index');
     Route::get('/user/create', 'create')->middleware(['auth', 'checkrole:superadmin'])->name('user.create');
     Route::get('/user/{id}/edit', 'edit')->middleware(['auth', 'checkrole:superadmin'])->name('user.edit');
     Route::put('/user/update/{id}', 'update')->middleware(['auth', 'checkrole:superadmin'])->name('user.update');
     Route::delete('/user/{id}', 'destroy')->middleware(['auth', 'checkrole:superadmin'])->name('user.destroy');
-    Route::get('/user/edit-desainer', 'editDesainer')->name('edit.desainer');//untuk menampilkan table daftar desainer
+    Route::get('/user/edit-desainer', 'editDesainer')->name('edit.desainer'); //untuk menampilkan table daftar desainer
 });
 
 //Route Resource BarangController
@@ -475,24 +479,22 @@ Route::resource('barang', BarangController::class)->middleware('auth');
 //Route Resource BahanController
 Route::resource('bahan', BahanController::class)->middleware('auth');
 
-Route::controller(BahanController::class)->middleware('auth')->group(function(){
+Route::controller(BahanController::class)->middleware('auth')->group(function () {
     Route::get('/bahan/total/{id}', 'totalBahan')->name('bahan.total');
 });
 
-Route::controller(GeneralController::class)->group(function(){
+Route::controller(GeneralController::class)->group(function () {
     Route::get('/getProvinsi', 'getProvinsi')->name('getProvinsi');
     Route::get('/getKota', 'getKota')->name('getKota');
     Route::get('/getTotalOmset/{month}', 'getTotalOmsetBulanan')->name('getTotalOmsetBulanan');
 });
 
-Route::controller(BarangController::class)->middleware('auth')->group(function(){
+Route::controller(BarangController::class)->middleware('auth')->group(function () {
     Route::get('/barang/getTotalHarga/{id}', 'getTotalHarga')->name('getTotalHarga');
     Route::get('/barang/show-create/{id}', 'showCreate')->name('barang.showCreate');
     Route::put('/barang/update/{id}', 'updateCreate')->name('barang.updateCreate');
-    //edit barang
     Route::get('/barang/edit/{id}', 'editCreate')->name('barang.editCreate');
     Route::get('/barang/show/{id}', 'show')->name('barang.show');
-
     Route::get('/barang/getTotalBarang/{id}', 'getTotalBarang')->name('getTotalBarang');
     Route::get('/barang/getBarangById/{id}', 'getBarangById')->name('getBarangById');
     Route::post('/barang/simpan-barang-dari-desain', 'simpanBarangDariDesain')->name('simpanBarangDariDesain');
@@ -500,8 +502,7 @@ Route::controller(BarangController::class)->middleware('auth')->group(function()
     Route::get('/barang/upload-cetak/{id}', 'uploadCetak')->name('barang.uploadCetak');
     Route::post('/barang/tugaskan-desainer', 'tugaskanDesainer')->name('barang.tugaskanDesainer');
     Route::put('barang/unggah-cetak/{id}', 'unggahCetak')->name('unggahCetak');
-    //ganti desainer
-    Route::post('/barang/ubah-desainer', 'ubahDesainer')->name('ubahDesainer');//untuk mengubah desainer
+    Route::post('/barang/ubah-desainer', 'ubahDesainer')->name('ubahDesainer'); //untuk mengubah desainer
     Route::post('/barang/store-produk', 'store')->name('barang.store');
 });
 
@@ -509,6 +510,7 @@ Route::get('/error', function () {
     //menampilkan halaman error dan error message
     if (session('error')) {
         $error = session('error');
+
         return view('error', compact('error'));
     }
 })->name('error.page');

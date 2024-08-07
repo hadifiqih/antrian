@@ -22,24 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const converter = new showdown.Converter();
     const kuota = document.getElementById('kuota');
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 7fe7f620678d2107e76411b931c76e12388652d0
-    // let calendarEl = document.getElementById('calendar');
-    // let calendar = new Calendar(calendarEl, {
-    //     plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-    //     initialView: 'dayGridMonth',
-    //     headerToolbar: {
-    //         left: 'prev,next today',
-    //         center: 'title',
-    //         right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-    //     },
-    // });
-    // calendar.render();
-
->>>>>>> 7fe7f620678d2107e76411b931c76e12388652d0
     var submitButton = document.getElementById('submitUploadDokumentasi');
 
     if(document.getElementById('myDropzoneDokumentasi')){

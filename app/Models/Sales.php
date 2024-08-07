@@ -17,6 +17,11 @@ class Sales extends Model
         return $this->hasMany(Antrian::class);
     }
 
+    public function sosialAccount()
+    {
+        return $this->hasMany(SosialAccount::class);
+    }
+
     public function antriandesain()
     {
         return $this->hasMany(AntrianDesain::class);

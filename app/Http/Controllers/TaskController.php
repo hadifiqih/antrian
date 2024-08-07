@@ -20,7 +20,7 @@ class TaskController extends Controller
     public function indexJson()
     {
         $task = TaskModel::with('sales', 'customer')->get();
-        
+
         return Datatables::of($task)
             ->addIndexColumn()
             ->addColumn('nama_task', function($task){
@@ -80,28 +80,13 @@ class TaskController extends Controller
         $task->batas_waktu = $request->batasWaktu ?? '';
         $task->akhir_batas_waktu = $request->akhirBatas ?? '';
         $task->status = strtolower($request->status);
-        $task->priority = strtolower($request->priority) ?? '';
-        $task->category = strtolower($request->category) ?? '';
         $task->customer_id = $request->customerId ?? 0;
         $task->save();
 
         //simpan lampiran
         if($request->hasFile('lampiran')){
             //jika lampiran lebih dari satu
-            if(count($request->file('lampiran')) > 1){
-                foreach($request->file('lampiran') as $lampiran){
-                    $lampiranName = time() . '.' . $lampiran->getClientOriginalExtension();
-                    Storage::disk('public')->put('lampiran/' . $lampiranName, file_get_contents($lampiran));
-
-                    //simpan ke database
-                    $lampiran = new Attachment;
-                    $lampiran->task_id = $task->id;
-                    $lampiran->file_name = $lampiranName;
-                    $lampiran->file_path = 'lampiran/' . $lampiranName;
-                    $lampiran->save();
-                }
-            }else{
-                $lampiran = $request->file('lampiran');
+            foreach($request->file('lampiran') as $lampiran){
                 $lampiranName = time() . '.' . $lampiran->getClientOriginalExtension();
                 Storage::disk('public')->put('lampiran/' . $lampiranName, file_get_contents($lampiran));
 

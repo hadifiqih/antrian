@@ -63,11 +63,12 @@ class AuthController extends Controller
                 if ($remember) {
                     // Store token in cookie (secure and http-only)
                     $cookie = Cookie::make('api-token', $token, 1440, null, null, true, true);
-                    return view('page.dashboard', ['token' => $token])->withCookie($cookie);
+                    return redirect()->route('dashboard')->with('token', $token)->withCookie($cookie);
                 }
 
                 // Jika email dan password benar
-                return view('page.dashboard', ['token' => $token]);
+                //return route dashboard dan mengirimkan token
+                return redirect()->route('dashboard')->with('token', $token);
             }
         }
 

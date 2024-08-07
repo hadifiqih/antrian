@@ -37,10 +37,10 @@ class SocialAccountController extends Controller
                 return $row->sales->name;
             })
             ->addColumn('password', function ($row) {
-                $password = Crypt::decryptString($row->password);
+                $password = $row->password;
                 return '<div class="password-container">
                     <input type="password" value="'.$password.'" class="password-field form-control" disabled>
-                    <i class="toggle-password fas fa-eye"></i>
+                    <i class="toggle-password copy-password fas fa-copy"></i>
                 </div>';
             })
             ->addColumn('action', function ($row) {
@@ -86,7 +86,7 @@ class SocialAccountController extends Controller
             $socialMediaAccount->username = $validatedData['username'];
             $socialMediaAccount->email = $validatedData['email'];
             $socialMediaAccount->phone = $validatedData['phone'];
-            $socialMediaAccount->password = Crypt::encryptString($validatedData['password']); // Encrypt the password
+            $socialMediaAccount->password = $validatedData['password']; // Encrypt the password
 
             // Save the new account
             $socialMediaAccount->save();
@@ -149,7 +149,7 @@ class SocialAccountController extends Controller
             $socialMediaAccount->email = $validatedData['email'];
             $socialMediaAccount->phone = $validatedData['phone'];
             if($request->filled('password')) {
-                $socialMediaAccount->password = Crypt::encryptString($validatedData['password']); // Encrypt the password
+                $socialMediaAccount->password = $validatedData['password']; // Encrypt the password
             }
 
             // Save the updated account

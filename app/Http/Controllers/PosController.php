@@ -444,8 +444,7 @@ class PosController extends Controller
 
     public function buatPesanan(Request $request)
     {
-
-        $cabang = auth()->user()->cabang_id;
+        $cabang = $request->dikirimDari;
         $sales = auth()->user()->sales->id;
         $customer = $request->customer_id;
         $date = date('ym');
@@ -481,7 +480,7 @@ class PosController extends Controller
         $penjualan->diskon = $diskon;
         $penjualan->diterima = CustomHelper::removeCurrencyFormat($request->total_bayar);
         $penjualan->keterangan = $request->keterangan;
-        $penjualan->cabang_id = $request->dikirimDari;
+        $penjualan->cabang_id = $cabang;
         $penjualan->metode_pembayaran = $request->metode;
         $penjualan->ppn = 0; //ppn 11%
         $penjualan->pph = 0; //pph 2,5%

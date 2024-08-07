@@ -48,7 +48,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -78,19 +78,47 @@
             ]
         });
 
-        // Toggle Password
-        $(document).on('click', '.toggle-password' ,function() {
+        // Fungsi copy password
+        $(document).on('click', '.copy-password', function() {
             var passwordField = $(this).siblings('.password-field');
-            var fieldType = passwordField.attr('type');
+            var passwordValue = passwordField.val();
 
-            if (fieldType === 'password') {
-                passwordField.attr('type', 'text');
-                $(this).removeClass('fa-eye').addClass('fa-eye-slash');
-            } else {
-                passwordField.attr('type', 'password');
-                $(this).removeClass('fa-eye-slash').addClass('fa-eye');
-            }
+            // Create a temporary input element
+            var tempInput = $('<input>');
+            $('body').append(tempInput);
+
+            // Set the value of the temporary input element to the password value
+            tempInput.val(passwordValue).select();
+
+            // Copy the password value to the clipboard
+            document.execCommand('copy');
+
+            // Remove the temporary input element
+            tempInput.remove();
+
+            // Show a success message
+            Swal.fire({
+                title: 'Berhasil',
+                text: 'Password berhasil disalin ke clipboard',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
         });
+
+        // Toggle Password
+        // $(document).on('click', '.toggle-password' ,function() {
+        //     var passwordField = $(this).siblings('.password-field');
+        //     var fieldType = passwordField.attr('type');
+
+        //     if (fieldType === 'password') {
+        //         passwordField.attr('type', 'text');
+        //         $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+        //     } else {
+        //         passwordField.attr('type', 'password');
+        //         $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+        //     }
+        // });
 
         // Delete
         $(document).on('click', '.delete', function() {

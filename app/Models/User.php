@@ -56,7 +56,7 @@ class User extends Authenticatable
 
     public function isSales()
     {
-        return $this->role_id == 11;
+        return $this->role_id == 11 ? true : false;
     }
 
     public function isDesigner()

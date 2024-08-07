@@ -19,7 +19,7 @@ use App\Http\Controllers\Api\StrukController;
 
 Route::apiResource('omset', ReportController::class);
 
-Route::get('/omset-global', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');
+// Route::get('/omset-global', [ReportController::class, 'omsetGlobalSales'])->name('omset.globalSales');
 
 //Cetak Struk Jasa
 Route::get('/cetak-struk/{id}', [StrukController::class, 'notaOrderJson'])->name('cetakStruk');

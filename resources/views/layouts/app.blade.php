@@ -160,31 +160,31 @@
               <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
-                @if(Auth::user()->role_id == 11)
+                @if(Auth::user()->role->role_slug == 'SLS')
                     @include('layouts.partials.menu-sales')
-                @elseif(Auth::user()->role_id == 12 || Auth::user()->role_id == 20)
+                @elseif(Auth::user()->role->role_slug == 'SPVMAROL' || Auth::user()->role->role_slug == 'MAROL')
                     @include('layouts.partials.menu-marol')
-                @elseif(Auth::user()->role_id == 15)
+                @elseif(Auth::user()->role->role_slug == 'ADMPROD')
                     @include('layouts.partials.menu-admin-workshop')
-                @elseif(Auth::user()->role_id == 19)
+                @elseif(Auth::user()->role->role_slug == 'ADM')
                     @include('layouts.partials.menu-admin')
-                @elseif(Auth::user()->role_id == 16 || Auth::user()->role_id == 17)
+                @elseif(Auth::user()->role->role_slug == 'DESAIN' || Auth::user()->role->role_slug == 'DESOPR')
                     @include('layouts.partials.menu-desainer')
-                @elseif(Auth::user()->role_id == 13)
+                @elseif(Auth::user()->role->role_slug == 'PROD')
                     @include('layouts.partials.menu-produksi')
-                @elseif(Auth::user()->role_id == 21)
+                @elseif(Auth::user()->role->role_slug == 'DOK')
                     @include('layouts.partials.menu-dokumentasi')
-                @elseif(Auth::user()->role_id == 10)
+                @elseif(Auth::user()->role->role_slug == 'EST')
                     @include('layouts.partials.menu-estimator')
-                @elseif(Auth::user()->role_id == 5)
+                @elseif(Auth::user()->role->role_slug == 'SPV')
                     @include('layouts.partials.menu-spv-desain')
-                @elseif(Auth::user()->role_id == 14)
+                @elseif(Auth::user()->role->role_slug == 'GUDANG')
                     @include('layouts.partials.menu-gudang')
-                @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 1 || Auth::user()->role_id == 9)
+                @elseif(Auth::user()->role->role_slug == 'CEO' || Auth::user()->role->role_slug == 'DU' || Auth::user()->role->role_slug == 'MNGKEUANGAN')
                     @include('layouts.partials.menu-ceo-dirut')
                 @endif
                 @include('layouts.partials.menu-bot')
-                
+
               </ul>
             </nav>
       <!-- /.sidebar-menu -->
@@ -258,23 +258,23 @@
 <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
 
 <script>
-  function notif(data) {
-    if(data.message.title == 'Antrian Workshop') {
-        $(document).Toasts('create', {
-        class: 'bg-warning',
-        body: data.message.body,
-        title: data.message.title,
-        icon: 'fas fa-envelope fa-lg',
-        });
-    }else if(data.message.title == 'Antrian Desain') {
-        $(document).Toasts('create', {
-        class: 'bg-info',
-        body: data.message.body,
-        title: data.message.title,
-        icon: 'fas fa-envelope fa-lg',
-        });
+    function notif(data) {
+        if(data.message.title == 'Antrian Workshop') {
+            $(document).Toasts('create', {
+            class: 'bg-warning',
+            body: data.message.body,
+            title: data.message.title,
+            icon: 'fas fa-envelope fa-lg',
+            });
+        }else if(data.message.title == 'Antrian Desain') {
+            $(document).Toasts('create', {
+            class: 'bg-info',
+            body: data.message.body,
+            title: data.message.title,
+            icon: 'fas fa-envelope fa-lg',
+            });
+        }
     }
-  }
 
   function confirmLogout(){
     const confirmation = confirm('Apakah Anda yakin ingin keluar?');
@@ -290,7 +290,7 @@
               localStorage.removeItem('beamsInitialized');
           })
           .catch(console.error);
-      
+
     }
     //jika beamsClient.stop() berhasil, maka akan dilanjutkan dengan logout
     window.location.href = "{{ route('auth.logout') }}";
@@ -381,7 +381,7 @@
               const roleId = {{ Auth::user()->role_id }};
               console.log('User role ID:', roleId);
               setDeviceInterests(beamsClient, roleId);
-              
+
               // Mark initialization in localStorage
               localStorage.setItem('beamsInitialized', 'true');
           })

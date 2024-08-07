@@ -32,7 +32,7 @@ class EstimatorController extends Controller
         $totalAdvertising = $data->where('kategori_id', 3)->sum('price');
         $totalDigital = $data->where('kategori_id', 4)->sum('price');
         $totalServis = $data->where('kategori_id', 5)->sum('price');
-        
+
         $stempels = $data->where('kategori_id', 1);
         $nonStempels = $data->where('kategori_id', 2);
         $advertisings = $data->where('kategori_id', 3);
@@ -84,7 +84,7 @@ class EstimatorController extends Controller
         return Datatables::of($antrians)
             ->addIndexColumn()
             ->addColumn('ticket_order', function ($antrian) {
-                return '<a class="text-primary" href="'.route('biaya.produksi', $antrian->id).'">'.$antrian->ticket_order.'</a>';
+                return '<a class="text-primary" href="'.route('antrian.show', $antrian->ticket_order).'">'.$antrian->ticket_order.'</a>';
             })
             ->addColumn('sales', function ($antrian) {
                 return $antrian->user->sales->sales_name;
@@ -139,7 +139,7 @@ class EstimatorController extends Controller
                         if($f == 'r'){
                             $namaFinishing[] = "<span class='text-primary'>Rekanan</span>";
                         }else{
-                            $namaFinishing[] = $employees[$f] ?? ''; 
+                            $namaFinishing[] = $employees[$f] ?? '';
                         }
                     }
                     return implode(', ', $namaFinishing);
@@ -153,7 +153,7 @@ class EstimatorController extends Controller
                     $qc = explode(',', $antrian->dataKerja->qc_id);
                     $namaQc = [];
                     foreach($qc as $q){
-                        $namaQc[] = $employees[$q] ?? ''; 
+                        $namaQc[] = $employees[$q] ?? '';
                     }
                     return implode(', ', $namaQc);
                 }

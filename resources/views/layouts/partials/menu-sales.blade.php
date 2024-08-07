@@ -22,6 +22,12 @@
                 <p>Daftar Aktivitas</p>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('sales.summaryReport') }}" class="nav-link {{ request()->routeIs('sales.summaryReport') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Laporan Produktivitas</p>
+            </a>
+        </li>
     </ul>
 </li>
 <li class="nav-item {{ request()->routeIs('design.indexDesain') || request()->routeIs('order.edit') || request()->routeIs('antrian.index') || request()->routeIs('antrian.edit') || request()->routeIs('antrian.show') || request()->routeIs('report.sales') || request()->routeIs('buatAntrianWorkshop') ? 'menu-open' : '' }}">
